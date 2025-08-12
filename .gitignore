@@ -13,6 +13,9 @@
 # Ignore all contents of the virtual environment directory
 .venv/
 
+# Ignore cpp2py conversion pipeline virtual environment
+pycog-zero-env/
+
 # Handle memory directory
 memory/**
 !memory/**/
