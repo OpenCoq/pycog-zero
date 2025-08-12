@@ -1,0 +1,30 @@
+{
+  "cognitive_mode": true,
+  "opencog_enabled": true,
+  "neural_symbolic_bridge": true,
+  "ecan_attention": true,
+  "pln_reasoning": true,
+  "atomspace_persistence": true,
+  "cognitive_tools": [
+    "cognitive_reasoning",
+    "cognitive_memory", 
+    "meta_cognition",
+    "neural_symbolic_agent"
+  ],
+  "atomspace_config": {
+    "persistence_backend": "file",
+    "persistence_path": "memory/cognitive_atomspace.pkl",
+    "attention_allocation": "ecan"
+  },
+  "neural_config": {
+    "embedding_dimension": 128,
+    "attention_heads": 8,
+    "device": "auto"
+  },
+  "reasoning_config": {
+    "pln_enabled": true,
+    "pattern_matching": true,
+    "forward_chaining": false,
+    "backward_chaining": true
+  }
+}
