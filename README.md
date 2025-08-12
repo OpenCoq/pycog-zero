@@ -1,10 +1,38 @@
 <div align="center">
 
-# `Agent Zero`
+# `PyCog-Zero` 🧠
 
+*A Python variant of OpenCog integrated with Agent-Zero*
 
 [![Agent Zero Website](https://img.shields.io/badge/Website-agent--zero.ai-0A192F?style=for-the-badge&logo=vercel&logoColor=white)](https://agent-zero.ai) [![Thanks to Sponsors](https://img.shields.io/badge/GitHub%20Sponsors-Thanks%20to%20Sponsors-FF69B4?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/agent0ai) [![Follow on X](https://img.shields.io/badge/X-Follow-000000?style=for-the-badge&logo=x&logoColor=white)](https://x.com/Agent0ai) [![Join our Discord](https://img.shields.io/badge/Discord-Join%20our%20server-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/B8KZKNsPpj) [![Subscribe on YouTube](https://img.shields.io/badge/YouTube-Subscribe-red?style=for-the-badge&logo=youtube&logoColor=white)](https://www.youtube.com/@AgentZeroFW) [![Connect on LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/jan-tomasek/) [![Follow on Warpcast](https://img.shields.io/badge/Warpcast-Follow-5A32F3?style=for-the-badge)](https://warpcast.com/agent-zero) 
 
+> **🔬 Cognitive Architecture Enhancement**  
+> PyCog-Zero integrates OpenCog's cognitive architecture with Agent-Zero's autonomous capabilities, creating a Python-native ecosystem for advanced cognitive agent development.
+
+</div>
+
+## 🧠 PyCog-Zero: Cognitive Agent Architecture
+
+PyCog-Zero represents a specialized adaptation of Agent-Zero that integrates with OpenCog's cognitive architecture to provide:
+
+### 🎯 Cognitive Capabilities
+- **AtomSpace Memory**: Hypergraph-based knowledge representation for persistent cognitive states
+- **PLN Reasoning**: Probabilistic Logic Networks for advanced logical inference
+- **ECAN Attention**: Economic Cognitive Attention Networks for dynamic priority allocation  
+- **Neural-Symbolic Bridge**: Seamless integration between PyTorch and OpenCog symbolic processing
+- **Meta-Cognition**: Self-reflective capabilities for adaptive learning and improvement
+
+### 🔧 Integration Features
+- **Agent-Zero Tools**: Cognitive capabilities exposed as Agent-Zero tools
+- **Multi-Agent Cognition**: Collaborative cognitive processing across agent networks
+- **Persistent Memory**: Long-term knowledge storage using AtomSpace persistence
+- **Real-time Learning**: Continuous adaptation and knowledge acquisition
+- **Cognitive Visualization**: Tools for understanding and debugging cognitive processes
+
+### 📚 Implementation Roadmap
+See [AGENT-ZERO-GENESIS.md](./AGENT-ZERO-GENESIS.md) for the complete development roadmap and implementation guide.
+
+---
 
 ## Documentation:
 
@@ -42,6 +70,8 @@ From now on, please use this name for both `git clone` and `docker pull` command
 
 
 ## A personal, organic agentic framework that grows and learns with you
+
+**Enhanced with OpenCog Cognitive Architecture for Advanced Reasoning**
 
 
 

@@ -41,3 +41,12 @@ crontab==1.0.1
 pathspec>=0.12.1
 psutil>=7.0.0
 soundfile==0.13.1
+
+# PyCog-Zero Cognitive Architecture Extensions
+# Uncomment the following lines to enable OpenCog integration:
+# opencog-atomspace>=5.0.0
+# opencog-python>=5.0.0  
+# cogutil>=2.0.0
+# torch>=2.0.0
+# scipy>=1.9.0
+# networkx>=2.8.0

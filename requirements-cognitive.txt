@@ -1,0 +1,29 @@
+# Core PyCog-Zero cognitive dependencies
+opencog-atomspace>=5.0.0
+opencog-python>=5.0.0
+cogutil>=2.0.0
+
+# Neural and symbolic integration
+torch>=2.0.0
+transformers>=4.21.0
+sentence-transformers>=3.0.1
+
+# Agent-Zero enhancements for cognitive processing
+networkx>=2.8.0  # For hypergraph visualization
+matplotlib>=3.5.0  # For cognitive state visualization
+plotly>=5.14.0  # Interactive cognitive maps
+
+# Cognitive architecture utilities
+pyparsing>=3.0.0  # For symbolic expression parsing
+sympy>=1.11.0  # Symbolic mathematics
+scipy>=1.9.0  # Scientific computing
+
+# Additional cognitive computing packages
+pattern>=3.6  # Text mining and NLP
+nltk>=3.7  # Natural language processing toolkit
+spacy>=3.4.0  # Advanced NLP
+gensim>=4.2.0  # Topic modeling and similarity analysis
+
+# Testing and development
+pytest>=7.1.0
+pytest-asyncio>=0.21.0
