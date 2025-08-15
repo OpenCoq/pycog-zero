@@ -1,0 +1,11 @@
+{
+  "component": "ure",
+  "phase": "phase_2_logic_systems",
+  "cloned_at": "Fri Aug 15 12:23:44 UTC 2025",
+  "status": "cloned",
+  "tasks_completed": [],
+  "dependencies": [
+    "atomspace",
+    "unify"
+  ]
+}

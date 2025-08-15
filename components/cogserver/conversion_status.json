@@ -1,0 +1,10 @@
+{
+  "component": "cogserver",
+  "phase": "phase_1_core_extensions",
+  "cloned_at": "Fri Aug 15 12:22:02 UTC 2025",
+  "status": "cloned",
+  "tasks_completed": [],
+  "dependencies": [
+    "atomspace"
+  ]
+}
