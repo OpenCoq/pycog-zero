@@ -59,8 +59,8 @@ source pycog-zero-env/bin/activate  # On Windows: pycog-zero-env\Scripts\activat
 # Install base dependencies
 pip install -r requirements.txt
 
-# Install OpenCog Python bindings
-pip install opencog-atomspace opencog-python
+# Install OpenCog Python bindings (built from source)
+./scripts/build_opencog.sh
 
 # Setup Agent-Zero with cognitive extensions
 export PYCOG_ZERO_MANIFEST=1
@@ -1082,8 +1082,8 @@ if __name__ == "__main__":
 ## Next Development Steps
 
 1. **Immediate (Week 1-2)**:
-   - [ ] Install and configure OpenCog Python bindings for Agent-Zero
-   - [ ] Create cognitive reasoning tool integration with Agent-Zero
+   - [x] Install and configure OpenCog Python bindings for Agent-Zero
+   - [x] Create cognitive reasoning tool integration with Agent-Zero  
    - [ ] Implement AtomSpace memory backend for Agent-Zero persistent memory
    - [ ] Build neural-symbolic bridge for PyTorch-OpenCog integration
    - [ ] Setup cognitive configuration management for Agent-Zero
