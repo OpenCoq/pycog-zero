@@ -38,6 +38,7 @@ See [AGENT-ZERO-GENESIS.md](./AGENT-ZERO-GENESIS.md) for the complete developmen
 
 [Introduction](#a-personal-organic-agentic-framework-that-grows-and-learns-with-you) •
 [Installation](./docs/installation.md) •
+[OpenCog Setup](./docs/OPENCOG_INSTALLATION.md) •
 [Development](./docs/development.md) •
 [Extensibility](./docs/extensibility.md) •
 [How to update](./docs/installation.md#how-to-update-agent-zero) •
