@@ -95,6 +95,24 @@ class Settings(TypedDict):
     mcp_server_enabled: bool
     mcp_server_token: str
 
+    # Cognitive configuration
+    cognitive_mode: bool
+    opencog_enabled: bool
+    neural_symbolic_bridge: bool
+    ecan_attention: bool
+    pln_reasoning: bool
+    atomspace_persistence: bool
+    atomspace_persistence_backend: str
+    atomspace_persistence_path: str
+    atomspace_attention_allocation: str
+    neural_embedding_dimension: int
+    neural_attention_heads: int
+    neural_device: str
+    reasoning_pln_enabled: bool
+    reasoning_pattern_matching: bool
+    reasoning_forward_chaining: bool
+    reasoning_backward_chaining: bool
+
 
 class PartialSettings(Settings, total=False):
     pass
@@ -1016,6 +1034,192 @@ def convert_out(settings: Settings) -> SettingsOutput:
         "tab": "backup",
     }
 
+    # Cognitive Configuration section
+    cognitive_fields: list[SettingsField] = []
+
+    cognitive_fields.append(
+        {
+            "id": "cognitive_mode",
+            "title": "Enable Cognitive Mode",
+            "description": "Enable PyCog-Zero cognitive capabilities integrating OpenCog with Agent-Zero",
+            "type": "switch",
+            "value": settings["cognitive_mode"],
+        }
+    )
+
+    cognitive_fields.append(
+        {
+            "id": "opencog_enabled",
+            "title": "Enable OpenCog",
+            "description": "Enable OpenCog AtomSpace and cognitive reasoning capabilities",
+            "type": "switch",
+            "value": settings["opencog_enabled"],
+        }
+    )
+
+    cognitive_fields.append(
+        {
+            "id": "neural_symbolic_bridge",
+            "title": "Neural-Symbolic Bridge",
+            "description": "Enable integration between neural networks and symbolic reasoning",
+            "type": "switch",
+            "value": settings["neural_symbolic_bridge"],
+        }
+    )
+
+    cognitive_fields.append(
+        {
+            "id": "ecan_attention",
+            "title": "ECAN Attention System",
+            "description": "Enable Economic Cognitive Attention Networks for attention allocation",
+            "type": "switch",
+            "value": settings["ecan_attention"],
+        }
+    )
+
+    cognitive_fields.append(
+        {
+            "id": "pln_reasoning",
+            "title": "PLN Reasoning",
+            "description": "Enable Probabilistic Logic Networks for uncertain reasoning",
+            "type": "switch",
+            "value": settings["pln_reasoning"],
+        }
+    )
+
+    cognitive_fields.append(
+        {
+            "id": "atomspace_persistence",
+            "title": "AtomSpace Persistence",
+            "description": "Enable persistent storage of AtomSpace knowledge",
+            "type": "switch",
+            "value": settings["atomspace_persistence"],
+        }
+    )
+
+    cognitive_fields.append(
+        {
+            "id": "atomspace_persistence_backend",
+            "title": "Persistence Backend",
+            "description": "Backend system for AtomSpace persistence",
+            "type": "select",
+            "value": settings["atomspace_persistence_backend"],
+            "options": [
+                {"value": "file", "label": "File System"},
+                {"value": "memory", "label": "Memory Only"},
+                {"value": "rocksdb", "label": "RocksDB"},
+            ],
+        }
+    )
+
+    cognitive_fields.append(
+        {
+            "id": "atomspace_persistence_path",
+            "title": "Persistence Path",
+            "description": "File path for AtomSpace persistence storage",
+            "type": "text",
+            "value": settings["atomspace_persistence_path"],
+        }
+    )
+
+    cognitive_fields.append(
+        {
+            "id": "atomspace_attention_allocation",
+            "title": "Attention Allocation",
+            "description": "Method for allocating attention in AtomSpace",
+            "type": "select",
+            "value": settings["atomspace_attention_allocation"],
+            "options": [
+                {"value": "ecan", "label": "ECAN (Economic)"},
+                {"value": "uniform", "label": "Uniform"},
+                {"value": "random", "label": "Random"},
+            ],
+        }
+    )
+
+    cognitive_fields.append(
+        {
+            "id": "neural_embedding_dimension",
+            "title": "Neural Embedding Dimension",
+            "description": "Dimension size for neural embeddings in the neural-symbolic bridge",
+            "type": "number",
+            "value": settings["neural_embedding_dimension"],
+        }
+    )
+
+    cognitive_fields.append(
+        {
+            "id": "neural_attention_heads",
+            "title": "Neural Attention Heads",
+            "description": "Number of attention heads for neural attention mechanisms",
+            "type": "number",
+            "value": settings["neural_attention_heads"],
+        }
+    )
+
+    cognitive_fields.append(
+        {
+            "id": "neural_device",
+            "title": "Neural Processing Device",
+            "description": "Device for neural network processing (auto, cpu, cuda)",
+            "type": "select",
+            "value": settings["neural_device"],
+            "options": [
+                {"value": "auto", "label": "Auto-detect"},
+                {"value": "cpu", "label": "CPU"},
+                {"value": "cuda", "label": "CUDA (GPU)"},
+            ],
+        }
+    )
+
+    cognitive_fields.append(
+        {
+            "id": "reasoning_pln_enabled",
+            "title": "PLN Reasoning Engine",
+            "description": "Enable Probabilistic Logic Networks reasoning engine",
+            "type": "switch",
+            "value": settings["reasoning_pln_enabled"],
+        }
+    )
+
+    cognitive_fields.append(
+        {
+            "id": "reasoning_pattern_matching",
+            "title": "Pattern Matching",
+            "description": "Enable pattern matching in reasoning engine",
+            "type": "switch",
+            "value": settings["reasoning_pattern_matching"],
+        }
+    )
+
+    cognitive_fields.append(
+        {
+            "id": "reasoning_forward_chaining",
+            "title": "Forward Chaining",
+            "description": "Enable forward chaining inference",
+            "type": "switch",
+            "value": settings["reasoning_forward_chaining"],
+        }
+    )
+
+    cognitive_fields.append(
+        {
+            "id": "reasoning_backward_chaining",
+            "title": "Backward Chaining",
+            "description": "Enable backward chaining inference",
+            "type": "switch",
+            "value": settings["reasoning_backward_chaining"],
+        }
+    )
+
+    cognitive_section: SettingsSection = {
+        "id": "cognitive",
+        "title": "Cognitive Configuration",
+        "description": "Configure PyCog-Zero cognitive capabilities, including OpenCog AtomSpace, PLN reasoning, neural-symbolic integration, and attention systems.",
+        "fields": cognitive_fields,
+        "tab": "cognitive",
+    }
+
     # Add the section to the result
     result: SettingsOutput = {
         "sections": [
@@ -1026,6 +1230,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
             embed_model_section,
             memory_section,
             speech_section,
+            cognitive_section,
             api_keys_section,
             auth_section,
             mcp_client_section,
@@ -1236,6 +1441,23 @@ def get_default_settings() -> Settings:
         mcp_client_tool_timeout=120,
         mcp_server_enabled=False,
         mcp_server_token=create_auth_token(),
+        # Cognitive configuration defaults
+        cognitive_mode=True,
+        opencog_enabled=True,
+        neural_symbolic_bridge=True,
+        ecan_attention=True,
+        pln_reasoning=True,
+        atomspace_persistence=True,
+        atomspace_persistence_backend="file",
+        atomspace_persistence_path="memory/cognitive_atomspace.pkl",
+        atomspace_attention_allocation="ecan",
+        neural_embedding_dimension=128,
+        neural_attention_heads=8,
+        neural_device="auto",
+        reasoning_pln_enabled=True,
+        reasoning_pattern_matching=True,
+        reasoning_forward_chaining=False,
+        reasoning_backward_chaining=True,
     )
 
 
@@ -1333,6 +1555,28 @@ def _apply_settings(previous: Settings | None):
                 update_mcp_token, current_token
             )  # TODO overkill, replace with background task
 
+        # sync cognitive configuration if cognitive settings changed
+        cognitive_changed = False
+        if previous:
+            cognitive_fields = [
+                "cognitive_mode", "opencog_enabled", "neural_symbolic_bridge",
+                "ecan_attention", "pln_reasoning", "atomspace_persistence",
+                "atomspace_persistence_backend", "atomspace_persistence_path",
+                "atomspace_attention_allocation", "neural_embedding_dimension",
+                "neural_attention_heads", "neural_device", "reasoning_pln_enabled",
+                "reasoning_pattern_matching", "reasoning_forward_chaining",
+                "reasoning_backward_chaining"
+            ]
+            for field in cognitive_fields:
+                if _settings.get(field) != previous.get(field):
+                    cognitive_changed = True
+                    break
+        else:
+            cognitive_changed = True  # First time setup
+            
+        if cognitive_changed:
+            sync_cognitive_config()
+
 
 def _env_to_dict(data: str):
     env_dict = {}
@@ -1411,3 +1655,120 @@ def _get_version():
         return str(git_info.get("short_tag", "")).strip() or "unknown"
     except Exception:
         return "unknown"
+
+
+def load_cognitive_config() -> dict:
+    """Load cognitive configuration from config_cognitive.json."""
+    try:
+        import json
+        config_file = files.get_abs_path("conf/config_cognitive.json")
+        if os.path.exists(config_file):
+            with open(config_file, 'r') as f:
+                return json.load(f)
+    except Exception as e:
+        print(f"Warning: Could not load cognitive config: {e}")
+    return {}
+
+
+def save_cognitive_config(cognitive_settings: dict):
+    """Save cognitive configuration to config_cognitive.json."""
+    try:
+        import json
+        config_file = files.get_abs_path("conf/config_cognitive.json")
+        
+        # Create cognitive config structure from settings
+        config = {
+            "cognitive_mode": cognitive_settings.get("cognitive_mode", True),
+            "opencog_enabled": cognitive_settings.get("opencog_enabled", True),
+            "neural_symbolic_bridge": cognitive_settings.get("neural_symbolic_bridge", True),
+            "ecan_attention": cognitive_settings.get("ecan_attention", True),
+            "pln_reasoning": cognitive_settings.get("pln_reasoning", True),
+            "atomspace_persistence": cognitive_settings.get("atomspace_persistence", True),
+            "cognitive_tools": [
+                "cognitive_reasoning",
+                "cognitive_memory", 
+                "meta_cognition",
+                "neural_symbolic_agent"
+            ],
+            "atomspace_config": {
+                "persistence_backend": cognitive_settings.get("atomspace_persistence_backend", "file"),
+                "persistence_path": cognitive_settings.get("atomspace_persistence_path", "memory/cognitive_atomspace.pkl"),
+                "attention_allocation": cognitive_settings.get("atomspace_attention_allocation", "ecan")
+            },
+            "neural_config": {
+                "embedding_dimension": cognitive_settings.get("neural_embedding_dimension", 128),
+                "attention_heads": cognitive_settings.get("neural_attention_heads", 8),
+                "device": cognitive_settings.get("neural_device", "auto")
+            },
+            "reasoning_config": {
+                "pln_enabled": cognitive_settings.get("reasoning_pln_enabled", True),
+                "pattern_matching": cognitive_settings.get("reasoning_pattern_matching", True),
+                "forward_chaining": cognitive_settings.get("reasoning_forward_chaining", False),
+                "backward_chaining": cognitive_settings.get("reasoning_backward_chaining", True)
+            }
+        }
+        
+        with open(config_file, 'w') as f:
+            json.dump(config, f, indent=2)
+            
+    except Exception as e:
+        print(f"Warning: Could not save cognitive config: {e}")
+
+
+def get_cognitive_config() -> dict:
+    """Get cognitive configuration as dict suitable for tools."""
+    settings = get_settings()
+    return {
+        "cognitive_mode": settings["cognitive_mode"],
+        "opencog_enabled": settings["opencog_enabled"],
+        "neural_symbolic_bridge": settings["neural_symbolic_bridge"],
+        "ecan_attention": settings["ecan_attention"],
+        "pln_reasoning": settings["pln_reasoning"],
+        "atomspace_persistence": settings["atomspace_persistence"],
+        "cognitive_tools": [
+            "cognitive_reasoning",
+            "cognitive_memory", 
+            "meta_cognition",
+            "neural_symbolic_agent"
+        ],
+        "atomspace_config": {
+            "persistence_backend": settings["atomspace_persistence_backend"],
+            "persistence_path": settings["atomspace_persistence_path"],
+            "attention_allocation": settings["atomspace_attention_allocation"]
+        },
+        "neural_config": {
+            "embedding_dimension": settings["neural_embedding_dimension"],
+            "attention_heads": settings["neural_attention_heads"],
+            "device": settings["neural_device"]
+        },
+        "reasoning_config": {
+            "pln_enabled": settings["reasoning_pln_enabled"],
+            "pattern_matching": settings["reasoning_pattern_matching"],
+            "forward_chaining": settings["reasoning_forward_chaining"],
+            "backward_chaining": settings["reasoning_backward_chaining"]
+        }
+    }
+
+
+def sync_cognitive_config():
+    """Sync cognitive settings with config_cognitive.json file."""
+    settings = get_settings()
+    cognitive_settings = {
+        "cognitive_mode": settings["cognitive_mode"],
+        "opencog_enabled": settings["opencog_enabled"],
+        "neural_symbolic_bridge": settings["neural_symbolic_bridge"],
+        "ecan_attention": settings["ecan_attention"],
+        "pln_reasoning": settings["pln_reasoning"],
+        "atomspace_persistence": settings["atomspace_persistence"],
+        "atomspace_persistence_backend": settings["atomspace_persistence_backend"],
+        "atomspace_persistence_path": settings["atomspace_persistence_path"],
+        "atomspace_attention_allocation": settings["atomspace_attention_allocation"],
+        "neural_embedding_dimension": settings["neural_embedding_dimension"],
+        "neural_attention_heads": settings["neural_attention_heads"],
+        "neural_device": settings["neural_device"],
+        "reasoning_pln_enabled": settings["reasoning_pln_enabled"],
+        "reasoning_pattern_matching": settings["reasoning_pattern_matching"],
+        "reasoning_forward_chaining": settings["reasoning_forward_chaining"],
+        "reasoning_backward_chaining": settings["reasoning_backward_chaining"],
+    }
+    save_cognitive_config(cognitive_settings)
