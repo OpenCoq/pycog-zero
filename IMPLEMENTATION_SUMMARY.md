@@ -180,8 +180,8 @@ pycog-zero/
    - [x] Testing framework validated with `tests/integration/test_cpp2py_pipeline.py`
    - [x] Build system created with `scripts/build_cpp2py_pipeline.sh`
    - [x] Validate cogutil Python bindings using `python3 scripts/cpp2py_conversion_pipeline.py validate cogutil`
-   - [ ] Create cognitive reasoning integration tests for cogutil components
-   - [ ] Document cogutil integration patterns in `docs/cpp2py/`
+   - [x] Create cognitive reasoning integration tests for cogutil components
+   - [x] Document cogutil integration patterns in `docs/cpp2py/`
 
 2. **Core Extensions Phase (Phase 1)**:
    - [ ] Validate atomspace integration using `python3 scripts/cpp2py_conversion_pipeline.py validate atomspace`
