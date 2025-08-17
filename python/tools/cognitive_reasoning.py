@@ -24,8 +24,9 @@ class CognitiveReasoningTool(Tool):
         super().__init__(agent)
         self.atomspace = None
         self.initialized = False
+        self.config = self._load_cognitive_config()
         
-        if OPENCOG_AVAILABLE:
+        if OPENCOG_AVAILABLE and self.config.get("opencog_enabled", True):
             try:
                 self.atomspace = AtomSpace()
                 initialize_opencog(self.atomspace)
@@ -34,8 +35,37 @@ class CognitiveReasoningTool(Tool):
             except Exception as e:
                 print(f"⚠️ OpenCog initialization failed: {e}")
     
+    def _load_cognitive_config(self):
+        """Load cognitive configuration from Agent-Zero settings."""
+        try:
+            # Try to import settings and get cognitive config
+            from python.helpers import settings
+            return settings.get_cognitive_config()
+        except Exception:
+            # Fallback to direct config file loading
+            try:
+                config_file = files.get_abs_path("conf/config_cognitive.json")
+                with open(config_file, 'r') as f:
+                    return json.load(f)
+            except Exception as e:
+                print(f"Warning: Could not load cognitive config: {e}")
+                return {
+                    "cognitive_mode": True,
+                    "opencog_enabled": True,
+                    "reasoning_config": {
+                        "pln_enabled": True,
+                        "pattern_matching": True
+                    }
+                }
+    
     async def execute(self, query: str, **kwargs):
         """Execute cognitive reasoning on Agent-Zero queries."""
+        
+        if not self.config.get("cognitive_mode", True):
+            return Response(
+                message="Cognitive mode is disabled",
+                data={"error": "Cognitive mode disabled in configuration"}
+            )
         
         if not self.initialized:
             return Response(
@@ -47,8 +77,8 @@ class CognitiveReasoningTool(Tool):
             # Convert natural language query to AtomSpace representation
             query_atoms = self.parse_query_to_atoms(query)
             
-            # For demonstration, perform basic reasoning
-            reasoning_results = self.basic_reasoning(query_atoms)
+            # Perform reasoning based on configuration
+            reasoning_results = self.execute_reasoning(query_atoms)
             
             # Format results for Agent-Zero consumption
             reasoning_steps = self.format_reasoning_for_agent(reasoning_results)
@@ -59,7 +89,11 @@ class CognitiveReasoningTool(Tool):
                     "query": query,
                     "atoms_created": len(query_atoms),
                     "reasoning_steps": reasoning_steps,
-                    "status": "success"
+                    "status": "success",
+                    "config": {
+                        "pln_enabled": self.config.get("reasoning_config", {}).get("pln_enabled", True),
+                        "pattern_matching": self.config.get("reasoning_config", {}).get("pattern_matching", True)
+                    }
                 }
             )
             
@@ -85,11 +119,26 @@ class CognitiveReasoningTool(Tool):
         
         return atoms
     
-    def basic_reasoning(self, atoms):
-        """Perform basic reasoning operations on atoms."""
+    def execute_reasoning(self, atoms):
+        """Perform reasoning operations based on configuration."""
         if not atoms:
             return []
         
+        results = []
+        reasoning_config = self.config.get("reasoning_config", {})
+        
+        # Pattern matching (if enabled)
+        if reasoning_config.get("pattern_matching", True):
+            results.extend(self.pattern_matching_reasoning(atoms))
+        
+        # PLN reasoning (if enabled)
+        if reasoning_config.get("pln_enabled", True):
+            results.extend(self.pln_reasoning(atoms))
+        
+        return results
+    
+    def pattern_matching_reasoning(self, atoms):
+        """Perform pattern matching reasoning."""
         results = []
         
         # Create simple inheritance relationships between concepts
@@ -99,6 +148,21 @@ class CognitiveReasoningTool(Tool):
                 [atoms[i], atoms[i + 1]]
             )
             results.append(inheritance_link)
+        
+        return results
+    
+    def pln_reasoning(self, atoms):
+        """Perform PLN (Probabilistic Logic Networks) reasoning."""
+        # Placeholder for PLN reasoning - would integrate with actual PLN when available
+        results = []
+        
+        # Create evaluation links with truth values
+        for atom in atoms:
+            evaluation_link = self.atomspace.add_link(
+                types.EvaluationLink,
+                [self.atomspace.add_node(types.PredicateNode, "relevant"), atom]
+            )
+            results.append(evaluation_link)
         
         return results
     
