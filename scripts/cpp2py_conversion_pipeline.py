@@ -531,9 +531,231 @@ class CPP2PyConversionPipeline:
     
     def _validate_atomspace_python_readiness(self, component_dir: Path) -> bool:
         """Validate atomspace-specific Python binding readiness."""
-        # Placeholder for atomspace validation
-        logger.info("atomspace Python validation not yet implemented")
-        return True
+        try:
+            logger.info("Validating atomspace Python binding readiness...")
+            validation_checks = []
+            
+            # 1. Check for core atomspace C++ headers
+            core_headers_check = self._check_atomspace_core_headers(component_dir)
+            validation_checks.append(("Core AtomSpace Headers", core_headers_check))
+            
+            # 2. Check for Cython binding files  
+            cython_bindings_check = self._check_atomspace_cython_bindings(component_dir)
+            validation_checks.append(("Cython Binding Files", cython_bindings_check))
+            
+            # 3. Check for Python module structure
+            python_modules_check = self._check_atomspace_python_modules(component_dir)
+            validation_checks.append(("Python Module Structure", python_modules_check))
+            
+            # 4. Check CMake Cython configuration
+            cmake_cython_check = self._check_atomspace_cmake_cython_config(component_dir)
+            validation_checks.append(("CMake Cython Configuration", cmake_cython_check))
+            
+            # 5. Check for test infrastructure
+            test_infrastructure_check = self._check_atomspace_test_infrastructure(component_dir)
+            validation_checks.append(("Test Infrastructure", test_infrastructure_check))
+            
+            # Print detailed validation results
+            print(f"\nAtomSpace Python Readiness Validation:")
+            print("-" * 50)
+            all_passed = True
+            for check_name, result in validation_checks:
+                status = "✓ PASS" if result else "✗ FAIL"
+                print(f"  {status}: {check_name}")
+                if not result:
+                    all_passed = False
+            
+            if all_passed:
+                logger.info("✓ atomspace Python binding validation completed successfully")
+            else:
+                logger.warning("✗ Some atomspace Python binding validation checks failed")
+            
+            return all_passed
+            
+        except Exception as e:
+            logger.error(f"Error validating atomspace Python readiness: {e}")
+            return False
+    
+    def _check_atomspace_core_headers(self, component_dir: Path) -> bool:
+        """Check for essential atomspace C++ header files."""
+        try:
+            core_headers = [
+                "opencog/atomspace/AtomSpace.h",
+                "opencog/atoms/base/Atom.h", 
+                "opencog/atoms/base/Handle.h",
+                "opencog/atoms/base/Node.h",
+                "opencog/atoms/base/Link.h",
+                "opencog/atoms/truthvalue/TruthValue.h"
+            ]
+            
+            missing_headers = []
+            for header in core_headers:
+                header_path = component_dir / header
+                if not header_path.exists():
+                    missing_headers.append(header)
+            
+            if missing_headers:
+                logger.warning(f"Missing core atomspace headers: {missing_headers}")
+                return False
+            
+            logger.info("✓ All core atomspace headers found")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error checking core headers: {e}")
+            return False
+    
+    def _check_atomspace_cython_bindings(self, component_dir: Path) -> bool:
+        """Check for Cython binding files."""
+        try:
+            cython_dir = component_dir / "opencog" / "cython" / "opencog"
+            if not cython_dir.exists():
+                logger.warning("Cython bindings directory not found")
+                return False
+            
+            essential_cython_files = [
+                "atomspace.pyx",
+                "atomspace.pxd", 
+                "atom.pyx",
+                "value.pyx",
+                "truth_value.pyx",
+                "type_constructors.pyx",
+                "__init__.py"
+            ]
+            
+            missing_files = []
+            for cython_file in essential_cython_files:
+                file_path = cython_dir / cython_file
+                if not file_path.exists():
+                    missing_files.append(cython_file)
+            
+            if missing_files:
+                logger.warning(f"Missing essential Cython files: {missing_files}")
+                return False
+            
+            logger.info("✓ All essential Cython binding files found")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error checking Cython bindings: {e}")
+            return False
+    
+    def _check_atomspace_python_modules(self, component_dir: Path) -> bool:
+        """Check for proper Python module structure."""
+        try:
+            # Check for main cython module directory
+            cython_opencog_dir = component_dir / "opencog" / "cython" / "opencog"
+            if not cython_opencog_dir.exists():
+                logger.warning("Python module directory not found")
+                return False
+            
+            # Check for __init__.py
+            init_file = cython_opencog_dir / "__init__.py"
+            if not init_file.exists():
+                logger.warning("Python module __init__.py not found")
+                return False
+            
+            # Check for expected Python interface files
+            interface_files = [
+                "atomspace.pxd",  # Cython definitions
+                "utilities.pxd",  # Utility definitions
+                "value_types.pxd"  # Value type definitions
+            ]
+            
+            missing_interfaces = []
+            for interface_file in interface_files:
+                if not (cython_opencog_dir / interface_file).exists():
+                    missing_interfaces.append(interface_file)
+            
+            if missing_interfaces:
+                logger.warning(f"Missing Python interface files: {missing_interfaces}")
+                return False
+            
+            logger.info("✓ Python module structure is correct")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error checking Python modules: {e}")
+            return False
+    
+    def _check_atomspace_cmake_cython_config(self, component_dir: Path) -> bool:
+        """Check CMake Cython configuration for atomspace."""
+        try:
+            # Check main CMake file
+            main_cmake = component_dir / "CMakeLists.txt"
+            if not main_cmake.exists():
+                logger.warning("Main CMakeLists.txt not found")
+                return False
+            
+            # Check Cython-specific CMake file (the actual one with Cython config)
+            cython_cmake = component_dir / "opencog" / "cython" / "opencog" / "CMakeLists.txt"
+            if not cython_cmake.exists():
+                logger.warning("Cython opencog CMakeLists.txt not found")
+                return False
+            
+            # Check the content for Cython configuration
+            with open(cython_cmake, 'r') as f:
+                cmake_content = f.read()
+            
+            required_cmake_elements = [
+                "CYTHON_ADD_MODULE_PYX",
+                "atomspace_cython",
+                "type_constructors",
+                "Python3_LIBRARIES",
+                "Python3_INCLUDE_DIRS"
+            ]
+            
+            missing_elements = []
+            for element in required_cmake_elements:
+                if element not in cmake_content:
+                    missing_elements.append(element)
+            
+            if missing_elements:
+                logger.warning(f"Missing CMake Cython elements: {missing_elements}")
+                return False
+            
+            logger.info("✓ CMake Cython configuration is correct")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error checking CMake Cython config: {e}")
+            return False
+    
+    def _check_atomspace_test_infrastructure(self, component_dir: Path) -> bool:
+        """Check for atomspace test infrastructure."""
+        try:
+            tests_dir = component_dir / "tests"
+            if not tests_dir.exists():
+                logger.warning("Tests directory not found")
+                return False
+            
+            # Check for Cython tests
+            cython_tests_dir = tests_dir / "cython" / "atomspace"
+            if not cython_tests_dir.exists():
+                logger.warning("Cython tests directory not found")
+                return False
+            
+            # Check for key test files
+            key_test_files = [
+                "test_atomspace.py",
+                "test_atom.py"
+            ]
+            
+            missing_tests = []
+            for test_file in key_test_files:
+                if not (cython_tests_dir / test_file).exists():
+                    missing_tests.append(test_file)
+            
+            if missing_tests:
+                logger.warning(f"Missing key test files: {missing_tests}")
+                return False
+            
+            logger.info("✓ Test infrastructure is present")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error checking test infrastructure: {e}")
+            return False
     
     def _validate_generic_python_readiness(self, component_dir: Path) -> bool:
         """Generic Python binding readiness validation."""
