@@ -1,5 +1,5 @@
 #
-# Master AtomSpace RocksDB Backend CMake file.
+# Master AtomSpace Storage CMake file.
 #
 # General organization:
 # -- check for different compilers, OS'es
@@ -18,7 +18,7 @@ IF (COMMAND CMAKE_POLICY)
 	CMAKE_POLICY(SET CMP0045 NEW)
 ENDIF (COMMAND CMAKE_POLICY)
 
-PROJECT(atomspace-rocks)
+PROJECT(atomspace-storage)
 
 # ----------------------------------------------------------
 # User-modifiable options. Feel free to change these!
@@ -77,34 +77,6 @@ include(Summary)
 # ===================================================================
 # Check for existance of various required, optional packages.
 
-# AtomSpace
-FIND_PACKAGE(AtomSpace 5.0.5 CONFIG REQUIRED)
-IF (ATOMSPACE_FOUND)
-	MESSAGE(STATUS "AtomSpace found.")
-	ADD_DEFINITIONS(-DHAVE_ATOMSPACE)
-	SET(HAVE_ATOMSPACE 1)
-ELSE (ATOMSPACE_FOUND)
-	MESSAGE(FATAL_ERROR "AtomSpace missing: it is needed!")
-ENDIF (ATOMSPACE_FOUND)
-
-FIND_PACKAGE(AtomSpaceStorage 1.2.0 CONFIG REQUIRED)
-IF (ATOMSPACE_STORAGE_FOUND)
-	MESSAGE(STATUS "AtomSpace Storage found.")
-	ADD_DEFINITIONS(-DHAVE_ATOMSPACE_STORAGE)
-	SET(HAVE_ATOMSPACE_STORAGE 1)
-ELSE (ATOMSPACE_STORAGE_FOUND)
-	MESSAGE(FATAL_ERROR "AtomSpace Storage missing: it is needed!")
-ENDIF (ATOMSPACE_STORAGE_FOUND)
-
-# RocksDB
-FIND_PACKAGE(RocksDB REQUIRED)
-IF (ROCKSDB_FOUND)
-	MESSAGE(STATUS "RocksDB found.")
-	SET(HAVE_ROCKSDB 1)
-ELSE (ROCKSDB_FOUND)
-	MESSAGE(FATAL_ERROR "RocksDB was not found.")
-ENDIF (ROCKSDB_FOUND)
-
 # ----------------------------------------------------------
 # Needed for unit tests
 
@@ -119,20 +91,33 @@ ENDIF (NOT CXXTEST_FOUND)
 include(OpenCogFindGuile)
 include(OpenCogFindPython)
 
+
+# Check for boost. We need dynamic-linked, threaded libs by default.
+# This is use for the file backend.
+SET(Boost_USE_STATIC_LIBS OFF)
+SET(Boost_USE_MULTITHREADED ON)
+
+FIND_PACKAGE(Boost) ### OPTIONAL_COMPONENTS system)
+IF (Boost_FOUND)
+	SET(HAVE_BOOST 1)
+	ADD_DEFINITIONS(-DHAVE_BOOST)
+	INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS})
+ENDIF (Boost_FOUND)
+
 # ----------------------------------------------------------
-# Optional, currently needed only to hush up DRD in util/Logger.cc
-FIND_PACKAGE(VALGRIND)
-IF (VALGRIND_FOUND)
-	MESSAGE(STATUS "VALGRIND was found.")
-	IF (VALGRIND_INCLUDE_DIR)
-		MESSAGE(STATUS "VALGRIND devel headers found.")
-		ADD_DEFINITIONS(-DHAVE_VALGRIND)
-	ELSE (VALGRIND_INCLUDE_DIR)
-		MESSAGE(STATUS "VALGRIND devel headers NOT FOUND: needed for thread debugging.")
-	ENDIF (VALGRIND_INCLUDE_DIR)
-ELSE (VALGRIND_FOUND)
-	MESSAGE(STATUS "VALGRIND missing: needed for thread debugging.")
-ENDIF (VALGRIND_FOUND)
+# Search for AtomSpace AFTER searching for python, as otherwise
+# HAVE_CYTHON will not be set and the libraries will be calculated
+# incorrectly
+
+# AtomSpace
+FIND_PACKAGE(AtomSpace 5.0.5 CONFIG REQUIRED)
+IF (ATOMSPACE_FOUND)
+	MESSAGE(STATUS "AtomSpace found.")
+	ADD_DEFINITIONS(-DHAVE_ATOMSPACE)
+	SET(HAVE_ATOMSPACE 1)
+ELSE (ATOMSPACE_FOUND)
+	MESSAGE(FATAL_ERROR "AtomSpace missing: it is needed!")
+ENDIF (ATOMSPACE_FOUND)
 
 # ===================================================================
 # Include configuration.
@@ -180,20 +165,6 @@ IF (CXXTEST_FOUND)
 		)
 	ENDIF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
 
-	ADD_CUSTOM_TARGET(test_mono
-		DEPENDS tests
-		WORKING_DIRECTORY tests/persist/monospace
-		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
-		COMMENT "Running Monospace tests..."
-	)
-
-	ADD_CUSTOM_TARGET(test_multi
-		DEPENDS tests
-		WORKING_DIRECTORY tests/persist/rocks
-		COMMAND ${CMAKE_CTEST_COMMAND} $(ARGS)
-		COMMENT "Running Multispace tests..."
-	)
-
 ENDIF (CXXTEST_FOUND)
 
 ADD_CUSTOM_TARGET(cscope
@@ -219,8 +190,8 @@ STRING(TIMESTAMP UTC_DATE %Y%m%d UTC)
 FILE(WRITE "${PROJECT_BINARY_DIR}/install_manifest.txt")
 ## It doesn't have a header-file declaring the version similar to cogutil and
 ## atomspace.
-# SEMANTIC_VERSION is set in `cmake/CMakeLists.txt`
-SET(SEMANTIC_VERSION 1.3.0)
+# SEMANTIC_VERSION is set in `lib/AtomSpaceStorageConfig.cmake.in`
+SET(SEMANTIC_VERSION 1.2.0)
 
 ## Cpack configuration
 SET(CPACK_GENERATOR "DEB")
@@ -228,7 +199,7 @@ SET(CPACK_PACKAGE_CONTACT "opencog@googlegroups.com")
 SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
 SET(CPACK_PACKAGE_DIRECTORY "${CMAKE_BINARY_DIR}/packages")
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "The AtomSpace RocksDB Storage Backend")
-SET(CPACK_PACKAGE_NAME "atomspace-rocks-dev")
+SET(CPACK_PACKAGE_NAME "atomspace-storage-dev")
 SET(CPACK_PACKAGE_VENDOR "opencog.org")
 SET(CPACK_PACKAGE_VERSION "${SEMANTIC_VERSION}-${UTC_DATE}")
 SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
@@ -240,9 +211,8 @@ SET(CPACK_PACKAGING_INSTALL_PREFIX "/usr/local")
 SET(DEPENDENCY_LIST
 	"guile-3.0-dev (>= 3.0.0)"
 	"libstdc++6 (>= 7.0)"
-	"libcogutil-dev (>= 2.0.3)"
-	"atomspace-dev (>= 5.0.5)"
-	"atomspace-storage-dev (>= 1.2.0)"
+	"libcogutil-dev (>= 2.0.2)"
+	"atomspace-dev (>= 5.0.3)"
 )
 
 STRING(REPLACE ";" ", " MAIN_DEPENDENCIES "${DEPENDENCY_LIST}")
@@ -259,9 +229,8 @@ FIND_PACKAGE(Doxygen)
 # ===================================================================
 # Show a summary of what we found, what we will do.
 
-SUMMARY_ADD("AtomSpace-Rocks" "AtomSpace RocksDB Backend"
-	HAVE_ATOMSPACE AND HAVE_ATOMSPACE_STORAGE AND HAVE_ROCKSDB)
-SUMMARY_ADD("Cython"     "Cython (python) bindings" HAVE_CYTHON)
+SUMMARY_ADD("AtomSpace Storage" "AtomSpace persistence backend" HAVE_ATOMSPACE)
+SUMMARY_ADD("CSV support"      "CSV Table support (requires Boost)" BOOST_FOUND)
 SUMMARY_ADD("Doxygen"    "Code documentation" DOXYGEN_FOUND)
 SUMMARY_ADD("Unit tests" "Unit tests" CXXTEST_FOUND)
 
