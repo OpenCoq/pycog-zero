@@ -140,6 +140,21 @@ python3 scripts/cpp2py_conversion_pipeline.py clone all
 ```bash
 # Check if dependencies are satisfied for a component
 python3 scripts/cpp2py_conversion_pipeline.py validate atomspace
+
+# Validate dependencies only (skip Python bindings validation)
+python3 scripts/cpp2py_conversion_pipeline.py validate cogutil --deps-only
+```
+
+**Validate Python Bindings**
+```bash
+# Full validation including Python bindings readiness
+python3 scripts/cpp2py_conversion_pipeline.py validate cogutil
+
+# This checks:
+# - CMake Python configuration
+# - Python interpreter compatibility
+# - Component-specific Python readiness
+# - Build system compatibility
 ```
 
 **Run Tests**

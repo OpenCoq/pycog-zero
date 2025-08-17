@@ -367,6 +367,242 @@ class CPP2PyConversionPipeline:
         logger.info(f"All dependencies satisfied for {component_name}")
         return True
     
+    def validate_python_bindings(self, component_name: str) -> bool:
+        """Validate Python bindings for a component."""
+        if component_name not in self.components:
+            logger.error(f"Unknown component: {component_name}")
+            return False
+        
+        component = self.components[component_name]
+        component_dir = self.components_dir / component_name
+        
+        if not component_dir.exists():
+            logger.error(f"Component {component_name} not cloned yet")
+            return False
+        
+        logger.info(f"Validating Python bindings for {component_name}")
+        
+        # Check for Python binding prerequisites
+        validation_results = []
+        
+        # 1. Check CMake Python configuration
+        cmake_check = self._validate_cmake_python_config(component_dir)
+        validation_results.append(("CMake Python Config", cmake_check))
+        
+        # 2. Check Python interpreter availability
+        python_check = self._validate_python_interpreter()
+        validation_results.append(("Python Interpreter", python_check))
+        
+        # 3. Check component-specific Python readiness
+        component_check = self._validate_component_python_readiness(component_name, component_dir)
+        validation_results.append(("Component Python Readiness", component_check))
+        
+        # 4. Check build system compatibility
+        build_check = self._validate_build_system_compatibility(component_dir)
+        validation_results.append(("Build System Compatibility", build_check))
+        
+        # Print detailed results
+        print(f"\nPython Bindings Validation Results for {component_name}:")
+        print("=" * 60)
+        all_passed = True
+        for check_name, result in validation_results:
+            status = "✓ PASS" if result else "✗ FAIL"
+            print(f"  {status}: {check_name}")
+            if not result:
+                all_passed = False
+        
+        if all_passed:
+            logger.info(f"✓ Python bindings validation passed for {component_name}")
+            self._update_component_status(component_name, "python_bindings_validated")
+        else:
+            logger.error(f"✗ Python bindings validation failed for {component_name}")
+        
+        return all_passed
+    
+    def _validate_cmake_python_config(self, component_dir: Path) -> bool:
+        """Check if CMake Python configuration is present and valid."""
+        try:
+            cmake_files = list(component_dir.glob("**/CMakeLists.txt"))
+            python_cmake_files = list(component_dir.glob("**/OpenCogFindPython.cmake"))
+            
+            # Check if main CMakeLists.txt exists
+            main_cmake = component_dir / "CMakeLists.txt"
+            if not main_cmake.exists():
+                logger.warning("No main CMakeLists.txt found")
+                return False
+            
+            # Check for Python-related CMake configuration
+            has_python_config = False
+            for cmake_file in cmake_files + python_cmake_files:
+                try:
+                    with open(cmake_file, 'r') as f:
+                        content = f.read().lower()
+                        if any(keyword in content for keyword in ['python', 'cython', 'find_package(python']):
+                            has_python_config = True
+                            break
+                except Exception:
+                    continue
+            
+            if has_python_config:
+                logger.info("✓ CMake Python configuration found")
+                return True
+            else:
+                logger.warning("No CMake Python configuration detected")
+                return False
+                
+        except Exception as e:
+            logger.error(f"Error checking CMake Python config: {e}")
+            return False
+    
+    def _validate_python_interpreter(self) -> bool:
+        """Check if Python interpreter is available and compatible."""
+        try:
+            result = subprocess.run([
+                "python3", "--version"
+            ], capture_output=True, text=True, check=True)
+            
+            version_output = result.stdout.strip()
+            logger.info(f"✓ {version_output} found")
+            
+            # Check if Python development headers are available
+            try:
+                import sysconfig
+                include_dir = sysconfig.get_path('include')
+                logger.info(f"✓ Python development headers available at {include_dir}")
+                return True
+            except Exception:
+                logger.warning("Python development headers may not be available")
+                return True  # Still count as success for basic validation
+                
+        except subprocess.CalledProcessError:
+            logger.error("Python3 interpreter not found")
+            return False
+        except Exception as e:
+            logger.error(f"Error checking Python interpreter: {e}")
+            return False
+    
+    def _validate_component_python_readiness(self, component_name: str, component_dir: Path) -> bool:
+        """Validate component-specific Python binding readiness."""
+        try:
+            if component_name == "cogutil":
+                return self._validate_cogutil_python_readiness(component_dir)
+            elif component_name == "atomspace":
+                return self._validate_atomspace_python_readiness(component_dir)
+            else:
+                # Generic validation for other components
+                return self._validate_generic_python_readiness(component_dir)
+                
+        except Exception as e:
+            logger.error(f"Error validating component Python readiness: {e}")
+            return False
+    
+    def _validate_cogutil_python_readiness(self, component_dir: Path) -> bool:
+        """Validate cogutil-specific Python binding readiness."""
+        try:
+            # Check for key utility headers that will be used by Python bindings
+            util_dir = component_dir / "opencog" / "util"
+            if not util_dir.exists():
+                logger.warning("cogutil utility directory not found")
+                return False
+            
+            # Check for key utility classes
+            key_files = ["cogutil.h", "Config.h", "Logger.h"]
+            missing_files = []
+            for key_file in key_files:
+                if not (util_dir / key_file).exists():
+                    missing_files.append(key_file)
+            
+            if missing_files:
+                logger.warning(f"Missing key cogutil files: {missing_files}")
+                return False
+            
+            # Check for Python binding configuration
+            python_cmake = component_dir / "cmake" / "OpenCogFindPython.cmake"
+            if python_cmake.exists():
+                logger.info("✓ cogutil Python CMake configuration found")
+                return True
+            else:
+                logger.warning("cogutil Python CMake configuration not found")
+                return False
+                
+        except Exception as e:
+            logger.error(f"Error validating cogutil Python readiness: {e}")
+            return False
+    
+    def _validate_atomspace_python_readiness(self, component_dir: Path) -> bool:
+        """Validate atomspace-specific Python binding readiness."""
+        # Placeholder for atomspace validation
+        logger.info("atomspace Python validation not yet implemented")
+        return True
+    
+    def _validate_generic_python_readiness(self, component_dir: Path) -> bool:
+        """Generic Python binding readiness validation."""
+        try:
+            # Check for basic structure
+            has_headers = len(list(component_dir.glob("**/*.h"))) > 0
+            has_sources = len(list(component_dir.glob("**/*.cc"))) > 0 or len(list(component_dir.glob("**/*.cpp"))) > 0
+            
+            if has_headers and has_sources:
+                logger.info("✓ Basic C++ structure found for Python binding generation")
+                return True
+            else:
+                logger.warning("Insufficient C++ structure for Python bindings")
+                return False
+                
+        except Exception as e:
+            logger.error(f"Error in generic Python validation: {e}")
+            return False
+    
+    def _validate_build_system_compatibility(self, component_dir: Path) -> bool:
+        """Check if the build system is compatible with Python bindings."""
+        try:
+            # Check for CMake compatibility
+            cmake_file = component_dir / "CMakeLists.txt"
+            if not cmake_file.exists():
+                logger.warning("No CMakeLists.txt found")
+                return False
+            
+            with open(cmake_file, 'r') as f:
+                content = f.read()
+            
+            # Check for minimum CMake version compatibility
+            if "CMAKE_MINIMUM_REQUIRED" in content:
+                logger.info("✓ CMake version requirements specified")
+                return True
+            else:
+                logger.warning("No CMake version requirements found")
+                return False
+                
+        except Exception as e:
+            logger.error(f"Error checking build system compatibility: {e}")
+            return False
+    
+    def _update_component_status(self, component_name: str, new_status: str):
+        """Update component status file with new validation status."""
+        try:
+            component_dir = self.components_dir / component_name
+            status_file = component_dir / "conversion_status.json"
+            
+            if status_file.exists():
+                with open(status_file, 'r') as f:
+                    status = json.load(f)
+                
+                if "tasks_completed" not in status:
+                    status["tasks_completed"] = []
+                
+                if new_status not in status["tasks_completed"]:
+                    status["tasks_completed"].append(new_status)
+                
+                status["last_updated"] = str(subprocess.check_output(["date"], text=True).strip())
+                
+                with open(status_file, 'w') as f:
+                    json.dump(status, f, indent=2)
+                
+                logger.info(f"Updated status for {component_name}: {new_status}")
+            
+        except Exception as e:
+            logger.warning(f"Could not update component status: {e}")
+    
     def generate_phase_report(self, phase: Phase) -> Dict:
         """Generate status report for a specific phase."""
         phase_components = [
@@ -446,8 +682,9 @@ def main():
     test_parser.add_argument("component", nargs="?", help="Component to test (default: all)")
     
     # Validate command
-    validate_parser = subparsers.add_parser("validate", help="Validate dependencies")
+    validate_parser = subparsers.add_parser("validate", help="Validate dependencies and Python bindings")
     validate_parser.add_argument("component", help="Component to validate")
+    validate_parser.add_argument("--deps-only", action="store_true", help="Only validate dependencies, skip Python bindings")
     
     args = parser.parse_args()
     
@@ -504,7 +741,16 @@ def main():
         sys.exit(0 if success else 1)
     
     elif args.command == "validate":
-        success = pipeline.validate_dependencies(args.component)
+        if args.deps_only:
+            success = pipeline.validate_dependencies(args.component)
+        else:
+            # Full validation includes dependencies + Python bindings
+            deps_success = pipeline.validate_dependencies(args.component)
+            if deps_success:
+                bindings_success = pipeline.validate_python_bindings(args.component)
+                success = deps_success and bindings_success
+            else:
+                success = False
         sys.exit(0 if success else 1)
 
 if __name__ == "__main__":

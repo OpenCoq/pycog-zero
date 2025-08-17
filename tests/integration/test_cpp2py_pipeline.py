@@ -246,6 +246,33 @@ class TestEndToEndWorkflow:
         
         # Should fail since components aren't cloned yet, but command should work
         assert result.returncode in [0, 1]  # 0 if deps found, 1 if missing (expected)
+    
+    def test_python_bindings_validation_command(self):
+        """Test Python bindings validation command for cogutil."""
+        script_path = project_root / "scripts" / "cpp2py_conversion_pipeline.py"
+        
+        result = subprocess.run([
+            "python", str(script_path), "validate", "cogutil"
+        ], capture_output=True, text=True, cwd=project_root)
+        
+        # Check that validation output includes Python binding checks
+        assert "Python Bindings Validation Results" in result.stdout
+        assert "CMake Python Config" in result.stdout
+        assert "Python Interpreter" in result.stdout
+        assert "Component Python Readiness" in result.stdout
+        assert "Build System Compatibility" in result.stdout
+        
+    def test_dependencies_only_validation_command(self):
+        """Test dependencies-only validation command."""
+        script_path = project_root / "scripts" / "cpp2py_conversion_pipeline.py"
+        
+        result = subprocess.run([
+            "python", str(script_path), "validate", "cogutil", "--deps-only"
+        ], capture_output=True, text=True, cwd=project_root)
+        
+        # Should not include Python binding validation output
+        assert "Python Bindings Validation Results" not in result.stdout
+        assert result.returncode in [0, 1]  # 0 if deps found, 1 if missing
 
 
 @pytest.mark.integration
