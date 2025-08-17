@@ -20,8 +20,12 @@ except ImportError:
 class CognitiveReasoningTool(Tool):
     """Agent-Zero tool for OpenCog cognitive reasoning."""
     
-    def __init__(self, agent):
-        super().__init__(agent)
+    def _initialize_if_needed(self):
+        """Initialize the cognitive reasoning system if not already done."""
+        if hasattr(self, '_cognitive_initialized'):
+            return
+        
+        self._cognitive_initialized = True
         self.atomspace = None
         self.initialized = False
         self.config = self._load_cognitive_config()
@@ -60,6 +64,9 @@ class CognitiveReasoningTool(Tool):
     
     async def execute(self, query: str, **kwargs):
         """Execute cognitive reasoning on Agent-Zero queries."""
+        
+        # Initialize if needed
+        self._initialize_if_needed()
         
         if not self.config.get("cognitive_mode", True):
             return Response(
