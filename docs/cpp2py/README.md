@@ -257,6 +257,7 @@ python3 -m pytest tests/integration/test_cpp2py_pipeline.py::TestComponentIntegr
 3. **PyCog-Zero Tests**: Test integration with existing cognitive tools
 4. **Build System Tests**: Validate build and dependency management
 5. **End-to-End Tests**: Complete workflow validation
+6. **Cogutil Integration Tests**: Foundation component integration validation (see [cogutil_integration_tests.md](cogutil_integration_tests.md))
 
 ### Performance Benchmarks
 
