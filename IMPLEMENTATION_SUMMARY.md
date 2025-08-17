@@ -173,26 +173,52 @@ pycog-zero/
 └── cpp2py_config.json                 # Pipeline configuration
 ```
 
-## 🎯 Next Development Steps
+## Next Development Steps
 
-### Immediate (Ready to Execute)
-- [x] ✅ Pipeline infrastructure complete
-- [x] ✅ Testing framework validated
-- [x] ✅ Documentation comprehensive
-- [ ] 🔄 Clone Phase 0 components (cogutil)
-- [ ] 🔄 Create Python bindings for cogutil
+1. **Foundation Components Integration**:
+   - [x] Pipeline infrastructure implemented via `scripts/cpp2py_conversion_pipeline.py`
+   - [x] Testing framework validated with `tests/integration/test_cpp2py_pipeline.py`
+   - [x] Build system created with `scripts/build_cpp2py_pipeline.sh`
+   - [ ] Validate cogutil Python bindings using `python3 scripts/cpp2py_conversion_pipeline.py validate cogutil`
+   - [ ] Create cognitive reasoning integration tests for cogutil components
+   - [ ] Document cogutil integration patterns in `docs/cpp2py/`
 
-### Short-term (Phase 1)
-- [ ] Clone atomspace, cogserver, atomspace-rocks
-- [ ] Create Agent-Zero tool integrations
-- [ ] Implement neural-symbolic bridges
-- [ ] Add performance benchmarking
+2. **Core Extensions Phase (Phase 1)**:
+   - [ ] Validate atomspace integration using `python3 scripts/cpp2py_conversion_pipeline.py validate atomspace`
+   - [ ] Test cogserver multi-agent functionality with existing scripts
+   - [ ] Create atomspace-rocks Python bindings for performance optimization
+   - [ ] Integrate Agent-Zero tools with atomspace components
+   - [ ] Add performance benchmarking using `scripts/cpp2py_conversion_pipeline.py test`
+   - [ ] Update `python/tools/cognitive_reasoning.py` with new atomspace bindings
 
-### Long-term (Phases 2-5)
-- [ ] Logic systems integration (unify, ure)
-- [ ] Cognitive systems (attention, ECAN)
-- [ ] Advanced reasoning (PLN)
-- [ ] Complete OpenCog stack integration
+3. **Logic Systems Integration (Phase 2)**:
+   - [ ] Clone and validate unify repository using `python3 scripts/cpp2py_conversion_pipeline.py clone unify`
+   - [ ] Implement URE (Unified Rule Engine) Python bindings
+   - [ ] Test pattern matching algorithms with existing cognitive tools
+   - [ ] Create logic system integration tests in `tests/integration/`
+   - [ ] Document logic system usage patterns for Agent-Zero integration
+
+4. **Cognitive Systems Enhancement (Phase 3)**:
+   - [ ] Clone attention system using `python3 scripts/cpp2py_conversion_pipeline.py clone attention`
+   - [ ] Integrate ECAN (Economic Attention Networks) with existing cognitive tools
+   - [ ] Test attention allocation mechanisms with Agent-Zero framework
+   - [ ] Update `conf/config_cognitive.json` with attention system parameters
+   - [ ] Create attention-based reasoning examples in cognitive documentation
+
+5. **Advanced Learning Systems (Phase 4)**:
+   - [ ] Clone PLN repository using `python3 scripts/cpp2py_conversion_pipeline.py clone pln`
+   - [ ] Implement Probabilistic Logic Networks Python integration
+   - [ ] Test PLN reasoning with existing PyCog-Zero tools
+   - [ ] Create advanced reasoning examples using PLN and Agent-Zero
+   - [ ] Performance optimize PLN integration for real-time agent operations
+
+6. **Complete Integration and Deployment (Phase 5)**:
+   - [ ] Final integration testing using `python3 scripts/cpp2py_conversion_pipeline.py status`
+   - [ ] Validate end-to-end OpenCog stack with `python3 -m pytest tests/integration/ -v`
+   - [ ] Create production deployment scripts based on `scripts/build_cpp2py_pipeline.sh`
+   - [ ] Generate comprehensive documentation covering all integrated components
+   - [ ] Create Agent-Zero examples demonstrating full cognitive architecture capabilities
+   - [ ] Performance benchmark complete integrated system for production readiness
 
 ## 🏆 Success Metrics Achieved
 
