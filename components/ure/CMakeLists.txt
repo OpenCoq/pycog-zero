@@ -308,8 +308,8 @@ SET(DEPENDENCY_LIST
 	"python3-dev (>= 3.6.7)"
 	"libboost-random-dev (>= ${MIN_BOOST})"
 	"libstdc++6 (>= 4.7)"
-	"libcogutil-dev (>= 2.0.2)"
-	"atomspace-dev (>= 5.0.3)"
+	"libcogutil-dev (>= 2.0.3)"
+	"atomspace-dev (>= 5.0.5)"
 )
 
 STRING(REPLACE ";" ", " MAIN_DEPENDENCIES "${DEPENDENCY_LIST}")

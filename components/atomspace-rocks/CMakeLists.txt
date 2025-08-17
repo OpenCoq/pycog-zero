@@ -57,7 +57,7 @@ ADD_DEFINITIONS(-DPROJECT_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/lib/")
 
 # Cogutil
-FIND_PACKAGE(CogUtil 2.0.1 CONFIG REQUIRED)
+FIND_PACKAGE(CogUtil 2.0.3 CONFIG REQUIRED)
 IF (COGUTIL_FOUND)
 	MESSAGE(STATUS "CogUtil version ${COGUTIL_VERSION} found.")
 	ADD_DEFINITIONS(-DHAVE_COGUTIL)
@@ -78,7 +78,7 @@ include(Summary)
 # Check for existance of various required, optional packages.
 
 # AtomSpace
-FIND_PACKAGE(AtomSpace 5.0.3 CONFIG REQUIRED)
+FIND_PACKAGE(AtomSpace 5.0.5 CONFIG REQUIRED)
 IF (ATOMSPACE_FOUND)
 	MESSAGE(STATUS "AtomSpace found.")
 	ADD_DEFINITIONS(-DHAVE_ATOMSPACE)
@@ -87,7 +87,7 @@ ELSE (ATOMSPACE_FOUND)
 	MESSAGE(FATAL_ERROR "AtomSpace missing: it is needed!")
 ENDIF (ATOMSPACE_FOUND)
 
-FIND_PACKAGE(AtomSpaceStorage CONFIG REQUIRED)
+FIND_PACKAGE(AtomSpaceStorage 1.2.0 CONFIG REQUIRED)
 IF (ATOMSPACE_STORAGE_FOUND)
 	MESSAGE(STATUS "AtomSpace Storage found.")
 	ADD_DEFINITIONS(-DHAVE_ATOMSPACE_STORAGE)
@@ -219,8 +219,8 @@ STRING(TIMESTAMP UTC_DATE %Y%m%d UTC)
 FILE(WRITE "${PROJECT_BINARY_DIR}/install_manifest.txt")
 ## It doesn't have a header-file declaring the version similar to cogutil and
 ## atomspace.
-# SEMANTIC_VERSION is set in `lib/AtomSpaceRocksConfig.cmake.in`
-# SET(SEMANTIC_VERSION 1.3.0)
+# SEMANTIC_VERSION is set in `cmake/CMakeLists.txt`
+SET(SEMANTIC_VERSION 1.3.0)
 
 ## Cpack configuration
 SET(CPACK_GENERATOR "DEB")
@@ -240,8 +240,9 @@ SET(CPACK_PACKAGING_INSTALL_PREFIX "/usr/local")
 SET(DEPENDENCY_LIST
 	"guile-3.0-dev (>= 3.0.0)"
 	"libstdc++6 (>= 7.0)"
-	"libcogutil-dev (>= 2.0.2)"
-	"atomspace-dev (>= 5.0.3)"
+	"libcogutil-dev (>= 2.0.3)"
+	"atomspace-dev (>= 5.0.5)"
+	"atomspace-storage-dev (>= 1.2.0)"
 )
 
 STRING(REPLACE ";" ", " MAIN_DEPENDENCIES "${DEPENDENCY_LIST}")

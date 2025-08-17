@@ -355,7 +355,7 @@ SET(DEPENDENCY_LIST
 	"python3-dev (>= 3.6.7)"
 	"libstdc++6 (>= 4.7)"
 	"libpq-dev (>=9.3.24)"
-	"libcogutil-dev (>= 2.0.2)"
+	"libcogutil-dev (>= 2.0.3)"
 )
 
 STRING(REPLACE ";" ", " MAIN_DEPENDENCIES "${DEPENDENCY_LIST}")

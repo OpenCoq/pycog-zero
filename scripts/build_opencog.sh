@@ -28,7 +28,7 @@ if [ ! -d "$PROJECT_ROOT/components" ]; then
 fi
 
 # Check for required components
-REQUIRED_COMPONENTS=("cogutil" "atomspace")
+REQUIRED_COMPONENTS=("cogutil" "atomspace" "atomspace-storage")
 for component in "${REQUIRED_COMPONENTS[@]}"; do
     if [ ! -d "$PROJECT_ROOT/components/$component" ]; then
         echo "❌ Error: Component $component not found in components/"
@@ -84,6 +84,19 @@ sudo make install
 sudo ldconfig
 
 echo "✅ atomspace built and installed"
+echo
+
+# Build atomspace-storage (storage backends)
+echo "🔧 Building atomspace-storage..."
+cd "$PROJECT_ROOT/components/atomspace-storage"
+mkdir -p build
+cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+make -j$(nproc)
+sudo make install
+sudo ldconfig
+
+echo "✅ atomspace-storage built and installed"
 echo
 
 # Test the installation
