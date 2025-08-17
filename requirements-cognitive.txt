@@ -1,9 +1,9 @@
 # Core PyCog-Zero cognitive dependencies
 # Note: OpenCog components are built from source using scripts/build_opencog.sh
 # The following packages are NOT available via pip and must be built from C++ source:
-# opencog-atomspace>=5.0.0  # Built from components/atomspace
-# opencog-python>=5.0.0     # Built from components/atomspace (Python bindings)
-# cogutil>=2.0.0             # Built from components/cogutil
+# opencog-atomspace>=5.0.5  # Built from components/atomspace
+# opencog-python>=5.0.5     # Built from components/atomspace (Python bindings)
+# cogutil>=2.0.3             # Built from components/cogutil
 
 # Build dependencies for OpenCog (installed automatically by build_opencog.sh)
 cython>=3.0.0

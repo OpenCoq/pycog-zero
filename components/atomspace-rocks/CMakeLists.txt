@@ -219,8 +219,8 @@ STRING(TIMESTAMP UTC_DATE %Y%m%d UTC)
 FILE(WRITE "${PROJECT_BINARY_DIR}/install_manifest.txt")
 ## It doesn't have a header-file declaring the version similar to cogutil and
 ## atomspace.
-# SEMANTIC_VERSION is set in `lib/AtomSpaceRocksConfig.cmake.in`
-# SET(SEMANTIC_VERSION 1.3.0)
+# SEMANTIC_VERSION is set in `cmake/CMakeLists.txt`
+SET(SEMANTIC_VERSION 1.3.0)
 
 ## Cpack configuration
 SET(CPACK_GENERATOR "DEB")
@@ -240,8 +240,8 @@ SET(CPACK_PACKAGING_INSTALL_PREFIX "/usr/local")
 SET(DEPENDENCY_LIST
 	"guile-3.0-dev (>= 3.0.0)"
 	"libstdc++6 (>= 7.0)"
-	"libcogutil-dev (>= 2.0.2)"
-	"atomspace-dev (>= 5.0.3)"
+	"libcogutil-dev (>= 2.0.3)"
+	"atomspace-dev (>= 5.0.5)"
 )
 
 STRING(REPLACE ";" ", " MAIN_DEPENDENCIES "${DEPENDENCY_LIST}")
