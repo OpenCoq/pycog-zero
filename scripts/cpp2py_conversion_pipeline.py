@@ -880,6 +880,164 @@ class CPP2PyConversionPipeline:
                 logger.error("Some integration tests failed")
                 return False
 
+    def run_performance_tests(self, component_name: str = None, benchmark_options: list = None) -> bool:
+        """Run performance benchmarks for a component or all components."""
+        benchmark_options = benchmark_options or []
+        
+        if component_name:
+            # Run performance tests for specific component
+            test_script = self.tests_dir / "performance" / f"test_{component_name}_performance.py"
+            if test_script.exists():
+                try:
+                    cmd = [sys.executable, "-m", "pytest", str(test_script), "--benchmark-only"] + benchmark_options
+                    subprocess.run(cmd, check=True)
+                    logger.info(f"Performance tests passed for {component_name}")
+                    return True
+                except subprocess.CalledProcessError:
+                    logger.error(f"Performance tests failed for {component_name}")
+                    return False
+            else:
+                logger.warning(f"No performance tests found for {component_name}")
+                return False
+        else:
+            # Run all performance tests
+            try:
+                cmd = [sys.executable, "-m", "pytest", str(self.tests_dir / "performance"), "--benchmark-only"] + benchmark_options
+                subprocess.run(cmd, check=True)
+                logger.info("All performance tests passed")
+                return True
+            except subprocess.CalledProcessError:
+                logger.error("Some performance tests failed")
+                return False
+
+    def run_all_tests(self, component_name: str = None, include_performance: bool = False, benchmark_options: list = None) -> bool:
+        """Run both integration and performance tests."""
+        integration_success = self.run_integration_tests(component_name)
+        
+        performance_success = True
+        if include_performance:
+            performance_success = self.run_performance_tests(component_name, benchmark_options)
+        
+        return integration_success and performance_success
+
+    def generate_performance_report(self, output_file: str = None) -> dict:
+        """Generate a comprehensive performance report."""
+        logger.info("Generating performance report...")
+        
+        # Run performance tests with JSON output
+        benchmark_options = ["--benchmark-json=benchmark_results.json"]
+        
+        try:
+            cmd = [
+                sys.executable, "-m", "pytest", 
+                str(self.tests_dir / "performance"), 
+                "--benchmark-only"
+            ] + benchmark_options
+            subprocess.run(cmd, check=True, capture_output=True)
+            
+            # Load benchmark results
+            results_file = self.root_dir / "benchmark_results.json"
+            if results_file.exists():
+                with open(results_file, 'r') as f:
+                    benchmark_data = json.load(f)
+                
+                # Generate summary report
+                report = self._process_benchmark_results(benchmark_data)
+                
+                # Save report if output file specified
+                if output_file:
+                    output_path = self.root_dir / output_file
+                    with open(output_path, 'w') as f:
+                        json.dump(report, f, indent=2)
+                    logger.info(f"Performance report saved to {output_path}")
+                
+                # Clean up temporary results file
+                results_file.unlink()
+                
+                return report
+            else:
+                logger.error("Benchmark results file not found")
+                return {}
+                
+        except subprocess.CalledProcessError:
+            logger.error("Failed to generate performance report")
+            return {}
+
+    def _process_benchmark_results(self, benchmark_data: dict) -> dict:
+        """Process raw benchmark data into a structured report."""
+        report = {
+            "summary": {
+                "total_benchmarks": len(benchmark_data.get("benchmarks", [])),
+                "test_session_start": benchmark_data.get("datetime"),
+                "machine_info": benchmark_data.get("machine_info", {}),
+                "commit_info": benchmark_data.get("commit_info", {})
+            },
+            "categories": {
+                "pipeline_performance": [],
+                "component_performance": [],
+                "cli_performance": [],
+                "memory_tests": [],
+                "scalability_tests": []
+            },
+            "performance_metrics": {
+                "fastest_tests": [],
+                "slowest_tests": [],
+                "memory_efficient_tests": [],
+                "high_memory_tests": []
+            }
+        }
+        
+        benchmarks = benchmark_data.get("benchmarks", [])
+        
+        # Categorize benchmarks
+        for benchmark in benchmarks:
+            name = benchmark.get("name", "")
+            stats = benchmark.get("stats", {})
+            
+            benchmark_info = {
+                "name": name,
+                "min_time": stats.get("min", 0),
+                "max_time": stats.get("max", 0),
+                "mean_time": stats.get("mean", 0),
+                "stddev": stats.get("stddev", 0),
+                "rounds": stats.get("rounds", 0)
+            }
+            
+            # Categorize by test type
+            if "pipeline" in name.lower():
+                report["categories"]["pipeline_performance"].append(benchmark_info)
+            elif any(comp in name.lower() for comp in ["cogutil", "atomspace", "ure", "pln", "opencog"]):
+                report["categories"]["component_performance"].append(benchmark_info)
+            elif "cli" in name.lower() or "command" in name.lower():
+                report["categories"]["cli_performance"].append(benchmark_info)
+            elif "memory" in name.lower():
+                report["categories"]["memory_tests"].append(benchmark_info)
+            elif "scalability" in name.lower() or "concurrent" in name.lower():
+                report["categories"]["scalability_tests"].append(benchmark_info)
+        
+        # Generate performance metrics
+        all_benchmarks = benchmarks[:]
+        all_benchmarks.sort(key=lambda x: x.get("stats", {}).get("mean", 0))
+        
+        # Fastest and slowest tests
+        report["performance_metrics"]["fastest_tests"] = [
+            {
+                "name": b.get("name", ""),
+                "mean_time": b.get("stats", {}).get("mean", 0)
+            }
+            for b in all_benchmarks[:5]
+        ]
+        
+        report["performance_metrics"]["slowest_tests"] = [
+            {
+                "name": b.get("name", ""),
+                "mean_time": b.get("stats", {}).get("mean", 0)
+            }
+            for b in all_benchmarks[-5:]
+        ]
+        
+        return report
+
 def main():
     """Main CLI interface for the cpp2py conversion pipeline."""
     import argparse
@@ -902,6 +1060,14 @@ def main():
     # Test command
     test_parser = subparsers.add_parser("test", help="Run integration tests")
     test_parser.add_argument("component", nargs="?", help="Component to test (default: all)")
+    test_parser.add_argument("--performance", action="store_true", help="Run performance benchmarks")
+    test_parser.add_argument("--benchmark-only", action="store_true", help="Run only performance benchmarks (no integration tests)")
+    test_parser.add_argument("--benchmark-compare", help="Compare benchmarks with previous results from file")
+    test_parser.add_argument("--benchmark-save", help="Save benchmark results to file")
+    test_parser.add_argument("--benchmark-warmup", type=int, default=1, help="Number of warmup rounds")
+    test_parser.add_argument("--benchmark-rounds", type=int, help="Number of benchmark rounds")
+    test_parser.add_argument("--report", help="Generate performance report and save to file")
+    test_parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
     
     # Validate command
     validate_parser = subparsers.add_parser("validate", help="Validate dependencies and Python bindings")
@@ -959,7 +1125,49 @@ def main():
                 print(f"  {phase.value}: {cloned}/{total} components cloned")
     
     elif args.command == "test":
-        success = pipeline.run_integration_tests(args.component)
+        # Build benchmark options
+        benchmark_options = []
+        
+        if args.verbose:
+            benchmark_options.extend(["-v", "--tb=short"])
+        
+        if args.benchmark_warmup:
+            benchmark_options.append(f"--benchmark-warmup-iterations={args.benchmark_warmup}")
+        
+        if args.benchmark_rounds:
+            benchmark_options.append(f"--benchmark-min-rounds={args.benchmark_rounds}")
+        
+        if args.benchmark_save:
+            benchmark_options.append(f"--benchmark-json={args.benchmark_save}")
+        
+        if args.benchmark_compare:
+            benchmark_options.append(f"--benchmark-compare={args.benchmark_compare}")
+        
+        # Determine what tests to run
+        if args.benchmark_only:
+            # Run only performance tests
+            success = pipeline.run_performance_tests(args.component, benchmark_options)
+        elif args.performance:
+            # Run both integration and performance tests
+            success = pipeline.run_all_tests(args.component, include_performance=True, benchmark_options=benchmark_options)
+        else:
+            # Run only integration tests (default behavior)
+            success = pipeline.run_integration_tests(args.component)
+        
+        # Generate performance report if requested
+        if args.report:
+            print(f"\nGenerating performance report...")
+            report = pipeline.generate_performance_report(args.report)
+            if report:
+                print(f"Performance report generated:")
+                print(f"- Total benchmarks: {report['summary']['total_benchmarks']}")
+                print(f"- Pipeline tests: {len(report['categories']['pipeline_performance'])}")
+                print(f"- Component tests: {len(report['categories']['component_performance'])}")
+                print(f"- CLI tests: {len(report['categories']['cli_performance'])}")
+                print(f"- Report saved to: {args.report}")
+            else:
+                print("Failed to generate performance report")
+        
         sys.exit(0 if success else 1)
     
     elif args.command == "validate":
