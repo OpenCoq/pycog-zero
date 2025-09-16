@@ -84,6 +84,9 @@ class CognitiveReasoningTool(Tool):
             # Convert natural language query to AtomSpace representation
             query_atoms = self.parse_query_to_atoms(query)
             
+            # Check if atomspace-rocks optimization is available
+            storage_optimization = self._get_storage_optimization_info()
+            
             # Perform reasoning based on configuration
             reasoning_results = self.execute_reasoning(query_atoms)
             
@@ -96,6 +99,7 @@ class CognitiveReasoningTool(Tool):
                     "query": query,
                     "atoms_created": len(query_atoms),
                     "reasoning_steps": reasoning_steps,
+                    "storage_optimization": storage_optimization,
                     "status": "success",
                     "config": {
                         "pln_enabled": self.config.get("reasoning_config", {}).get("pln_enabled", True),
@@ -125,6 +129,28 @@ class CognitiveReasoningTool(Tool):
                 atoms.append(concept_node)
         
         return atoms
+    
+    def _get_storage_optimization_info(self):
+        """Get information about atomspace-rocks storage optimization availability."""
+        try:
+            # Try to import atomspace-rocks optimizer
+            from python.tools.atomspace_rocks_optimizer import AtomSpaceRocksOptimizer
+            from python.helpers.enhanced_atomspace_rocks import get_rocks_storage_info
+            
+            rocks_info = get_rocks_storage_info()
+            return {
+                "atomspace_rocks_available": True,
+                "optimizer_available": True,
+                "rocks_info": rocks_info,
+                "integration_ready": True
+            }
+        except ImportError:
+            return {
+                "atomspace_rocks_available": False,
+                "optimizer_available": False,
+                "integration_ready": False,
+                "message": "AtomSpace-Rocks optimization not available"
+            }
     
     def execute_reasoning(self, atoms):
         """Perform reasoning operations based on configuration."""
