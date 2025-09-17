@@ -1,0 +1,25 @@
+{
+  "description": "AtomSpace-Rocks Performance Configuration",
+  "default_storage_path": "/tmp/atomspace_rocks",
+  "storage_type": "rocks",
+  "performance_optimization": {
+    "batch_size": 1000,
+    "cache_size": "256MB",
+    "write_buffer_size": "64MB",
+    "max_background_jobs": 4,
+    "compression": "lz4",
+    "enable_statistics": true
+  },
+  "monitoring": {
+    "enable_metrics": true,
+    "log_slow_operations": true,
+    "slow_operation_threshold_ms": 100,
+    "performance_logging": true
+  },
+  "optimization_strategies": {
+    "auto_compaction": true,
+    "cache_warming": true,
+    "background_optimization": true,
+    "batch_operations": true
+  }
+}
