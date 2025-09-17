@@ -38,11 +38,42 @@ except ImportError:
         def size(self, dim=None):
             return self.shape[dim] if dim is not None else self.shape
         
+        def norm(self, dim=None):
+            return MockTensor()
+        
+        def sum(self, dim=None):
+            return MockTensor()
+        
+        def argmax(self, dim=None):
+            return 0
+        
         def __getitem__(self, idx):
             return MockTensor()
         
         def __len__(self):
             return self.shape[0] if self.shape else 0
+        
+        def __mul__(self, other):
+            return MockTensor(shape=self.shape)
+        
+        def __add__(self, other):
+            return MockTensor(shape=self.shape)
+        
+        def __sub__(self, other):
+            return MockTensor(shape=self.shape)
+        
+        def __truediv__(self, other):
+            return MockTensor(shape=self.shape)
+        
+        def __iter__(self):
+            for i in range(len(self)):
+                yield MockTensor()
+        
+        def __float__(self):
+            return 0.0
+        
+        def item(self):
+            return 0.0
     
     class MockModule:
         def __init__(self, *args, **kwargs):
@@ -82,9 +113,9 @@ except ImportError:
     # Create mock torch module
     class MockTorch:
         Tensor = MockTensor
-        tensor = lambda *args, **kwargs: MockTensor()
+        tensor = lambda data, dtype=None: MockTensor(shape=(len(data),) if hasattr(data, '__len__') else (1,))
         randn = lambda *args, **kwargs: MockTensor(shape=args)
-        stack = lambda tensors: MockTensor(shape=(len(tensors), *tensors[0].shape) if tensors else (0,))
+        stack = lambda tensors, dim=0: MockTensor(shape=(len(tensors), *tensors[0].shape) if tensors and hasattr(tensors[0], 'shape') else (len(tensors),))
         empty = lambda shape: MockTensor(shape=shape)
         zeros = lambda shape: MockTensor(shape=shape)
         cat = lambda tensors, dim=0: MockTensor()
