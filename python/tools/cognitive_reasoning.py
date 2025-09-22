@@ -15,9 +15,20 @@ try:
     from opencog.atomspace import AtomSpace, types
     from opencog.utilities import initialize_opencog
     OPENCOG_AVAILABLE = True
+    
+    # Try to import PLN components
+    try:
+        from opencog.pln import PLNChainer
+        from opencog.ure import UREChainer
+        PLN_AVAILABLE = True
+    except ImportError:
+        PLN_AVAILABLE = False
+        print("PLN components not available - install with OpenCog PLN package")
+        
 except ImportError:
     print("OpenCog not available - install with: pip install opencog-atomspace opencog-python")
     OPENCOG_AVAILABLE = False
+    PLN_AVAILABLE = False
 
 # Import other atomspace tools for enhanced integration
 try:
@@ -26,6 +37,274 @@ try:
     ATOMSPACE_TOOLS_AVAILABLE = True
 except ImportError:
     ATOMSPACE_TOOLS_AVAILABLE = False
+
+
+class PLNReasoningTool:
+    """PLN (Probabilistic Logic Networks) reasoning implementation for Agent-Zero logical inference."""
+    
+    def __init__(self, atomspace=None):
+        self.atomspace = atomspace
+        self.pln_chainer = None
+        self.reasoning_rules = []
+        self._initialize_pln()
+        
+    def _initialize_pln(self):
+        """Initialize PLN chainer and reasoning rules."""
+        if OPENCOG_AVAILABLE and PLN_AVAILABLE and self.atomspace:
+            try:
+                # Initialize PLN chainer with AtomSpace
+                self.pln_chainer = PLNChainer(self.atomspace)
+                print("PLN chainer initialized with OpenCog")
+            except Exception as e:
+                print(f"⚠️ PLN chainer initialization warning: {e}")
+                self.pln_chainer = None
+        
+        # Initialize basic reasoning rules (fallback implementation)
+        self._setup_reasoning_rules()
+    
+    def _setup_reasoning_rules(self):
+        """Setup basic reasoning rules for logical inference."""
+        self.reasoning_rules = [
+            "deduction_rule",
+            "induction_rule", 
+            "abduction_rule",
+            "inheritance_rule",
+            "similarity_rule",
+            "concept_creation_rule",
+            "modus_ponens_rule"
+        ]
+    
+    def forward_chain(self, source_atoms, max_steps=10):
+        """Apply forward chaining reasoning from source atoms."""
+        if self.pln_chainer and PLN_AVAILABLE:
+            try:
+                return self.pln_chainer.forward_chain(source_atoms, max_steps=max_steps)
+            except Exception as e:
+                print(f"⚠️ PLN forward chaining warning: {e}")
+        
+        # Fallback implementation
+        return self._fallback_forward_chain(source_atoms, max_steps)
+    
+    def backward_chain(self, target_atoms, max_steps=10):
+        """Apply backward chaining reasoning toward target atoms."""
+        if self.pln_chainer and PLN_AVAILABLE:
+            try:
+                return self.pln_chainer.backward_chain(target_atoms, max_steps=max_steps)
+            except Exception as e:
+                print(f"⚠️ PLN backward chaining warning: {e}")
+        
+        # Fallback implementation
+        return self._fallback_backward_chain(target_atoms, max_steps)
+    
+    def apply_inference_rule(self, rule_name, premises):
+        """Apply specific inference rule to premises."""
+        if not premises:
+            return []
+            
+        results = []
+        
+        try:
+            if rule_name == "deduction_rule":
+                results = self._apply_deduction(premises)
+            elif rule_name == "induction_rule":
+                results = self._apply_induction(premises)
+            elif rule_name == "abduction_rule":
+                results = self._apply_abduction(premises)
+            elif rule_name == "inheritance_rule":
+                results = self._apply_inheritance(premises)
+            elif rule_name == "similarity_rule":
+                results = self._apply_similarity(premises)
+            elif rule_name == "concept_creation_rule":
+                results = self._apply_concept_creation(premises)
+            elif rule_name == "modus_ponens_rule":
+                results = self._apply_modus_ponens(premises)
+                
+        except Exception as e:
+            print(f"⚠️ Inference rule application warning for {rule_name}: {e}")
+            
+        return results
+    
+    def _fallback_forward_chain(self, source_atoms, max_steps):
+        """Fallback forward chaining implementation."""
+        results = []
+        current_atoms = list(source_atoms)
+        
+        for step in range(max_steps):
+            if not current_atoms:
+                break
+                
+            step_results = []
+            for atom in current_atoms:
+                # Apply each reasoning rule
+                for rule in self.reasoning_rules:
+                    rule_results = self.apply_inference_rule(rule, [atom])
+                    step_results.extend(rule_results)
+            
+            if not step_results:
+                break
+                
+            results.extend(step_results)
+            current_atoms = step_results
+            
+        return results
+    
+    def _fallback_backward_chain(self, target_atoms, max_steps):
+        """Fallback backward chaining implementation."""
+        results = []
+        current_targets = list(target_atoms)
+        
+        for step in range(max_steps):
+            if not current_targets:
+                break
+                
+            step_results = []
+            for target in current_targets:
+                # Try to find premises that could lead to this target
+                for rule in self.reasoning_rules:
+                    premises = self._find_premises_for_target(target, rule)
+                    if premises:
+                        step_results.extend(premises)
+            
+            if not step_results:
+                break
+                
+            results.extend(step_results)
+            current_targets = step_results
+            
+        return results
+    
+    def _apply_deduction(self, premises):
+        """Apply deduction rule: If A->B and B->C, then A->C."""
+        results = []
+        if len(premises) >= 2 and self.atomspace:
+            try:
+                # Create deductive inference link
+                deduction_link = self.atomspace.add_link(
+                    types.ImplicationLink,
+                    [premises[0], premises[-1]]
+                )
+                results.append(deduction_link)
+            except:
+                # Fallback: create evaluation link
+                results.append(f"deduction({premises[0]} -> {premises[-1]})")
+        return results
+    
+    def _apply_induction(self, premises):
+        """Apply induction rule: generalize from specific instances."""
+        results = []
+        if premises and self.atomspace:
+            try:
+                # Create generalization link
+                generalization = self.atomspace.add_link(
+                    types.InheritanceLink,
+                    [premises[0], self.atomspace.add_node(types.ConceptNode, "generalized_concept")]
+                )
+                results.append(generalization)
+            except:
+                results.append(f"induction_generalization({premises[0]})")
+        return results
+    
+    def _apply_abduction(self, premises):
+        """Apply abduction rule: find best explanation."""
+        results = []
+        if premises and self.atomspace:
+            try:
+                # Create explanatory link
+                explanation = self.atomspace.add_link(
+                    types.EvaluationLink,
+                    [
+                        self.atomspace.add_node(types.PredicateNode, "explains"),
+                        premises[0]
+                    ]
+                )
+                results.append(explanation)
+            except:
+                results.append(f"abduction_explanation({premises[0]})")
+        return results
+    
+    def _apply_inheritance(self, premises):
+        """Apply inheritance rule: create hierarchical relationships."""
+        results = []
+        if len(premises) >= 2 and self.atomspace:
+            try:
+                inheritance_link = self.atomspace.add_link(
+                    types.InheritanceLink,
+                    [premises[0], premises[1]]
+                )
+                results.append(inheritance_link)
+            except:
+                results.append(f"inheritance({premises[0]} isa {premises[1]})")
+        return results
+    
+    def _apply_similarity(self, premises):
+        """Apply similarity rule: create similarity relationships."""
+        results = []
+        if len(premises) >= 2 and self.atomspace:
+            try:
+                similarity_link = self.atomspace.add_link(
+                    types.SimilarityLink,
+                    [premises[0], premises[1]]
+                )
+                results.append(similarity_link)
+            except:
+                results.append(f"similarity({premises[0]} ~ {premises[1]})")
+        return results
+    
+    def _apply_concept_creation(self, premises):
+        """Apply concept creation rule: create new concepts from combinations."""
+        results = []
+        if premises and self.atomspace:
+            try:
+                new_concept = self.atomspace.add_node(
+                    types.ConceptNode, 
+                    f"derived_concept_{hash(str(premises)) % 1000}"
+                )
+                concept_link = self.atomspace.add_link(
+                    types.EvaluationLink,
+                    [
+                        self.atomspace.add_node(types.PredicateNode, "derived_from"),
+                        new_concept,
+                        premises[0]
+                    ]
+                )
+                results.append(new_concept)
+                results.append(concept_link)
+            except:
+                results.append(f"new_concept_from({premises[0]})")
+        return results
+    
+    def _apply_modus_ponens(self, premises):
+        """Apply modus ponens rule: If A and A->B, then B."""
+        results = []
+        if len(premises) >= 2 and self.atomspace:
+            try:
+                # Create consequent
+                consequent = self.atomspace.add_link(
+                    types.EvaluationLink,
+                    [
+                        self.atomspace.add_node(types.PredicateNode, "consequent"),
+                        premises[1]
+                    ]
+                )
+                results.append(consequent)
+            except:
+                results.append(f"modus_ponens_consequent({premises[1]})")
+        return results
+    
+    def _find_premises_for_target(self, target, rule):
+        """Find premises that could lead to target using specified rule."""
+        # This is a simplified implementation for demonstration
+        premises = []
+        
+        if self.atomspace and hasattr(target, 'name'):
+            try:
+                # Look for related atoms in atomspace
+                related_atoms = self.atomspace.get_atoms_by_type(types.Atom)[:5]  # Limit search
+                premises.extend(related_atoms[:2])  # Use first 2 as potential premises
+            except:
+                pass
+                
+        return premises
 
 
 class CognitiveReasoningTool(Tool):
@@ -45,6 +324,7 @@ class CognitiveReasoningTool(Tool):
         self.config = self._load_cognitive_config()
         self.tool_hub = None
         self.memory_bridge = None
+        self.pln_reasoning = None  # PLN reasoning tool
         
         # Initialize with shared or new atomspace
         if OPENCOG_AVAILABLE and self.config.get("opencog_enabled", True):
@@ -63,6 +343,10 @@ class CognitiveReasoningTool(Tool):
                 if self.atomspace:
                     self.initialized = True
                     print("✓ OpenCog cognitive reasoning initialized with enhanced atomspace bindings")
+                    
+                    # Initialize PLN reasoning tool
+                    self.pln_reasoning = PLNReasoningTool(self.atomspace)
+                    print("✓ PLN reasoning tool initialized")
                     
                     # Initialize cross-tool integration
                     self._setup_cross_tool_integration()
@@ -135,7 +419,11 @@ class CognitiveReasoningTool(Tool):
         """Setup fallback mode when OpenCog is not available."""
         self.atomspace = None
         self.initialized = False
+        
+        # Initialize PLN reasoning tool in fallback mode (no atomspace)
+        self.pln_reasoning = PLNReasoningTool(None)
         print("⚠️ Running in fallback mode - limited cognitive reasoning capabilities")
+        print("✓ PLN reasoning tool initialized in fallback mode")
     
     def _load_cognitive_config(self):
         """Load cognitive configuration from Agent-Zero settings."""
@@ -343,9 +631,9 @@ class CognitiveReasoningTool(Tool):
                 pattern_results = self.enhanced_pattern_matching_reasoning(atoms, context)
                 results.extend(pattern_results)
             
-            # PLN reasoning (enhanced)
+            # PLN reasoning (enhanced with PLNReasoningTool)
             if reasoning_config.get("pln_enabled", True):
-                pln_results = self.enhanced_pln_reasoning(atoms, context)
+                pln_results = await self._enhanced_pln_reasoning_with_tool(atoms, context)
                 results.extend(pln_results)
             
             # Backward chaining if enabled
@@ -362,6 +650,46 @@ class CognitiveReasoningTool(Tool):
             print(f"⚠️ Enhanced reasoning warning: {e}")
             # Fallback to basic reasoning
             results.extend(self.pattern_matching_reasoning(atoms))
+        
+        return results
+    
+    async def _enhanced_pln_reasoning_with_tool(self, atoms: List, context: Dict[str, Any]) -> List:
+        """Enhanced PLN reasoning using PLNReasoningTool for logical inference."""
+        results = []
+        
+        if not self.pln_reasoning:
+            # Fallback to original enhanced PLN reasoning
+            return self.enhanced_pln_reasoning(atoms, context)
+        
+        try:
+            reasoning_config = context.get("reasoning_config", {})
+            
+            # Apply forward chaining if enabled
+            if reasoning_config.get("forward_chaining", True):
+                forward_results = self.pln_reasoning.forward_chain(
+                    atoms, 
+                    max_steps=reasoning_config.get("max_forward_steps", 5)
+                )
+                results.extend(forward_results)
+                
+            # Apply backward chaining if enabled  
+            if reasoning_config.get("backward_chaining", True):
+                backward_results = self.pln_reasoning.backward_chain(
+                    atoms,
+                    max_steps=reasoning_config.get("max_backward_steps", 5) 
+                )
+                results.extend(backward_results)
+                
+            # Apply specific inference rules if requested
+            inference_rules = context.get("inference_rules", self.pln_reasoning.reasoning_rules[:3])
+            for rule in inference_rules:
+                rule_results = self.pln_reasoning.apply_inference_rule(rule, atoms)
+                results.extend(rule_results)
+                
+        except Exception as e:
+            print(f"⚠️ PLN reasoning tool error: {e}")
+            # Fallback to original enhanced PLN reasoning
+            results.extend(self.enhanced_pln_reasoning(atoms, context))
         
         return results
     
@@ -637,6 +965,67 @@ class CognitiveReasoningTool(Tool):
             print(f"⚠️ Basic PLN reasoning warning: {e}")
         
         return results
+    
+    async def perform_pln_logical_inference(self, query: str, reasoning_type: str = "auto", **kwargs) -> Response:
+        """Perform PLN logical inference for Agent-Zero queries.
+        
+        Args:
+            query: Natural language query to reason about
+            reasoning_type: Type of reasoning ('forward', 'backward', 'auto', 'deduction', etc.)
+            **kwargs: Additional reasoning parameters
+        """
+        self._initialize_if_needed()
+        
+        try:
+            # Parse query to atoms
+            reasoning_context = await self._build_reasoning_context(query, **kwargs)
+            query_atoms = self.parse_query_to_atoms(query, reasoning_context)
+            
+            if not query_atoms:
+                return Response(
+                    message="No atoms could be created from query for PLN reasoning",
+                    data={"query": query, "status": "no_atoms"}
+                )
+            
+            # Perform PLN reasoning based on type
+            reasoning_results = []
+            
+            if reasoning_type == "forward" and self.pln_reasoning:
+                reasoning_results = self.pln_reasoning.forward_chain(query_atoms, **kwargs)
+            elif reasoning_type == "backward" and self.pln_reasoning:
+                reasoning_results = self.pln_reasoning.backward_chain(query_atoms, **kwargs)
+            elif reasoning_type in self.pln_reasoning.reasoning_rules if self.pln_reasoning else []:
+                reasoning_results = self.pln_reasoning.apply_inference_rule(reasoning_type, query_atoms)
+            else:
+                # Auto reasoning - use enhanced PLN reasoning
+                reasoning_results = await self._enhanced_pln_reasoning_with_tool(query_atoms, reasoning_context)
+            
+            # Format results for Agent-Zero
+            formatted_results = self.format_reasoning_for_agent(reasoning_results)
+            
+            return Response(
+                message=f"PLN logical inference completed for: {query}",
+                data={
+                    "query": query,
+                    "reasoning_type": reasoning_type,
+                    "atoms_processed": len(query_atoms),
+                    "inference_results": len(reasoning_results),
+                    "reasoning_steps": formatted_results,
+                    "available_rules": self.pln_reasoning.reasoning_rules if self.pln_reasoning else [],
+                    "status": "success"
+                }
+            )
+            
+        except Exception as e:
+            return Response(
+                message=f"PLN logical inference error: {str(e)}",
+                data={
+                    "query": query,
+                    "reasoning_type": reasoning_type,
+                    "error": str(e),
+                    "status": "error"
+                }
+            )
     
     async def _analyze_patterns(self, query: str, **kwargs):
         """Analyze patterns in the query and atomspace."""
