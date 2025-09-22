@@ -27,6 +27,13 @@ try:
 except ImportError:
     ATOMSPACE_TOOLS_AVAILABLE = False
 
+# Import URE tools for rule-based reasoning
+try:
+    from python.tools.ure_tool import UREChainTool
+    URE_TOOL_AVAILABLE = True
+except ImportError:
+    URE_TOOL_AVAILABLE = False
+
 
 class CognitiveReasoningTool(Tool):
     """Agent-Zero tool for OpenCog cognitive reasoning with enhanced atomspace bindings."""
@@ -192,6 +199,10 @@ class CognitiveReasoningTool(Tool):
             return await self._get_reasoning_status()
         elif operation == "share_knowledge":
             return await self._share_knowledge_with_hub(query, **kwargs)
+        elif operation == "ure_forward_chain":
+            return await self._delegate_to_ure(query, "forward_chain", **kwargs)
+        elif operation == "ure_backward_chain":
+            return await self._delegate_to_ure(query, "backward_chain", **kwargs)
         else:
             # Default to reasoning
             return await self._perform_reasoning(query, **kwargs)
@@ -912,6 +923,52 @@ class CognitiveReasoningTool(Tool):
                 )
         except Exception as e:
             print(f"⚠️ Failed to share reasoning results: {e}")
+    
+    async def _delegate_to_ure(self, query: str, operation: str, **kwargs):
+        """Delegate reasoning to URE tool for rule-based inference."""
+        if not URE_TOOL_AVAILABLE:
+            return Response(
+                message=f"URE tool not available for {operation}\\n"
+                       f"Data: {json.dumps({'error': 'URE tool not loaded', 'requested_operation': operation})}",
+                break_loop=False
+            )
+        
+        try:
+            # Create URE tool instance
+            dummy_params = {
+                'name': f'ure_delegation_{operation}',
+                'method': None,
+                'args': kwargs,
+                'message': '',
+                'loop_data': None
+            }
+            
+            if hasattr(self, 'agent'):
+                ure_tool = UREChainTool(self.agent, **dummy_params)
+                
+                # Execute URE operation
+                ure_response = await ure_tool.execute(query, operation, **kwargs)
+                
+                # Enhance response with cognitive context
+                enhanced_message = f"Cognitive reasoning delegated to URE for {operation}\\n" + ure_response.message
+                
+                return Response(
+                    message=enhanced_message,
+                    break_loop=ure_response.break_loop
+                )
+            else:
+                return Response(
+                    message=f"Cannot delegate to URE - agent context not available\\n"
+                           f"Data: {json.dumps({'error': 'No agent context', 'operation': operation})}",
+                    break_loop=False
+                )
+                
+        except Exception as e:
+            return Response(
+                message=f"URE delegation error for {operation}: {str(e)}\\n"
+                       f"Data: {json.dumps({'error': str(e), 'operation': operation, 'status': 'delegation_error'})}",
+                break_loop=False
+            )
     
     def format_reasoning_for_agent(self, results):
         """Format OpenCog results for Agent-Zero consumption with enhanced details."""
