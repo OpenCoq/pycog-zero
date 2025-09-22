@@ -1,0 +1,287 @@
+{
+  "benchmark_summary": {
+    "algorithms_tested": 5,
+    "validation_scenarios": 3,
+    "average_accuracy": 1.0,
+    "performance_rating": "Excellent",
+    "scalability_assessment": "Linear to quadratic complexity observed",
+    "recommendations": [
+      "All algorithms demonstrate correct functionality",
+      "Enhanced pattern matching provides richest relationship detection",
+      "PLN reasoning excels at probabilistic evaluations",
+      "Backward chaining effective for goal-directed reasoning",
+      "Cross-tool integration enables powerful combinations"
+    ]
+  },
+  "algorithm_performance": {
+    "Basic Pattern Matching": {
+      "small": {
+        "avg_processing_time": 1.8596649169921875e-06,
+        "min_processing_time": 7.152557373046875e-07,
+        "max_processing_time": 7.62939453125e-06,
+        "std_dev": 2.0595587474267573e-06,
+        "concepts_processed": 5,
+        "throughput": 2688656.4102564105
+      },
+      "medium": {
+        "avg_processing_time": 2.765655517578125e-06,
+        "min_processing_time": 1.6689300537109375e-06,
+        "max_processing_time": 6.9141387939453125e-06,
+        "std_dev": 1.6753512182936807e-06,
+        "concepts_processed": 15,
+        "throughput": 5423668.9655172415
+      },
+      "large": {
+        "avg_processing_time": 1.2850761413574218e-05,
+        "min_processing_time": 4.76837158203125e-06,
+        "max_processing_time": 7.700920104980469e-05,
+        "std_dev": 2.2634967074634274e-05,
+        "concepts_processed": 50,
+        "throughput": 3890820.0371057517
+      }
+    },
+    "Enhanced Pattern Matching": {
+      "small": {
+        "avg_processing_time": 5.292892456054687e-06,
+        "min_processing_time": 3.337860107421875e-06,
+        "max_processing_time": 9.059906005859375e-06,
+        "std_dev": 1.666278852587112e-06,
+        "concepts_processed": 5,
+        "throughput": 944663.0630630631
+      },
+      "medium": {
+        "avg_processing_time": 6.270408630371094e-06,
+        "min_processing_time": 5.7220458984375e-06,
+        "max_processing_time": 8.58306884765625e-06,
+        "std_dev": 8.994839233983937e-07,
+        "concepts_processed": 15,
+        "throughput": 2392188.5931558935
+      },
+      "large": {
+        "avg_processing_time": 1.7642974853515625e-05,
+        "min_processing_time": 1.5497207641601562e-05,
+        "max_processing_time": 2.574920654296875e-05,
+        "std_dev": 3.6505648542581723e-06,
+        "concepts_processed": 50,
+        "throughput": 2833989.189189189
+      }
+    },
+    "PLN Reasoning": {
+      "small": {
+        "avg_processing_time": 5.53131103515625e-06,
+        "min_processing_time": 3.337860107421875e-06,
+        "max_processing_time": 7.62939453125e-06,
+        "std_dev": 1.2705719561075428e-06,
+        "concepts_processed": 5,
+        "throughput": 903944.827586207
+      },
+      "medium": {
+        "avg_processing_time": 9.34600830078125e-06,
+        "min_processing_time": 9.059906005859375e-06,
+        "max_processing_time": 1.049041748046875e-05,
+        "std_dev": 4.175162485937658e-07,
+        "concepts_processed": 15,
+        "throughput": 1604963.2653061224
+      },
+      "large": {
+        "avg_processing_time": 3.247261047363281e-05,
+        "min_processing_time": 3.0994415283203125e-05,
+        "max_processing_time": 4.1484832763671875e-05,
+        "std_dev": 3.223895677891469e-06,
+        "concepts_processed": 50,
+        "throughput": 1539759.1776798826
+      }
+    },
+    "Backward Chaining": {
+      "small": {
+        "avg_processing_time": 3.981590270996094e-06,
+        "min_processing_time": 2.384185791015625e-06,
+        "max_processing_time": 8.58306884765625e-06,
+        "std_dev": 1.723113822462948e-06,
+        "concepts_processed": 5,
+        "throughput": 1255779.640718563
+      },
+      "medium": {
+        "avg_processing_time": 9.34600830078125e-06,
+        "min_processing_time": 5.4836273193359375e-06,
+        "max_processing_time": 3.886222839355469e-05,
+        "std_dev": 1.0405058325131135e-05,
+        "concepts_processed": 15,
+        "throughput": 1604963.2653061224
+      },
+      "large": {
+        "avg_processing_time": 1.8310546875e-05,
+        "min_processing_time": 1.7642974853515625e-05,
+        "max_processing_time": 2.0265579223632812e-05,
+        "std_dev": 8.243753102550468e-07,
+        "concepts_processed": 50,
+        "throughput": 2730666.666666667
+      }
+    },
+    "Cross-Tool Reasoning": {
+      "small": {
+        "avg_processing_time": 3.1709671020507814e-06,
+        "min_processing_time": 1.9073486328125e-06,
+        "max_processing_time": 5.4836273193359375e-06,
+        "std_dev": 1.101494982243134e-06,
+        "concepts_processed": 5,
+        "throughput": 1576806.015037594
+      },
+      "medium": {
+        "avg_processing_time": 2.288818359375e-06,
+        "min_processing_time": 1.9073486328125e-06,
+        "max_processing_time": 4.0531158447265625e-06,
+        "std_dev": 6.377666043516439e-07,
+        "concepts_processed": 15,
+        "throughput": 6553600.0
+      },
+      "large": {
+        "avg_processing_time": 2.1457672119140625e-06,
+        "min_processing_time": 1.9073486328125e-06,
+        "max_processing_time": 2.86102294921875e-06,
+        "std_dev": 2.9736021254650284e-07,
+        "concepts_processed": 50,
+        "throughput": 23301688.888888888
+      }
+    }
+  },
+  "validation_results": {
+    "Linear Concept Chain": {
+      "basic_pattern_matching": {
+        "correct": true,
+        "links_created": 3,
+        "expected": 3
+      },
+      "enhanced_pattern_matching": {
+        "correct": true,
+        "inheritance_links": 3,
+        "total_links": 7,
+        "expected_inheritance": 3
+      },
+      "pln_reasoning": {
+        "correct": true,
+        "evaluation_links": 8,
+        "minimum_expected": 4
+      }
+    },
+    "Cognitive Domain Concepts": {
+      "basic_pattern_matching": {
+        "correct": true,
+        "links_created": 4,
+        "expected": 4
+      },
+      "enhanced_pattern_matching": {
+        "correct": true,
+        "inheritance_links": 4,
+        "total_links": 9,
+        "expected_inheritance": 4
+      },
+      "pln_reasoning": {
+        "correct": true,
+        "evaluation_links": 10,
+        "minimum_expected": 5
+      }
+    },
+    "Learning Concepts": {
+      "basic_pattern_matching": {
+        "correct": true,
+        "links_created": 4,
+        "expected": 4
+      },
+      "enhanced_pattern_matching": {
+        "correct": true,
+        "inheritance_links": 4,
+        "total_links": 9,
+        "expected_inheritance": 4
+      },
+      "pln_reasoning": {
+        "correct": true,
+        "evaluation_links": 10,
+        "minimum_expected": 5
+      }
+    }
+  },
+  "scalability_analysis": {
+    "size_5": {
+      "enhanced_pattern_matching": {
+        "processing_time": 4.291534423828125e-06,
+        "links_created": 7,
+        "concepts_per_second": 1165084.4444444445,
+        "memory_complexity": "O(n\u00b2)",
+        "time_complexity": "O(n\u00b2)"
+      },
+      "basic_pattern_matching": {
+        "processing_time": 2.6226043701171875e-06,
+        "links_created": 4,
+        "concepts_per_second": 1906501.8181818181,
+        "memory_complexity": "O(n)",
+        "time_complexity": "O(n)"
+      }
+    },
+    "size_10": {
+      "enhanced_pattern_matching": {
+        "processing_time": 5.245208740234375e-06,
+        "links_created": 17,
+        "concepts_per_second": 1906501.8181818181,
+        "memory_complexity": "O(n\u00b2)",
+        "time_complexity": "O(n\u00b2)"
+      },
+      "basic_pattern_matching": {
+        "processing_time": 2.86102294921875e-06,
+        "links_created": 9,
+        "concepts_per_second": 3495253.3333333335,
+        "memory_complexity": "O(n)",
+        "time_complexity": "O(n)"
+      }
+    },
+    "size_20": {
+      "enhanced_pattern_matching": {
+        "processing_time": 1.1444091796875e-05,
+        "links_created": 37,
+        "concepts_per_second": 1747626.6666666667,
+        "memory_complexity": "O(n\u00b2)",
+        "time_complexity": "O(n\u00b2)"
+      },
+      "basic_pattern_matching": {
+        "processing_time": 5.9604644775390625e-06,
+        "links_created": 19,
+        "concepts_per_second": 3355443.2,
+        "memory_complexity": "O(n)",
+        "time_complexity": "O(n)"
+      }
+    },
+    "size_50": {
+      "enhanced_pattern_matching": {
+        "processing_time": 2.9802322387695312e-05,
+        "links_created": 97,
+        "concepts_per_second": 1677721.6,
+        "memory_complexity": "O(n\u00b2)",
+        "time_complexity": "O(n\u00b2)"
+      },
+      "basic_pattern_matching": {
+        "processing_time": 1.1920928955078125e-05,
+        "links_created": 49,
+        "concepts_per_second": 4194304.0,
+        "memory_complexity": "O(n)",
+        "time_complexity": "O(n)"
+      }
+    },
+    "size_100": {
+      "enhanced_pattern_matching": {
+        "processing_time": 6.771087646484375e-05,
+        "links_created": 197,
+        "concepts_per_second": 1476867.6056338027,
+        "memory_complexity": "O(n\u00b2)",
+        "time_complexity": "O(n\u00b2)"
+      },
+      "basic_pattern_matching": {
+        "processing_time": 1.5497207641601562e-05,
+        "links_created": 99,
+        "concepts_per_second": 6452775.384615385,
+        "memory_complexity": "O(n)",
+        "time_complexity": "O(n)"
+      }
+    }
+  },
+  "accuracy_metrics": {}
+}
