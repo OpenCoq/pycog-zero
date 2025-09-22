@@ -227,7 +227,6 @@ class CognitiveReasoningTool(Tool):
                 await self._share_reasoning_results(query, reasoning_results)
             
             return Response(
-#<<<<<<< copilot/fix-41
                 message=f"Enhanced cognitive reasoning completed for: {query}\\n"
                        f"Data: {json.dumps({
                            'query': query,
@@ -244,20 +243,6 @@ class CognitiveReasoningTool(Tool):
                            }
                        })}",
                 break_loop=False
-#=======
-                message=f"Cognitive reasoning completed for: {query}",
-                data={
-                    "query": query,
-                    "atoms_created": len(query_atoms),
-                    "reasoning_steps": reasoning_steps,
-                    "storage_optimization": storage_optimization,
-                    "status": "success",
-                    "config": {
-                        "pln_enabled": self.config.get("reasoning_config", {}).get("pln_enabled", True),
-                        "pattern_matching": self.config.get("reasoning_config", {}).get("pattern_matching", True)
-                    }
-                }
-#>>>>>>> main
             )
             
         except Exception as e:
