@@ -208,16 +208,11 @@ class CognitiveReasoningTool(Tool):
             # Convert natural language query to AtomSpace representation
             query_atoms = self.parse_query_to_atoms(query, reasoning_context)
             
-#<<<<<<< copilot/fix-41
-            # Perform multi-modal reasoning based on configuration
-            reasoning_results = await self._execute_enhanced_reasoning(query_atoms, reasoning_context)
-#=======
             # Check if atomspace-rocks optimization is available
             storage_optimization = self._get_storage_optimization_info()
             
-            # Perform reasoning based on configuration
-            reasoning_results = self.execute_reasoning(query_atoms)
-#>>>>>>> main
+            # Perform multi-modal reasoning based on configuration
+            reasoning_results = await self._execute_enhanced_reasoning(query_atoms, reasoning_context)
             
             # Format results for Agent-Zero consumption
             reasoning_steps = self.format_reasoning_for_agent(reasoning_results)
@@ -227,37 +222,22 @@ class CognitiveReasoningTool(Tool):
                 await self._share_reasoning_results(query, reasoning_results)
             
             return Response(
-#<<<<<<< copilot/fix-41
-                message=f"Enhanced cognitive reasoning completed for: {query}\\n"
-                       f"Data: {json.dumps({
-                           'query': query,
-                           'operation': 'reason',
-                           'atoms_created': len(query_atoms),
-                           'reasoning_steps': reasoning_steps,
-                           'context_size': len(reasoning_context.get('related_concepts', [])),
-                           'cross_tool_integration': ATOMSPACE_TOOLS_AVAILABLE,
-                           'status': 'success',
-                           'config': {
-                               'pln_enabled': self.config.get('reasoning_config', {}).get('pln_enabled', True),
-                               'pattern_matching': self.config.get('reasoning_config', {}).get('pattern_matching', True),
-                               'cross_tool_sharing': self.config.get('atomspace_config', {}).get('cross_tool_sharing', True)
-                           }
-                       })}",
-                break_loop=False
-#=======
-                message=f"Cognitive reasoning completed for: {query}",
+                message=f"Enhanced cognitive reasoning completed for: {query}",
                 data={
                     "query": query,
+                    "operation": "reason",
                     "atoms_created": len(query_atoms),
                     "reasoning_steps": reasoning_steps,
+                    "context_size": len(reasoning_context.get('related_concepts', [])),
+                    "cross_tool_integration": ATOMSPACE_TOOLS_AVAILABLE,
                     "storage_optimization": storage_optimization,
                     "status": "success",
                     "config": {
                         "pln_enabled": self.config.get("reasoning_config", {}).get("pln_enabled", True),
-                        "pattern_matching": self.config.get("reasoning_config", {}).get("pattern_matching", True)
+                        "pattern_matching": self.config.get("reasoning_config", {}).get("pattern_matching", True),
+                        "cross_tool_sharing": self.config.get("atomspace_config", {}).get("cross_tool_sharing", True)
                     }
                 }
-#>>>>>>> main
             )
             
         except Exception as e:
@@ -430,10 +410,6 @@ class CognitiveReasoningTool(Tool):
         
         return atoms
     
-#<<<<<<< copilot/fix-41
-    def enhanced_pattern_matching_reasoning(self, atoms: List, context: Dict[str, Any]) -> List:
-        """Enhanced pattern matching reasoning with context awareness."""
-#=======
     def _get_storage_optimization_info(self):
         """Get information about atomspace-rocks storage optimization availability."""
         try:
@@ -461,7 +437,8 @@ class CognitiveReasoningTool(Tool):
         if not atoms:
             return []
         
-#>>>>>>> main
+    def enhanced_pattern_matching_reasoning(self, atoms: List, context: Dict[str, Any]) -> List:
+        """Enhanced pattern matching reasoning with context awareness."""
         results = []
         
         try:
