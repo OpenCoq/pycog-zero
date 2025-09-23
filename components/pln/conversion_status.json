@@ -1,0 +1,11 @@
+{
+  "component": "pln",
+  "phase": "phase_4_advanced_learning",
+  "cloned_at": "Tue Sep 23 07:35:24 UTC 2025",
+  "status": "cloned",
+  "tasks_completed": [],
+  "dependencies": [
+    "atomspace",
+    "ure"
+  ]
+}
