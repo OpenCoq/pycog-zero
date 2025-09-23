@@ -1090,7 +1090,7 @@ if __name__ == "__main__":
 
 2. **Short-term (Month 1)**:
    - [x] Implement PLN reasoning tool for Agent-Zero logical inference
-   - [ ] Add ECAN attention allocation for Agent-Zero task prioritization
+   - [x] Add ECAN attention allocation for Agent-Zero task prioritization
    - [x] Create meta-cognitive self-reflection capabilities
    - [ ] Build multi-agent cognitive collaboration framework
    - [ ] Develop cognitive memory persistence with AtomSpace backend
