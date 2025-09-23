@@ -551,12 +551,7 @@ class CognitiveReasoningTool(Tool):
                 await self._share_reasoning_results(query, reasoning_results)
             
             return Response(
-# <<<<<<< copilot/fix-51
                 message=f"Enhanced cognitive reasoning completed for: {query}\n"
-# =======
-# <<<<<<< copilot/fix-48
-                message=f"Enhanced cognitive reasoning completed for: {query}\\n"
-# >>>>>>> main
                        f"Data: {json.dumps({
                            'query': query,
                            'operation': 'reason',
