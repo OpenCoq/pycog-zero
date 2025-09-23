@@ -217,7 +217,7 @@ pycog-zero/
 5. **Advanced Learning Systems (Phase 4)**:
    - [ ] Clone PLN repository using `python3 scripts/cpp2py_conversion_pipeline.py clone pln`
    - [ ] Implement Probabilistic Logic Networks Python integration
-   - [ ] Test PLN reasoning with existing PyCog-Zero tools
+   - [x] Test PLN reasoning with existing PyCog-Zero tools
    - [ ] Create advanced reasoning examples using PLN and Agent-Zero
    - [ ] Performance optimize PLN integration for real-time agent operations
 
