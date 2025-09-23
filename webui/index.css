@@ -2717,3 +2717,48 @@ nav ul li a img {
 .spin {
   animation: spin 1s linear infinite;
 }
+
+/* Cognitive Status Enhancements */
+.rotate-90 {
+  transform: rotate(90deg);
+  transition: transform 0.3s ease;
+}
+
+.cognitive-status-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.25rem;
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+.cognitive-status-indicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 0.5rem;
+}
+
+.cognitive-active {
+  color: #4ade80;
+}
+
+.cognitive-inactive {
+  color: #ef4444;
+}
+
+.cognitive-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
+}
