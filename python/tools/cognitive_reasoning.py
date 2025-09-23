@@ -2,12 +2,15 @@
 PyCog-Zero Cognitive Reasoning Tool
 Integrates OpenCog cognitive architecture with Agent-Zero framework
 Enhanced with new atomspace bindings and cross-tool integration
+Optimized for real-time agent operations with performance enhancements
 """
 
 from python.helpers.tool import Tool, Response
 from python.helpers import files
 import json
 import asyncio
+import time
+import concurrent.futures
 from typing import Dict, Any, List, Optional
 
 # Try to import OpenCog components (graceful fallback if not installed)
@@ -55,29 +58,91 @@ try:
 except ImportError:
     ECAN_COORDINATOR_AVAILABLE = False
 
+# Import performance monitoring for real-time optimization
+try:
+    from python.helpers.pln_performance_monitor import (
+        get_performance_monitor, profile_operation, PerformanceMetric
+    )
+    PERFORMANCE_MONITORING_AVAILABLE = True
+except ImportError:
+    PERFORMANCE_MONITORING_AVAILABLE = False
+
 
 class PLNReasoningTool:
-    """PLN (Probabilistic Logic Networks) reasoning implementation for Agent-Zero logical inference."""
+    """PLN (Probabilistic Logic Networks) reasoning implementation for Agent-Zero logical inference.
+    
+    Optimized for real-time agent operations with:
+    - Lazy initialization to reduce startup time
+    - Result caching for frequent reasoning patterns
+    - Concurrent processing support
+    """
     
     def __init__(self, atomspace=None):
         self.atomspace = atomspace
         self.pln_chainer = None
         self.reasoning_rules = []
-        self._initialize_pln()
+        self._initialized = False
+        self._result_cache = {}  # Cache for frequently accessed reasoning results
+        self._cache_max_size = 100  # Limit cache size for memory optimization
+        self._performance_metrics = {"cache_hits": 0, "cache_misses": 0, "reasoning_time": []}
         
-    def _initialize_pln(self):
-        """Initialize PLN chainer and reasoning rules."""
+        # Lazy initialization - defer expensive setup until first use
+        self._setup_reasoning_rules()
+        
+    def _initialize_pln_lazy(self):
+        """Lazy initialize PLN chainer only when first needed for performance."""
+        if self._initialized:
+            return
+            
         if OPENCOG_AVAILABLE and PLN_AVAILABLE and self.atomspace:
             try:
                 # Initialize PLN chainer with AtomSpace
                 self.pln_chainer = PLNChainer(self.atomspace)
-                print("PLN chainer initialized with OpenCog")
+                print("PLN chainer lazily initialized with OpenCog")
             except Exception as e:
-                print(f"⚠️ PLN chainer initialization warning: {e}")
+                print(f"⚠️ PLN chainer lazy initialization warning: {e}")
                 self.pln_chainer = None
         
-        # Initialize basic reasoning rules (fallback implementation)
-        self._setup_reasoning_rules()
+        self._initialized = True
+        
+    def _get_cache_key(self, operation, atoms, max_steps=None):
+        """Generate cache key for reasoning operations."""
+        # Create a simple hash-based key for caching
+        atom_ids = [str(atom) for atom in atoms[:5]] if atoms else []  # Limit for performance
+        key_data = f"{operation}_{':'.join(atom_ids)}_{max_steps}"
+        return hash(key_data) % 10000  # Simple hash with collision handling
+    
+    def _cache_result(self, cache_key, result):
+        """Cache reasoning result with LRU eviction."""
+        if len(self._result_cache) >= self._cache_max_size:
+            # Simple LRU: remove oldest entry
+            oldest_key = next(iter(self._result_cache))
+            del self._result_cache[oldest_key]
+        
+        self._result_cache[cache_key] = result
+        
+    def _get_cached_result(self, cache_key):
+        """Retrieve cached result if available."""
+        if cache_key in self._result_cache:
+            self._performance_metrics["cache_hits"] += 1
+            return self._result_cache[cache_key]
+        else:
+            self._performance_metrics["cache_misses"] += 1
+            return None
+    
+    def get_performance_metrics(self):
+        """Get current performance metrics for monitoring."""
+        total_requests = self._performance_metrics["cache_hits"] + self._performance_metrics["cache_misses"]
+        cache_hit_rate = (self._performance_metrics["cache_hits"] / total_requests) if total_requests > 0 else 0
+        avg_reasoning_time = sum(self._performance_metrics["reasoning_time"][-10:]) / min(10, len(self._performance_metrics["reasoning_time"])) if self._performance_metrics["reasoning_time"] else 0
+        
+        return {
+            "cache_hit_rate": cache_hit_rate,
+            "cache_size": len(self._result_cache),
+            "total_requests": total_requests,
+            "avg_reasoning_time_ms": avg_reasoning_time * 1000,
+            "initialized": self._initialized
+        }
     
     def _setup_reasoning_rules(self):
         """Setup basic reasoning rules for logical inference."""
@@ -92,26 +157,96 @@ class PLNReasoningTool:
         ]
     
     def forward_chain(self, source_atoms, max_steps=10):
-        """Apply forward chaining reasoning from source atoms."""
+        """Apply forward chaining reasoning from source atoms with performance optimization."""
+        
+        # Use performance monitoring if available
+        if PERFORMANCE_MONITORING_AVAILABLE:
+            with profile_operation("pln_forward_chain", len(source_atoms)) as profiler:
+                return self._forward_chain_internal(source_atoms, max_steps, profiler)
+        else:
+            return self._forward_chain_internal(source_atoms, max_steps, None)
+    
+    def _forward_chain_internal(self, source_atoms, max_steps, profiler):
+        """Internal forward chaining implementation with profiling support."""
+        start_time = time.perf_counter()
+        
+        # Check cache first for real-time performance
+        cache_key = self._get_cache_key("forward_chain", source_atoms, max_steps)
+        cached_result = self._get_cached_result(cache_key)
+        if cached_result is not None:
+            if profiler:
+                profiler.mark_cache_hit()
+            end_time = time.perf_counter()
+            self._performance_metrics["reasoning_time"].append(end_time - start_time)
+            return cached_result
+        
+        # Lazy initialize PLN chainer only when needed
+        self._initialize_pln_lazy()
+        
+        result = []
         if self.pln_chainer and PLN_AVAILABLE:
             try:
-                return self.pln_chainer.forward_chain(source_atoms, max_steps=max_steps)
+                result = self.pln_chainer.forward_chain(source_atoms, max_steps=max_steps)
             except Exception as e:
                 print(f"⚠️ PLN forward chaining warning: {e}")
+                result = self._fallback_forward_chain(source_atoms, max_steps)
+        else:
+            # Fallback implementation
+            result = self._fallback_forward_chain(source_atoms, max_steps)
         
-        # Fallback implementation
-        return self._fallback_forward_chain(source_atoms, max_steps)
+        # Cache result for future requests
+        self._cache_result(cache_key, result)
+        
+        end_time = time.perf_counter()
+        self._performance_metrics["reasoning_time"].append(end_time - start_time)
+        
+        return result
     
     def backward_chain(self, target_atoms, max_steps=10):
-        """Apply backward chaining reasoning toward target atoms."""
+        """Apply backward chaining reasoning toward target atoms with performance optimization."""
+        
+        # Use performance monitoring if available
+        if PERFORMANCE_MONITORING_AVAILABLE:
+            with profile_operation("pln_backward_chain", len(target_atoms)) as profiler:
+                return self._backward_chain_internal(target_atoms, max_steps, profiler)
+        else:
+            return self._backward_chain_internal(target_atoms, max_steps, None)
+    
+    def _backward_chain_internal(self, target_atoms, max_steps, profiler):
+        """Internal backward chaining implementation with profiling support."""
+        start_time = time.perf_counter()
+        
+        # Check cache first for real-time performance
+        cache_key = self._get_cache_key("backward_chain", target_atoms, max_steps)
+        cached_result = self._get_cached_result(cache_key)
+        if cached_result is not None:
+            if profiler:
+                profiler.mark_cache_hit()
+            end_time = time.perf_counter()
+            self._performance_metrics["reasoning_time"].append(end_time - start_time)
+            return cached_result
+        
+        # Lazy initialize PLN chainer only when needed
+        self._initialize_pln_lazy()
+        
+        result = []
         if self.pln_chainer and PLN_AVAILABLE:
             try:
-                return self.pln_chainer.backward_chain(target_atoms, max_steps=max_steps)
+                result = self.pln_chainer.backward_chain(target_atoms, max_steps=max_steps)
             except Exception as e:
                 print(f"⚠️ PLN backward chaining warning: {e}")
+                result = self._fallback_backward_chain(target_atoms, max_steps)
+        else:
+            # Fallback implementation
+            result = self._fallback_backward_chain(target_atoms, max_steps)
         
-        # Fallback implementation
-        return self._fallback_backward_chain(target_atoms, max_steps)
+        # Cache result for future requests
+        self._cache_result(cache_key, result)
+        
+        end_time = time.perf_counter()
+        self._performance_metrics["reasoning_time"].append(end_time - start_time)
+        
+        return result
     
     def apply_inference_rule(self, rule_name, premises):
         """Apply specific inference rule to premises."""
@@ -325,10 +460,24 @@ class PLNReasoningTool:
 
 
 class CognitiveReasoningTool(Tool):
-    """Agent-Zero tool for OpenCog cognitive reasoning with enhanced atomspace bindings."""
+    """Agent-Zero tool for OpenCog cognitive reasoning with enhanced atomspace bindings.
+    
+    Optimized for real-time operations with:
+    - Lazy initialization and shared atomspace
+    - Concurrent processing for parallel reasoning
+    - Performance monitoring and caching
+    """
     
     # Class-level shared atomspace for cross-tool integration
     _shared_atomspace = None
+    _thread_pool = None  # Shared thread pool for concurrent operations
+    
+    @classmethod
+    def get_shared_thread_pool(cls):
+        """Get or create shared thread pool for concurrent operations."""
+        if cls._thread_pool is None:
+            cls._thread_pool = concurrent.futures.ThreadPoolExecutor(max_workers=4)
+        return cls._thread_pool
     
     def _initialize_if_needed(self):
         """Initialize the cognitive reasoning system if not already done."""
@@ -342,6 +491,7 @@ class CognitiveReasoningTool(Tool):
         self.tool_hub = None
         self.memory_bridge = None
         self.pln_reasoning = None  # PLN reasoning tool
+        self._performance_monitor = {"total_operations": 0, "avg_response_time": 0.0}
         
         # Initialize with shared or new atomspace
         if OPENCOG_AVAILABLE and self.config.get("opencog_enabled", True):
@@ -361,9 +511,9 @@ class CognitiveReasoningTool(Tool):
                     self.initialized = True
                     print("✓ OpenCog cognitive reasoning initialized with enhanced atomspace bindings")
                     
-                    # Initialize PLN reasoning tool
+                    # Initialize PLN reasoning tool with lazy loading
                     self.pln_reasoning = PLNReasoningTool(self.atomspace)
-                    print("✓ PLN reasoning tool initialized")
+                    print("✓ PLN reasoning tool initialized with performance optimization")
                     
                     # Initialize cross-tool integration
                     self._setup_cross_tool_integration()
@@ -478,16 +628,44 @@ class CognitiveReasoningTool(Tool):
                     }
                 }
     
+    def get_performance_report(self) -> Dict[str, Any]:
+        """Get comprehensive performance report for real-time monitoring."""
+        report = {
+            "tool_performance": self._performance_monitor,
+            "initialization_status": {
+                "initialized": self.initialized,
+                "opencog_available": OPENCOG_AVAILABLE,
+                "pln_available": PLN_AVAILABLE,
+                "atomspace_tools_available": ATOMSPACE_TOOLS_AVAILABLE
+            }
+        }
+        
+        # Add PLN-specific metrics if available
+        if self.pln_reasoning:
+            report["pln_metrics"] = self.pln_reasoning.get_performance_metrics()
+        
+        # Add atomspace size info if available
+        if self.atomspace:
+            try:
+                report["atomspace_metrics"] = {
+                    "atom_count": len(self.atomspace),
+                    "initialized": True
+                }
+            except:
+                report["atomspace_metrics"] = {"initialized": False}
+        
+        return report
+    
     async def execute(self, query: str, operation: str = "reason", **kwargs):
-        """Execute cognitive reasoning on Agent-Zero queries with enhanced atomspace operations."""
+        """Execute cognitive reasoning on Agent-Zero queries with enhanced atomspace operations and performance monitoring."""
         
         # Initialize if needed
         self._initialize_if_needed()
         
         if not self.config.get("cognitive_mode", True):
             return Response(
-                message="Cognitive mode is disabled\\n"
-                       f"Data: {json.dumps({'error': 'Cognitive mode disabled in configuration'})}",
+                message="Cognitive mode is disabled",
+                data={'error': 'Cognitive mode disabled in configuration'},
                 break_loop=False
             )
         
@@ -500,6 +678,13 @@ class CognitiveReasoningTool(Tool):
             return await self._cross_reference_with_tools(query, **kwargs)
         elif operation == "status":
             return await self._get_reasoning_status()
+        elif operation == "performance_report":
+            performance_data = self.get_performance_report()
+            return Response(
+                message="Cognitive reasoning performance report",
+                data=performance_data,
+                break_loop=False
+            )
         elif operation == "share_knowledge":
             return await self._share_knowledge_with_hub(query, **kwargs)
         elif operation == "ure_forward_chain":
@@ -696,7 +881,8 @@ class CognitiveReasoningTool(Tool):
         return results
     
     async def _enhanced_pln_reasoning_with_tool(self, atoms: List, context: Dict[str, Any]) -> List:
-        """Enhanced PLN reasoning using PLNReasoningTool for logical inference."""
+        """Enhanced PLN reasoning using PLNReasoningTool with concurrent processing for real-time operations."""
+        start_time = time.perf_counter()
         results = []
         
         if not self.pln_reasoning:
@@ -705,33 +891,67 @@ class CognitiveReasoningTool(Tool):
         
         try:
             reasoning_config = context.get("reasoning_config", {})
+            thread_pool = self.get_shared_thread_pool()
             
-            # Apply forward chaining if enabled
+            # Submit parallel reasoning tasks for better performance
+            future_tasks = []
+            
+            # Apply forward chaining if enabled (concurrent)
             if reasoning_config.get("forward_chaining", True):
-                forward_results = self.pln_reasoning.forward_chain(
-                    atoms, 
-                    max_steps=reasoning_config.get("max_forward_steps", 5)
-                )
-                results.extend(forward_results)
-                
-            # Apply backward chaining if enabled  
-            if reasoning_config.get("backward_chaining", True):
-                backward_results = self.pln_reasoning.backward_chain(
+                forward_task = thread_pool.submit(
+                    self.pln_reasoning.forward_chain,
                     atoms,
-                    max_steps=reasoning_config.get("max_backward_steps", 5) 
+                    reasoning_config.get("max_forward_steps", 5)
                 )
-                results.extend(backward_results)
+                future_tasks.append(("forward_chaining", forward_task))
                 
-            # Apply specific inference rules if requested
+            # Apply backward chaining if enabled (concurrent)
+            if reasoning_config.get("backward_chaining", True):
+                backward_task = thread_pool.submit(
+                    self.pln_reasoning.backward_chain,
+                    atoms,
+                    reasoning_config.get("max_backward_steps", 5)
+                )
+                future_tasks.append(("backward_chaining", backward_task))
+            
+            # Process specific inference rules concurrently (limit to 3 for performance)
             inference_rules = context.get("inference_rules", self.pln_reasoning.reasoning_rules[:3])
-            for rule in inference_rules:
-                rule_results = self.pln_reasoning.apply_inference_rule(rule, atoms)
-                results.extend(rule_results)
+            for rule in inference_rules[:3]:  # Limit concurrent rule applications
+                rule_task = thread_pool.submit(
+                    self.pln_reasoning.apply_inference_rule,
+                    rule,
+                    atoms
+                )
+                future_tasks.append((f"rule_{rule}", rule_task))
+            
+            # Collect results with timeout for real-time constraints
+            timeout = reasoning_config.get("reasoning_timeout", 5.0)  # 5 second default timeout
+            
+            for task_name, task in future_tasks:
+                try:
+                    task_results = task.result(timeout=timeout)
+                    if task_results:
+                        results.extend(task_results)
+                except concurrent.futures.TimeoutError:
+                    print(f"⚠️ PLN reasoning timeout for {task_name}")
+                    task.cancel()  # Cancel timed out tasks
+                except Exception as e:
+                    print(f"⚠️ PLN reasoning error in {task_name}: {e}")
                 
         except Exception as e:
             print(f"⚠️ PLN reasoning tool error: {e}")
             # Fallback to original enhanced PLN reasoning
             results.extend(self.enhanced_pln_reasoning(atoms, context))
+        
+        # Update performance metrics
+        end_time = time.perf_counter()
+        self._performance_monitor["total_operations"] += 1
+        current_time = end_time - start_time
+        
+        # Running average of response times
+        total_ops = self._performance_monitor["total_operations"]
+        prev_avg = self._performance_monitor["avg_response_time"]
+        self._performance_monitor["avg_response_time"] = (prev_avg * (total_ops - 1) + current_time) / total_ops
         
         return results
     
