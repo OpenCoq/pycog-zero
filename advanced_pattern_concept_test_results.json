@@ -1,0 +1,18 @@
+{
+  "tests_passed": 0,
+  "tests_failed": 3,
+  "advanced_pattern_results": {},
+  "concept_learning_results": {},
+  "integration_results": {
+    "tools_integration": {
+      "pattern_tool_available": false,
+      "concept_tool_available": false,
+      "integration_success": false
+    }
+  },
+  "errors": [
+    "Advanced Pattern Recognition Setup: Tool initialization failed",
+    "Concept Learning Setup: Tool initialization failed",
+    "Tools Integration: One or both tools failed to initialize"
+  ]
+}
