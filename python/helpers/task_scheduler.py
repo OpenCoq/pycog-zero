@@ -566,10 +566,13 @@ class SchedulerTaskList(BaseModel):
     async def get_due_tasks(self) -> list[Union[ScheduledTask, AdHocTask, PlannedTask]]:
         with self._lock:
             await self.reload()
-            return [
+            due_tasks = [
                 task for task in self.tasks
                 if task.check_schedule() and task.state == TaskState.IDLE
             ]
+            
+            # Apply ECAN attention-based prioritization if available
+            return await self._prioritize_tasks_with_ecan(due_tasks)
 
     def get_task_by_uuid(self, task_uuid: str) -> Union[ScheduledTask, AdHocTask, PlannedTask] | None:
         with self._lock:
@@ -594,6 +597,143 @@ class SchedulerTaskList(BaseModel):
             self.tasks = [task for task in self.tasks if task.name != name]
             await self.save()
         return self
+
+    async def _prioritize_tasks_with_ecan(self, tasks: list[Union[ScheduledTask, AdHocTask, PlannedTask]]) -> list[Union[ScheduledTask, AdHocTask, PlannedTask]]:
+        """Apply ECAN attention allocation to prioritize tasks for execution."""
+        if not tasks:
+            return tasks
+        
+        try:
+            # Try to import meta-cognition tool for ECAN integration
+            from python.tools.meta_cognition import MetaCognitionTool
+            
+            # Create a temporary agent context for ECAN operations
+            from agent import Agent, AgentConfig
+            
+            # Use a minimal config for meta-cognition operations
+            temp_config = AgentConfig(
+                chat_model=None,
+                utility_model=None, 
+                embeddings_model=None,
+                browser_model=None,
+                mcp_servers=""
+            )
+            
+            # Create temporary agent for meta-cognition operations
+            temp_agent = Agent(0, temp_config)
+            
+            # Create meta-cognition tool instance
+            meta_tool = MetaCognitionTool(temp_agent)
+            
+            # Extract task information for attention allocation
+            task_names = [task.name for task in tasks]
+            task_prompts = [task.prompt for task in tasks]
+            
+            # Combine goals and tasks for ECAN prioritization
+            attention_params = {
+                "goals": task_names,
+                "tasks": task_prompts,
+                "importance": 100  # Base importance level
+            }
+            
+            # Allocate attention using ECAN
+            response = await meta_tool.allocate_attention(attention_params)
+            
+            # Parse attention allocation results
+            if hasattr(response, 'message') and 'Data:' in response.message:
+                try:
+                    import json
+                    data_start = response.message.find('Data:') + 5
+                    data_json = response.message[data_start:].strip()
+                    attention_results = json.loads(data_json)
+                    
+                    # Extract prioritization information
+                    if attention_results.get('status') == 'success':
+                        results_data = attention_results.get('results', {})
+                        
+                        # If ECAN was successful, use attention distribution for ordering
+                        if results_data.get('attention_allocated') and not results_data.get('fallback_mode'):
+                            distribution = results_data.get('distribution', {})
+                            top_goals = distribution.get('top_goals', [])
+                            top_tasks = distribution.get('top_tasks', [])
+                            
+                            # Create priority mapping based on ECAN attention
+                            priority_map = {}
+                            
+                            # Assign high priorities to top goals
+                            for i, goal_name in enumerate(top_goals):
+                                priority_map[goal_name] = 1000 - i * 100  # Higher scores = higher priority
+                            
+                            # Assign medium priorities to top tasks
+                            for i, task_prompt in enumerate(top_tasks):
+                                # Find tasks that match this prompt
+                                for task in tasks:
+                                    if task_prompt in task.prompt:
+                                        current_priority = priority_map.get(task.name, 0)
+                                        priority_map[task.name] = max(current_priority, 500 - i * 50)
+                            
+                            # Sort tasks by ECAN-determined priority
+                            def get_priority(task):
+                                name_priority = priority_map.get(task.name, 0)
+                                # Also consider prompt matching
+                                prompt_priority = 0
+                                for top_task in top_tasks:
+                                    if top_task in task.prompt:
+                                        prompt_priority += 200
+                                        break
+                                return name_priority + prompt_priority
+                            
+                            prioritized_tasks = sorted(tasks, key=get_priority, reverse=True)
+                            
+                            # Log ECAN prioritization results
+                            print(f"✓ ECAN task prioritization applied to {len(tasks)} tasks")
+                            print(f"  Top priorities: {[task.name for task in prioritized_tasks[:3]]}")
+                            
+                            return prioritized_tasks
+                        
+                        # If ECAN not available, use fallback prioritization 
+                        elif results_data.get('fallback_mode'):
+                            fallback_goals = results_data.get('prioritized_goals', [])
+                            fallback_tasks = results_data.get('prioritized_tasks', [])
+                            
+                            # Create priority mapping from fallback results
+                            priority_map = {}
+                            
+                            # Use fallback goal priorities
+                            for goal_data in fallback_goals:
+                                if isinstance(goal_data, dict):
+                                    priority_map[goal_data.get('goal', '')] = goal_data.get('priority', 0)
+                            
+                            # Use fallback task priorities
+                            for task_data in fallback_tasks:
+                                if isinstance(task_data, dict):
+                                    task_prompt = task_data.get('task', '')
+                                    priority_score = task_data.get('priority', 0)
+                                    # Match tasks by prompt content
+                                    for task in tasks:
+                                        if task_prompt in task.prompt:
+                                            current_priority = priority_map.get(task.name, 0)
+                                            priority_map[task.name] = max(current_priority, priority_score)
+                            
+                            # Sort by fallback priorities
+                            def get_fallback_priority(task):
+                                return priority_map.get(task.name, 0)
+                            
+                            prioritized_tasks = sorted(tasks, key=get_fallback_priority, reverse=True)
+                            
+                            print(f"✓ Fallback task prioritization applied to {len(tasks)} tasks")
+                            return prioritized_tasks
+                
+                except (json.JSONDecodeError, KeyError, AttributeError) as e:
+                    print(f"⚠️ Failed to parse ECAN attention results: {e}")
+                    
+        except ImportError:
+            print("⚠️ MetaCognitionTool not available for ECAN task prioritization")
+        except Exception as e:
+            print(f"⚠️ ECAN task prioritization failed: {e}")
+        
+        # Fallback: return tasks sorted by creation time (newest first)
+        return sorted(tasks, key=lambda t: t.created_at, reverse=True)
 
 
 class TaskScheduler:
