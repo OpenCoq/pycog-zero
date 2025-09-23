@@ -1,0 +1,44 @@
+{
+  "timestamp": "2025-09-23T07:43:21.626281",
+  "test_scenarios": [
+    {
+      "scenario": "PLN Tool Structure",
+      "status": "PASS",
+      "details": "All PLN elements present",
+      "timestamp": "2025-09-23T07:43:21.626540"
+    },
+    {
+      "scenario": "PLN Forward Chaining",
+      "status": "PASS",
+      "details": "Generated 4 reasoning steps",
+      "timestamp": "2025-09-23T07:43:21.626606"
+    },
+    {
+      "scenario": "PLN Backward Chaining",
+      "status": "PASS",
+      "details": "Generated 9 reasoning steps",
+      "timestamp": "2025-09-23T07:43:21.626674"
+    },
+    {
+      "scenario": "PLN AtomSpace Integration",
+      "status": "PARTIAL",
+      "details": "Limited integration: 4 tools, 4 results",
+      "timestamp": "2025-09-23T07:43:21.626840"
+    },
+    {
+      "scenario": "PLN URE Integration",
+      "status": "PASS",
+      "details": "Found 5 URE patterns, created 5 scenarios",
+      "timestamp": "2025-09-23T07:43:21.626948"
+    },
+    {
+      "scenario": "Cross-Tool PLN Reasoning",
+      "status": "PASS",
+      "details": "Generated 16 cross-tool reasoning steps",
+      "timestamp": "2025-09-23T07:43:21.627002"
+    }
+  ],
+  "total_tests": 6,
+  "passed_tests": 5,
+  "failed_tests": 1
+}

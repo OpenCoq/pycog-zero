@@ -227,7 +227,7 @@ pycog-zero/
      - [x] Created PLN integration demonstration (`demo_pln_integration.py`)
      - [x] Integrated with Agent-Zero CognitiveReasoningTool
      - [x] Documentation and error handling implemented
-   - [ ] Test PLN reasoning with existing PyCog-Zero tools
+   - [x] Test PLN reasoning with existing PyCog-Zero tools
    - [ ] Create advanced reasoning examples using PLN and Agent-Zero
    - [ ] Performance optimize PLN integration for real-time agent operations
 
