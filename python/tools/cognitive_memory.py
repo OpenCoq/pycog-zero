@@ -1,13 +1,18 @@
 """
-PyCog-Zero Cognitive Memory Tool
+Enhanced Cognitive Memory Tool for Agent-Zero
 Integrates Agent-Zero memory with OpenCog AtomSpace for persistent cognitive memory
+Now with performance optimization for large-scale processing
 """
 
 from python.helpers.tool import Tool, Response
+from python.helpers.performance_optimizer import get_performance_optimizer, optimize
 from python.helpers import files
 import json
 import pickle
 import os
+import asyncio
+import time
+from typing import Dict, List, Any, Optional
 
 # Try to import OpenCog components (graceful fallback if not installed)
 try:
@@ -42,6 +47,27 @@ class CognitiveMemoryTool(Tool):
         self.memory_file = files.get_abs_path("memory/cognitive_atomspace.pkl")
         self.initialized = False
         self._fallback_memory = {"atoms": [], "metadata": {"total_atoms": 0}}
+        
+        # Initialize performance optimizer
+        optimizer_config = {
+            'cache_size': 2000,  # Large cache for memory operations
+            'batch_size': 100,   # Bigger batches for memory operations
+            'batch_wait_time': 0.5,
+            'memory_pool_size': 200
+        }
+        self.performance_optimizer = get_performance_optimizer(optimizer_config)
+        
+        # Performance monitoring
+        self.memory_stats = {
+            'total_operations': 0,
+            'cached_operations': 0,
+            'batch_operations': 0,
+            'storage_operations': 0,
+            'avg_response_time': 0.0
+        }
+        
+        # Setup batch handlers
+        self._setup_batch_handlers()
         
         if OPENCOG_AVAILABLE:
             try:
