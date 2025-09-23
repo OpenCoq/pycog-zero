@@ -96,6 +96,143 @@
                 }
             };
         };
+
+        // Cognitive Status Component
+        window.cognitiveStatus = function() {
+            return {
+                showCognitive: false,
+                cognitiveMode: true,
+                openCogEnabled: true,
+                neuralSymbolic: true,
+                ecanAttention: true,
+                plnReasoning: true,
+                atomspaceStats: {
+                    atoms: 0,
+                    memory: 0
+                },
+                
+                init() {
+                    this.loadCognitiveStatus();
+                    // Refresh status every 30 seconds
+                    setInterval(() => {
+                        this.loadCognitiveStatus();
+                    }, 30000);
+                },
+                
+                async loadCognitiveStatus() {
+                    try {
+                        // Load cognitive configuration status
+                        const response = await fetch('/api/settings');
+                        if (response.ok) {
+                            const data = await response.json();
+                            const cognitiveSection = data.sections?.find(s => s.id === 'cognitive');
+                            if (cognitiveSection) {
+                                // Extract status from cognitive fields
+                                cognitiveSection.fields.forEach(field => {
+                                    switch(field.id) {
+                                        case 'cognitive_mode':
+                                            this.cognitiveMode = field.value === true || field.value === 'true';
+                                            break;
+                                        case 'opencog_enabled':
+                                            this.openCogEnabled = field.value === true || field.value === 'true';
+                                            break;
+                                        case 'neural_symbolic_bridge':
+                                            this.neuralSymbolic = field.value === true || field.value === 'true';
+                                            break;
+                                        case 'ecan_attention':
+                                            this.ecanAttention = field.value === true || field.value === 'true';
+                                            break;
+                                        case 'pln_reasoning':
+                                            this.plnReasoning = field.value === true || field.value === 'true';
+                                            break;
+                                    }
+                                });
+                            }
+                        }
+                        
+                        // Load AtomSpace statistics if available
+                        try {
+                            const statsResponse = await fetch('/api/cognitive/status');
+                            if (statsResponse.ok) {
+                                const stats = await statsResponse.json();
+                                this.atomspaceStats = stats;
+                            }
+                        } catch (e) {
+                            // AtomSpace stats not available, keep defaults
+                        }
+                        
+                    } catch (error) {
+                        console.log('Could not load cognitive status:', error);
+                    }
+                }
+            };
+        };
+
+        // Cognitive Activity Component  
+        window.cognitiveActivity = function() {
+            return {
+                isActive: false,
+                currentActivity: 'Initializing cognitive systems...',
+                activeTools: [],
+                lastCheck: 0,
+                
+                init() {
+                    this.monitorCognitiveActivity();
+                    // Check for activity every 5 seconds
+                    setInterval(() => {
+                        this.monitorCognitiveActivity();
+                    }, 5000);
+                },
+                
+                async monitorCognitiveActivity() {
+                    try {
+                        const response = await fetch('/api/cognitive/status');
+                        if (response.ok) {
+                            const status = await response.json();
+                            
+                            // Show activity if cognitive mode is enabled and tools are active
+                            const hasActiveTools = status.atomspace_stats?.tools_active?.length > 0;
+                            const cognitiveEnabled = status.cognitive_mode;
+                            
+                            if (cognitiveEnabled && hasActiveTools) {
+                                this.isActive = true;
+                                this.activeTools = status.atomspace_stats.tools_active;
+                                this.currentActivity = `Processing with ${this.activeTools.length} cognitive tool${this.activeTools.length !== 1 ? 's' : ''}`;
+                                
+                                // Auto-hide after 10 seconds if no new activity
+                                setTimeout(() => {
+                                    if (Date.now() - this.lastCheck > 8000) {
+                                        this.isActive = false;
+                                    }
+                                }, 10000);
+                                
+                                this.lastCheck = Date.now();
+                                
+                            } else if (cognitiveEnabled) {
+                                // Show brief status when cognitive is enabled but idle
+                                this.currentActivity = 'Cognitive systems ready';
+                                this.activeTools = [];
+                                
+                                // Only show briefly on first load or state change
+                                if (!this.hasShownReady) {
+                                    this.isActive = true;
+                                    this.hasShownReady = true;
+                                    setTimeout(() => {
+                                        this.isActive = false;
+                                    }, 3000);
+                                }
+                                
+                            } else {
+                                this.isActive = false;
+                            }
+                        }
+                    } catch (error) {
+                        // Cognitive API not available, hide indicator
+                        this.isActive = false;
+                    }
+                }
+            };
+        };
     </script>
 
     <!-- Load module scripts first -->
@@ -327,6 +464,46 @@
                         </ul>
                     </span>
                 </div>
+                
+                <!-- Cognitive Status Indicator -->
+                <div class="config-section" x-data="cognitiveStatus" x-init="init()">
+                    <h3 @click="showCognitive = !showCognitive" style="cursor: pointer; display: flex; align-items: center; margin-bottom: 0.5rem;">
+                        <span style="color: var(--color-accent); margin-right: 0.5rem;">🧠</span>
+                        Cognitive Status
+                        <svg width="16" height="16" style="margin-left: auto;" :class="{'rotate-90': showCognitive}">
+                            <path d="M6 9l3 3 3-3" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </h3>
+                    <div x-show="showCognitive" x-transition>
+                        <div style="font-size: 0.8rem; opacity: 0.8; margin-bottom: 0.5rem;">
+                            <div style="display: flex; align-items: center; margin-bottom: 0.25rem;">
+                                <span :style="`color: ${cognitiveMode ? '#4ade80' : '#ef4444'};`">●</span>
+                                <span style="margin-left: 0.5rem;" x-text="cognitiveMode ? 'Cognitive Mode: Active' : 'Cognitive Mode: Inactive'"></span>
+                            </div>
+                            <div style="display: flex; align-items: center; margin-bottom: 0.25rem;">
+                                <span :style="`color: ${openCogEnabled ? '#4ade80' : '#ef4444'};`">●</span>
+                                <span style="margin-left: 0.5rem;" x-text="openCogEnabled ? 'OpenCog: Connected' : 'OpenCog: Disconnected'"></span>
+                            </div>
+                            <div style="display: flex; align-items: center; margin-bottom: 0.25rem;">
+                                <span :style="`color: ${neuralSymbolic ? '#4ade80' : '#ef4444'};`">●</span>
+                                <span style="margin-left: 0.5rem;" x-text="neuralSymbolic ? 'Neural-Symbolic: Active' : 'Neural-Symbolic: Inactive'"></span>
+                            </div>
+                            <div style="display: flex; align-items: center; margin-bottom: 0.25rem;">
+                                <span :style="`color: ${ecanAttention ? '#4ade80' : '#ef4444'};`">●</span>
+                                <span style="margin-left: 0.5rem;" x-text="ecanAttention ? 'ECAN Attention: Active' : 'ECAN Attention: Inactive'"></span>
+                            </div>
+                            <div style="display: flex; align-items: center; margin-bottom: 0.25rem;">
+                                <span :style="`color: ${plnReasoning ? '#4ade80' : '#ef4444'};`">●</span>
+                                <span style="margin-left: 0.5rem;" x-text="plnReasoning ? 'PLN Reasoning: Active' : 'PLN Reasoning: Inactive'"></span>
+                            </div>
+                            <div x-show="atomspaceStats.atoms > 0" style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid var(--color-border);">
+                                <div style="margin-bottom: 0.25rem;" x-text="`AtomSpace: ${atomspaceStats.atoms} atoms`"></div>
+                                <div style="margin-bottom: 0.25rem;" x-text="`Memory Usage: ${atomspaceStats.memory}MB`"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- Version Info -->
                 <div class="version-info">
                     <span id="a0version">Version {{version_no}} {{version_time}}</span>
@@ -349,6 +526,23 @@
                     </svg>
                 </div>
             </div>
+            
+            <!-- Cognitive Reasoning Activity Indicator -->
+            <div id="cognitive-activity-indicator" x-data="cognitiveActivity" x-init="init()" 
+                 x-show="isActive" x-transition
+                 style="background: linear-gradient(45deg, #1a1a2e, #16213e); border: 1px solid #4ade80; border-radius: 8px; margin: 8px; padding: 12px; font-size: 0.85rem;">
+                <div style="display: flex; align-items: center; margin-bottom: 6px;">
+                    <div class="cognitive-pulse" style="width: 12px; height: 12px; background: #4ade80; border-radius: 50%; margin-right: 8px; animation: pulse 2s infinite;"></div>
+                    <span style="color: #4ade80; font-weight: 600;">🧠 Cognitive Reasoning Active</span>
+                </div>
+                <div style="color: #a0a0a0; font-size: 0.8rem;" x-text="currentActivity"></div>
+                <div x-show="activeTools.length > 0" style="margin-top: 6px;">
+                    <template x-for="tool in activeTools" :key="tool">
+                        <span style="display: inline-block; background: rgba(74, 222, 128, 0.2); color: #4ade80; padding: 2px 6px; border-radius: 4px; margin-right: 4px; margin-bottom: 4px; font-size: 0.75rem;" x-text="tool.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())"></span>
+                    </template>
+                </div>
+            </div>
+            
             <div id="chat-history">
             </div>
             <div id="toast" class="toast">
@@ -541,6 +735,10 @@
                                      :class="{'active': activeTab === 'mcp'}"
                                      @click="switchTab('mcp')"
                                      title="MCP">MCP</div>
+                                <div class="settings-tab"
+                                     :class="{'active': activeTab === 'cognitive'}"
+                                     @click="switchTab('cognitive')"
+                                     title="Cognitive Configuration">Cognitive</div>
                                 <div class="settings-tab"
                                      :class="{'active': activeTab === 'developer'}"
                                      @click="switchTab('developer')"
