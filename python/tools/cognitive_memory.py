@@ -18,6 +18,16 @@ except ImportError:
     print("OpenCog not available - install with: pip install opencog-atomspace opencog-python")
     OPENCOG_AVAILABLE = False
 
+# Import ECAN coordinator for cross-tool attention management
+try:
+    from python.helpers.ecan_coordinator import (
+        get_ecan_coordinator, register_tool_with_ecan, 
+        request_attention_for_tool, AttentionRequest
+    )
+    ECAN_COORDINATOR_AVAILABLE = True
+except ImportError:
+    ECAN_COORDINATOR_AVAILABLE = False
+
 
 class CognitiveMemoryTool(Tool):
     """Integrate Agent-Zero memory with OpenCog AtomSpace."""
@@ -40,6 +50,11 @@ class CognitiveMemoryTool(Tool):
                 self.load_persistent_memory()
                 self.initialized = True
                 print("✓ OpenCog cognitive memory initialized")
+                
+                # Register with ECAN coordinator for attention management
+                if ECAN_COORDINATOR_AVAILABLE:
+                    register_tool_with_ecan("cognitive_memory", default_priority=1.0)
+                    print("✓ Registered with ECAN coordinator for memory attention management")
             except Exception as e:
                 print(f"⚠️ OpenCog cognitive memory initialization failed: {e}")
                 print("ℹ️ Falling back to basic persistence mode")
@@ -122,6 +137,21 @@ class CognitiveMemoryTool(Tool):
         
         try:
             concept_name = data["concept"]
+            
+            # Request attention allocation for memory storage
+            if ECAN_COORDINATOR_AVAILABLE:
+                concepts = [concept_name]
+                if "properties" in data:
+                    concepts.extend(data["properties"].keys())
+                
+                priority = data.get("importance", 1.0)  # Use importance if provided
+                request_attention_for_tool(
+                    tool_name="cognitive_memory",
+                    priority=priority,
+                    context=f"Storing knowledge: {concept_name}",
+                    concepts=concepts[:6],  # Limit concepts
+                    importance_multiplier=1.0
+                )
             
             if self.initialized:
                 # Store in OpenCog AtomSpace

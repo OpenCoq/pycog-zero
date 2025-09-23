@@ -36,6 +36,16 @@ try:
 except ImportError:
     ATOMSPACE_TOOLS_AVAILABLE = False
 
+# Import ECAN coordinator for enhanced cross-tool integration
+try:
+    from python.helpers.ecan_coordinator import (
+        get_ecan_coordinator, register_tool_with_ecan, 
+        request_attention_for_tool, AttentionRequest
+    )
+    ECAN_COORDINATOR_AVAILABLE = True
+except ImportError:
+    ECAN_COORDINATOR_AVAILABLE = False
+
 
 class MetaCognitionTool(Tool):
     """Meta-cognitive capabilities for Agent-Zero self-reflection and introspection."""
@@ -102,6 +112,13 @@ class MetaCognitionTool(Tool):
         else:
             print("⚠️ ECAN not available - using fallback attention mechanisms")
         
+        # Register with centralized ECAN coordinator
+        if ECAN_COORDINATOR_AVAILABLE:
+            # Pass our atomspace to the coordinator for shared attention management
+            coordinator = get_ecan_coordinator(self.atomspace)
+            register_tool_with_ecan("meta_cognition", default_priority=2.0)  # Higher priority
+            print("✓ Registered with centralized ECAN coordinator")
+        
         self.initialized = True
         print("✓ Meta-cognitive self-reflection system initialized with OpenCog")
     
@@ -164,7 +181,18 @@ class MetaCognitionTool(Tool):
             if operation == "self_reflect":
                 return await self.generate_self_description(**kwargs)
             elif operation == "attention_focus":
-                return await self.allocate_attention(kwargs)
+                # Handle goals parameter that may be captured separately
+                all_params = kwargs.copy()
+                if goals is not None:
+                    all_params["goals"] = goals
+                
+                # Pass individual parameters instead of kwargs dict
+                params = {
+                    "goals": all_params.get("goals", []),
+                    "tasks": all_params.get("tasks", []),
+                    "importance": all_params.get("importance", 100)
+                }
+                return await self.allocate_attention(params)
             elif operation == "goal_prioritize":
                 goals_to_use = goals or kwargs.get("goals", [])
                 return await self.prioritize_goals(goals_to_use, **kwargs)
