@@ -45,6 +45,16 @@ try:
 except ImportError:
     URE_TOOL_AVAILABLE = False
 
+# Import ECAN coordinator for cross-tool attention management
+try:
+    from python.helpers.ecan_coordinator import (
+        get_ecan_coordinator, register_tool_with_ecan, 
+        request_attention_for_tool, AttentionRequest
+    )
+    ECAN_COORDINATOR_AVAILABLE = True
+except ImportError:
+    ECAN_COORDINATOR_AVAILABLE = False
+
 
 class PLNReasoningTool:
     """PLN (Probabilistic Logic Networks) reasoning implementation for Agent-Zero logical inference."""
@@ -358,6 +368,11 @@ class CognitiveReasoningTool(Tool):
                     # Initialize cross-tool integration
                     self._setup_cross_tool_integration()
                     
+                    # Register with ECAN coordinator for attention management
+                    if ECAN_COORDINATOR_AVAILABLE:
+                        register_tool_with_ecan("cognitive_reasoning", default_priority=1.5)
+                        print("✓ Registered with ECAN coordinator for attention management")
+                    
             except Exception as e:
                 print(f"⚠️ OpenCog initialization failed: {e}")
                 self._setup_fallback_mode()
@@ -501,6 +516,21 @@ class CognitiveReasoningTool(Tool):
             return await self._fallback_reasoning(query, **kwargs)
         
         try:
+            # Request attention allocation from ECAN coordinator
+            reasoning_concepts = self._extract_concepts_from_query(query)
+            priority = kwargs.get('priority', 2.0)  # Higher priority for reasoning
+            
+            if ECAN_COORDINATOR_AVAILABLE:
+                attention_requested = request_attention_for_tool(
+                    tool_name="cognitive_reasoning",
+                    priority=priority,
+                    context=f"Reasoning query: {query[:50]}...",
+                    concepts=reasoning_concepts,
+                    importance_multiplier=1.2  # Boost importance for reasoning tasks
+                )
+                if attention_requested:
+                    print(f"✓ ECAN attention allocated for reasoning: {len(reasoning_concepts)} concepts")
+            
             # Enhanced reasoning with cross-tool integration
             reasoning_context = await self._build_reasoning_context(query, **kwargs)
             
@@ -748,6 +778,27 @@ class CognitiveReasoningTool(Tool):
             print(f"⚠️ Query parsing warning: {e}")
         
         return atoms
+    
+    def _extract_concepts_from_query(self, query: str) -> List[str]:
+        """Extract key concepts from a reasoning query for ECAN attention allocation."""
+        import re
+        
+        # Clean and tokenize the query
+        words = re.findall(r'\b[a-zA-Z]{3,}\b', query.lower())
+        
+        # Filter out common stop words and focus on meaningful concepts
+        stop_words = {
+            'the', 'and', 'are', 'was', 'were', 'been', 'have', 'has', 'had', 
+            'will', 'would', 'could', 'should', 'can', 'may', 'might', 'must',
+            'how', 'what', 'when', 'where', 'why', 'who', 'which', 'that', 'this',
+            'for', 'with', 'from', 'about', 'into', 'through', 'during', 'before',
+            'after', 'above', 'below', 'between', 'among'
+        }
+        
+        concepts = [word for word in words if word not in stop_words]
+        
+        # Limit to most relevant concepts
+        return concepts[:8]  # Limit to 8 concepts for attention management
     
     def _get_storage_optimization_info(self):
         """Get information about atomspace-rocks storage optimization availability."""

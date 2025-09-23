@@ -36,6 +36,16 @@ try:
 except ImportError:
     ATOMSPACE_TOOLS_AVAILABLE = False
 
+# Import ECAN coordinator for enhanced cross-tool integration
+try:
+    from python.helpers.ecan_coordinator import (
+        get_ecan_coordinator, register_tool_with_ecan, 
+        request_attention_for_tool, AttentionRequest
+    )
+    ECAN_COORDINATOR_AVAILABLE = True
+except ImportError:
+    ECAN_COORDINATOR_AVAILABLE = False
+
 
 class MetaCognitionTool(Tool):
     """Meta-cognitive capabilities for Agent-Zero self-reflection and introspection."""
@@ -101,6 +111,13 @@ class MetaCognitionTool(Tool):
             print("✓ ECAN attention allocation initialized")
         else:
             print("⚠️ ECAN not available - using fallback attention mechanisms")
+        
+        # Register with centralized ECAN coordinator
+        if ECAN_COORDINATOR_AVAILABLE:
+            # Pass our atomspace to the coordinator for shared attention management
+            coordinator = get_ecan_coordinator(self.atomspace)
+            register_tool_with_ecan("meta_cognition", default_priority=2.0)  # Higher priority
+            print("✓ Registered with centralized ECAN coordinator")
         
         self.initialized = True
         print("✓ Meta-cognitive self-reflection system initialized with OpenCog")
