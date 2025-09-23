@@ -1,0 +1,64 @@
+{
+  "multi_agent_config": {
+    "max_agents": 5,
+    "default_num_agents": 3,
+    "collaboration_timeout": 300,
+    "coordination_strategy": "distributed_cognitive_reasoning",
+    "memory_sharing": true,
+    "reasoning_integration": true,
+    "metacognitive_feedback": true,
+    "communication_protocols": [
+      "direct_messaging",
+      "shared_memory",
+      "event_broadcast",
+      "consensus_protocol"
+    ]
+  },
+  "agent_profiles": {
+    "cognitive_reasoner": {
+      "capabilities": ["logical_reasoning", "pattern_matching", "inference"],
+      "specializations": ["PLN_reasoning", "deductive_logic"],
+      "priority_weight": 0.8
+    },
+    "cognitive_analyzer": {
+      "capabilities": ["data_analysis", "pattern_recognition", "classification"],
+      "specializations": ["statistical_analysis", "concept_extraction"],
+      "priority_weight": 0.7
+    },
+    "cognitive_coordinator": {
+      "capabilities": ["task_coordination", "agent_communication", "resource_allocation"],
+      "specializations": ["multi_agent_orchestration", "consensus_building"],
+      "priority_weight": 0.9
+    },
+    "cognitive_memory": {
+      "capabilities": ["knowledge_storage", "memory_retrieval", "learning"],
+      "specializations": ["episodic_memory", "semantic_networks"],
+      "priority_weight": 0.6
+    },
+    "cognitive_meta": {
+      "capabilities": ["self_reflection", "performance_monitoring", "adaptation"],
+      "specializations": ["recursive_introspection", "capability_assessment"],
+      "priority_weight": 0.7
+    }
+  },
+  "task_coordination": {
+    "max_concurrent_tasks": 3,
+    "task_timeout": 600,
+    "priority_levels": 5,
+    "auto_assignment": true,
+    "load_balancing": true
+  },
+  "performance_monitoring": {
+    "track_collaboration_metrics": true,
+    "measure_agent_performance": true,
+    "optimize_task_distribution": true,
+    "learning_enabled": true
+  },
+  "integration": {
+    "opencog_enabled": false,
+    "agent_zero_tools": true,
+    "cognitive_reasoning_integration": true,
+    "memory_persistence": true,
+    "web_ui_integration": true
+  }
+}
