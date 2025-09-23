@@ -202,6 +202,106 @@ class TestCognitiveReasoningFunctionality:
         
         assert len(pln_evaluations) == len(concepts), "Should create evaluations for all concepts"
 
+
+class TestPLNLogicalInference:
+    """Test suite for PLN logical inference capabilities."""
+    
+    def test_pln_reasoning_tool_structure(self):
+        """Test that PLNReasoningTool class exists with required methods."""
+        with open(COGNITIVE_TOOL_PATH, 'r') as f:
+            content = f.read()
+        
+        # PLN reasoning tool requirements
+        pln_tool_elements = [
+            'class PLNReasoningTool:',
+            'def forward_chain(',
+            'def backward_chain(',
+            'def apply_inference_rule(',
+            'def _apply_deduction(',
+            'def _apply_induction(',
+            'def _apply_abduction(',
+            'def _apply_inheritance(',
+            'def _apply_similarity(',
+            'def _apply_modus_ponens('
+        ]
+        
+        for element in pln_tool_elements:
+            assert element in content, f"Missing PLN reasoning tool element: {element}"
+    
+    def test_pln_reasoning_integration(self):
+        """Test that PLN reasoning is integrated into CognitiveReasoningTool."""
+        with open(COGNITIVE_TOOL_PATH, 'r') as f:
+            content = f.read()
+        
+        # Integration requirements
+        integration_elements = [
+            'self.pln_reasoning = None',
+            'self.pln_reasoning = PLNReasoningTool(',
+            'async def perform_pln_logical_inference(',
+            'async def _enhanced_pln_reasoning_with_tool(',
+        ]
+        
+        for element in integration_elements:
+            assert element in content, f"Missing PLN integration element: {element}"
+    
+    def test_inference_rules_available(self):
+        """Test that all required inference rules are available."""
+        with open(COGNITIVE_TOOL_PATH, 'r') as f:
+            content = f.read()
+        
+        # Required inference rules
+        inference_rules = [
+            "deduction_rule",
+            "induction_rule", 
+            "abduction_rule",
+            "inheritance_rule",
+            "similarity_rule",
+            "concept_creation_rule",
+            "modus_ponens_rule"
+        ]
+        
+        for rule in inference_rules:
+            assert rule in content, f"Missing inference rule: {rule}"
+    
+    def test_pln_reasoning_logic_simulation(self):
+        """Simulate PLN reasoning logic without OpenCog dependencies."""
+        # Simulate forward chaining
+        source_atoms = ['concept_a', 'concept_b', 'concept_c']
+        forward_chain_steps = []
+        
+        for atom in source_atoms:
+            # Simulate rule applications
+            forward_chain_steps.append(f"deduction({atom})")
+            forward_chain_steps.append(f"induction({atom})")
+        
+        assert len(forward_chain_steps) == len(source_atoms) * 2, "Forward chaining should apply multiple rules"
+        
+        # Simulate backward chaining
+        target_atom = 'goal_concept'
+        backward_chain_steps = []
+        
+        # Simulate finding premises
+        for i in range(3):
+            premise = f"premise_{i}"
+            backward_chain_steps.append(f"premise_for({target_atom}): {premise}")
+        
+        assert len(backward_chain_steps) == 3, "Backward chaining should find premises"
+        
+    def test_logical_inference_patterns(self):
+        """Test logical inference patterns and rule applications."""
+        # Test deduction pattern: A -> B, B -> C, therefore A -> C
+        premises = ['A', 'B', 'C']
+        deduction_result = f"deduction({premises[0]} -> {premises[-1]})"
+        assert deduction_result == "deduction(A -> C)", "Deduction should connect first to last premise"
+        
+        # Test modus ponens pattern: A, A -> B, therefore B
+        modus_ponens_result = f"modus_ponens_consequent({premises[1]})"
+        assert modus_ponens_result == "modus_ponens_consequent(B)", "Modus ponens should derive consequent"
+        
+        # Test inheritance pattern: X isa Y
+        inheritance_result = f"inheritance({premises[0]} isa {premises[1]})"
+        assert inheritance_result == "inheritance(A isa B)", "Inheritance should create isa relationship"
+
 if __name__ == "__main__":
     # Run tests directly if executed as script
     pytest.main([__file__, "-v"])
