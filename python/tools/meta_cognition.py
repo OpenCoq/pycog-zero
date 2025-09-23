@@ -46,6 +46,13 @@ try:
 except ImportError:
     ECAN_COORDINATOR_AVAILABLE = False
 
+# Import cognitive learning for enhanced meta-learning capabilities
+try:
+    from python.tools.cognitive_learning import CognitiveLearningTool
+    COGNITIVE_LEARNING_AVAILABLE = True
+except ImportError:
+    COGNITIVE_LEARNING_AVAILABLE = False
+
 
 class MetaCognitionTool(Tool):
     """Meta-cognitive capabilities for Agent-Zero self-reflection and introspection."""
@@ -81,6 +88,16 @@ class MetaCognitionTool(Tool):
         self.last_self_description = None
         self.attention_history = []
         self.goal_priorities = {}
+        
+        # Cognitive learning integration
+        self.learning_tool = None
+        if COGNITIVE_LEARNING_AVAILABLE:
+            try:
+                # Note: learning tool will be initialized when first used
+                self.learning_tool_class = CognitiveLearningTool
+                print("✓ Cognitive learning integration available")
+            except Exception as e:
+                print(f"⚠️ Cognitive learning integration warning: {e}")
         
         # Initialize with OpenCog if available
         if OPENCOG_AVAILABLE and self.config.get("opencog_enabled", True):
@@ -891,25 +908,28 @@ class MetaCognitionTool(Tool):
         return patterns
     
     async def _assess_learning_capacity(self):
-        """Assess learning and adaptation capacity."""
+        """Assess learning and adaptation capacity with cognitive learning integration."""
         learning_assessment = {
             "learning_score": 0.0,  # 0.0 to 1.0
             "adaptation_indicators": [],
             "knowledge_growth": "unknown",
-            "meta_learning_capability": False
+            "meta_learning_capability": False,
+            "cognitive_learning_active": False,
+            "learning_velocity": 0.0,
+            "behavioral_patterns_count": 0
         }
         
         # Base learning score on meta-cognitive features
         score = 0.0
         
         if self.initialized:
-            score += 0.3  # OpenCog integration
+            score += 0.2  # OpenCog integration
         
         if ECAN_AVAILABLE and self.attention_bank:
-            score += 0.2  # Attention allocation
+            score += 0.15  # Attention allocation
         
         if self.last_self_description:
-            score += 0.2  # Self-awareness
+            score += 0.15  # Self-awareness
         
         if len(self.attention_history) > 5:
             score += 0.1  # Experience accumulation
@@ -917,21 +937,73 @@ class MetaCognitionTool(Tool):
         if self.goal_priorities:
             score += 0.1  # Goal management
         
+        # Enhanced learning assessment with cognitive learning integration
+        if hasattr(self, 'learning_tool_class') and self.learning_tool_class:
+            try:
+                # Lazy initialize learning tool if needed
+                if not self.learning_tool:
+                    self.learning_tool = self.learning_tool_class(self.agent, "cognitive_learning", None, {}, "", None)
+                
+                # Get learning data from cognitive learning tool
+                learning_analysis = await self.learning_tool.analyze_learning_progress({})
+                if learning_analysis.data:
+                    learning_data = learning_analysis.data
+                    
+                    # Add learning velocity to assessment
+                    learning_assessment["learning_velocity"] = learning_data.get("learning_velocity", 0.0)
+                    learning_assessment["behavioral_patterns_count"] = learning_data.get("behavioral_patterns_count", 0)
+                    learning_assessment["cognitive_learning_active"] = True
+                    
+                    # Boost score based on actual learning activity
+                    if learning_data.get("total_experiences", 0) > 10:
+                        score += 0.15  # Active learning
+                    
+                    if learning_data.get("learning_velocity", 0) > 0.1:
+                        score += 0.1  # Good learning velocity
+                    
+                    if learning_data.get("behavioral_patterns_count", 0) > 3:
+                        score += 0.1  # Pattern formation
+                    
+                    # Determine knowledge growth trend
+                    perf_trend = learning_data.get("performance_trend", {})
+                    if perf_trend.get("trend_direction") == "improving":
+                        learning_assessment["knowledge_growth"] = "expanding"
+                        score += 0.05
+                    elif perf_trend.get("trend_direction") == "declining":
+                        learning_assessment["knowledge_growth"] = "declining"
+                        score -= 0.05
+                    else:
+                        learning_assessment["knowledge_growth"] = "stable"
+                    
+            except Exception as e:
+                print(f"Learning assessment warning: {e}")
+        
         learning_assessment["learning_score"] = min(score, 1.0)
         
-        # Determine meta-learning capability
+        # Determine meta-learning capability (enhanced criteria)
         learning_assessment["meta_learning_capability"] = (
             learning_assessment["learning_score"] > 0.5 and 
-            self.last_self_description is not None
+            self.last_self_description is not None and
+            (learning_assessment["cognitive_learning_active"] or len(self.attention_history) > 10)
         )
         
-        # Adaptation indicators
+        # Adaptation indicators (enhanced)
         if learning_assessment["meta_learning_capability"]:
             learning_assessment["adaptation_indicators"].extend([
                 "self_reflection_capable",
                 "attention_management",
                 "goal_prioritization"
             ])
+            
+            if learning_assessment["cognitive_learning_active"]:
+                learning_assessment["adaptation_indicators"].extend([
+                    "experience_based_learning",
+                    "behavioral_pattern_formation",
+                    "adaptive_behavior_modification"
+                ])
+            
+            if learning_assessment["learning_velocity"] > 0.1:
+                learning_assessment["adaptation_indicators"].append("high_learning_velocity")
         
         return learning_assessment
     
