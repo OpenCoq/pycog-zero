@@ -1,0 +1,394 @@
+{
+  "validation_suite": "comprehensive_validation",
+  "timestamp": 1758613699.8536203,
+  "validation_config": {
+    "accuracy_threshold": 0.8,
+    "consistency_threshold": 0.9,
+    "error_recovery_threshold": 0.95
+  },
+  "total_validation_tests": 4,
+  "passed_tests": 2,
+  "failed_tests": 2,
+  "success_rate": 0.5,
+  "validation_results": [
+    {
+      "validation_test": "reasoning_accuracy",
+      "success": true,
+      "timestamp": 1758613699.8531666,
+      "details": {
+        "total_test_cases": 4,
+        "accuracy_results": [
+          {
+            "query": "If A is related to B, and B is related to C, what is the relationship between A and C?",
+            "expected_reasoning_type": "transitive",
+            "actual_reasoning_result": {
+              "query": "If A is related to B, and B is related to C, what is the relationship between A and C?",
+              "reasoning_type": "transitive",
+              "concepts_identified": [
+                "related",
+                "related",
+                "relationship",
+                "between"
+              ],
+              "reasoning_steps": [
+                "Identify relation A -> B",
+                "Identify relation B -> C",
+                "Apply transitivity rule",
+                "Conclude A -> C relationship"
+              ],
+              "confidence": 0.85,
+              "processing_time": 0.186,
+              "status": "success"
+            },
+            "accuracy_score": 2.2,
+            "meets_accuracy_threshold": true,
+            "concept_coverage": 0.4,
+            "confidence_in_range": true
+          },
+          {
+            "query": "All birds can fly. Penguins are birds. Can penguins fly?",
+            "expected_reasoning_type": "deductive",
+            "actual_reasoning_result": {
+              "query": "All birds can fly. Penguins are birds. Can penguins fly?",
+              "reasoning_type": "deductive",
+              "concepts_identified": [
+                "birds",
+                "fly",
+                "penguins",
+                "birds",
+                "penguins",
+                "fly"
+              ],
+              "reasoning_steps": [
+                "Parse universal statement",
+                "Identify specific case",
+                "Apply deductive logic",
+                "Generate conclusion"
+              ],
+              "confidence": 0.75,
+              "processing_time": 0.156,
+              "status": "success"
+            },
+            "accuracy_score": 2.4,
+            "meets_accuracy_threshold": true,
+            "concept_coverage": 1.0,
+            "confidence_in_range": true
+          },
+          {
+            "query": "What are the properties of cognitive reasoning?",
+            "expected_reasoning_type": "descriptive",
+            "actual_reasoning_result": {
+              "query": "What are the properties of cognitive reasoning?",
+              "reasoning_type": "descriptive",
+              "concepts_identified": [
+                "properties",
+                "cognitive",
+                "reasoning"
+              ],
+              "reasoning_steps": [
+                "Parse descriptive query",
+                "Retrieve relevant knowledge",
+                "Structure response",
+                "Provide description"
+              ],
+              "confidence": 0.9,
+              "processing_time": 0.14700000000000002,
+              "status": "success"
+            },
+            "accuracy_score": 2.4,
+            "meets_accuracy_threshold": true,
+            "concept_coverage": 1.0,
+            "confidence_in_range": true
+          },
+          {
+            "query": "How do memory and learning interact in cognitive systems?",
+            "expected_reasoning_type": "analytical",
+            "actual_reasoning_result": {
+              "query": "How do memory and learning interact in cognitive systems?",
+              "reasoning_type": "analytical",
+              "concepts_identified": [
+                "memory",
+                "learning",
+                "interact",
+                "cognitive",
+                "systems"
+              ],
+              "reasoning_steps": [
+                "Identify key components",
+                "Analyze relationships",
+                "Synthesize interactions",
+                "Formulate explanation"
+              ],
+              "confidence": 0.8,
+              "processing_time": 0.157,
+              "status": "success"
+            },
+            "accuracy_score": 2.4,
+            "meets_accuracy_threshold": true,
+            "concept_coverage": 1.0,
+            "confidence_in_range": true
+          }
+        ],
+        "average_accuracy": 2.35,
+        "tests_meeting_threshold": 4,
+        "overall_accuracy_acceptable": true,
+        "concept_coverage_average": 0.85,
+        "confidence_calibration_good": true
+      }
+    },
+    {
+      "validation_test": "consistency_across_sessions",
+      "success": false,
+      "timestamp": 1758613699.8534577,
+      "details": {
+        "queries_tested": 3,
+        "sessions_per_query": 5,
+        "consistency_analysis": {
+          "What is the relationship between cognition and intelligence?": {
+            "query": "What is the relationship between cognition and intelligence?",
+            "sessions_tested": 5,
+            "concepts_consistency": 1.0,
+            "confidence_consistency": 0.3781268815810507,
+            "reasoning_steps_consistency": 1.0,
+            "overall_consistency": 0.8134380644743153,
+            "meets_consistency_threshold": false
+          },
+          "How does pattern matching work in cognitive systems?": {
+            "query": "How does pattern matching work in cognitive systems?",
+            "sessions_tested": 5,
+            "concepts_consistency": 1.0,
+            "confidence_consistency": 0.42147636546931144,
+            "reasoning_steps_consistency": 1.0,
+            "overall_consistency": 0.8264429096407935,
+            "meets_consistency_threshold": false
+          },
+          "Explain the concept of meta-cognition": {
+            "query": "Explain the concept of meta-cognition",
+            "sessions_tested": 5,
+            "concepts_consistency": 1.0,
+            "confidence_consistency": 0.5735090050045941,
+            "reasoning_steps_consistency": 1.0,
+            "overall_consistency": 0.8720527015013781,
+            "meets_consistency_threshold": false
+          }
+        },
+        "average_consistency": 0.8373112252054957,
+        "queries_meeting_threshold": 0,
+        "system_consistent": false
+      }
+    },
+    {
+      "validation_test": "error_handling_and_recovery",
+      "success": false,
+      "timestamp": 1758613699.8535235,
+      "details": {
+        "scenarios_tested": 5,
+        "error_handling_results": [
+          {
+            "scenario": "invalid_input",
+            "input_type": "graceful_handling",
+            "error_detected": true,
+            "graceful_handling": true,
+            "recovery_successful": true,
+            "error_message_informative": true,
+            "system_stability_maintained": true,
+            "overall_error_handling_score": 1.0
+          },
+          {
+            "scenario": "malformed_query",
+            "input_type": "error_detection_and_fallback",
+            "error_detected": true,
+            "graceful_handling": true,
+            "recovery_successful": true,
+            "error_message_informative": true,
+            "system_stability_maintained": true,
+            "overall_error_handling_score": 0.9
+          },
+          {
+            "scenario": "extremely_long_input",
+            "input_type": "resource_management",
+            "error_detected": true,
+            "graceful_handling": true,
+            "recovery_successful": true,
+            "error_message_informative": true,
+            "system_stability_maintained": true,
+            "overall_error_handling_score": 0.95
+          },
+          {
+            "scenario": "recursive_query",
+            "input_type": "recursion_detection",
+            "error_detected": true,
+            "graceful_handling": true,
+            "recovery_successful": true,
+            "error_message_informative": true,
+            "system_stability_maintained": true,
+            "overall_error_handling_score": 0.85
+          },
+          {
+            "scenario": "resource_exhaustion_simulation",
+            "input_type": "resource_error_recovery",
+            "error_detected": true,
+            "graceful_handling": true,
+            "recovery_successful": true,
+            "error_message_informative": true,
+            "system_stability_maintained": true,
+            "overall_error_handling_score": 0.8
+          }
+        ],
+        "average_handling_score": 0.9,
+        "all_errors_handled_gracefully": true,
+        "system_stability_maintained": true,
+        "error_recovery_effective": true,
+        "meets_error_handling_threshold": false
+      }
+    },
+    {
+      "validation_test": "configuration_validation",
+      "success": true,
+      "timestamp": 1758613699.853607,
+      "details": {
+        "total_config_tests": 5,
+        "validation_results": [
+          {
+            "config_name": "valid_minimal_config",
+            "config_data": {
+              "cognitive_mode": true,
+              "opencog_enabled": false
+            },
+            "expected_valid": true,
+            "actually_valid": true,
+            "validation_errors": [],
+            "test_passed": true,
+            "validation_details": {
+              "is_valid": true,
+              "errors": [],
+              "config_checked": {
+                "cognitive_mode": true,
+                "opencog_enabled": false
+              },
+              "validation_timestamp": 1758613699.8535771
+            }
+          },
+          {
+            "config_name": "valid_full_config",
+            "config_data": {
+              "cognitive_mode": true,
+              "opencog_enabled": true,
+              "neural_symbolic_bridge": true,
+              "reasoning_config": {
+                "pln_enabled": true,
+                "pattern_matching": true
+              },
+              "atomspace_config": {
+                "persistence_backend": "memory"
+              }
+            },
+            "expected_valid": true,
+            "actually_valid": true,
+            "validation_errors": [],
+            "test_passed": true,
+            "validation_details": {
+              "is_valid": true,
+              "errors": [],
+              "config_checked": {
+                "cognitive_mode": true,
+                "opencog_enabled": true,
+                "neural_symbolic_bridge": true,
+                "reasoning_config": {
+                  "pln_enabled": true,
+                  "pattern_matching": true
+                },
+                "atomspace_config": {
+                  "persistence_backend": "memory"
+                }
+              },
+              "validation_timestamp": 1758613699.8535862
+            }
+          },
+          {
+            "config_name": "invalid_cognitive_mode_type",
+            "config_data": {
+              "cognitive_mode": "invalid_string",
+              "opencog_enabled": false
+            },
+            "expected_valid": false,
+            "actually_valid": false,
+            "validation_errors": [
+              "Field 'cognitive_mode' should be bool, got str"
+            ],
+            "test_passed": true,
+            "validation_details": {
+              "is_valid": false,
+              "errors": [
+                "Field 'cognitive_mode' should be bool, got str"
+              ],
+              "config_checked": {
+                "cognitive_mode": "invalid_string",
+                "opencog_enabled": false
+              },
+              "validation_timestamp": 1758613699.8535929
+            }
+          },
+          {
+            "config_name": "missing_required_fields",
+            "config_data": {
+              "some_other_field": "value"
+            },
+            "expected_valid": false,
+            "actually_valid": false,
+            "validation_errors": [
+              "Missing required field: cognitive_mode",
+              "Missing required field: opencog_enabled"
+            ],
+            "test_passed": true,
+            "validation_details": {
+              "is_valid": false,
+              "errors": [
+                "Missing required field: cognitive_mode",
+                "Missing required field: opencog_enabled"
+              ],
+              "config_checked": {
+                "some_other_field": "value"
+              },
+              "validation_timestamp": 1758613699.853596
+            }
+          },
+          {
+            "config_name": "invalid_nested_config",
+            "config_data": {
+              "cognitive_mode": true,
+              "opencog_enabled": false,
+              "reasoning_config": {
+                "pln_enabled": "invalid_boolean"
+              }
+            },
+            "expected_valid": false,
+            "actually_valid": false,
+            "validation_errors": [
+              "reasoning_config.pln_enabled should be boolean"
+            ],
+            "test_passed": true,
+            "validation_details": {
+              "is_valid": false,
+              "errors": [
+                "reasoning_config.pln_enabled should be boolean"
+              ],
+              "config_checked": {
+                "cognitive_mode": true,
+                "opencog_enabled": false,
+                "reasoning_config": {
+                  "pln_enabled": "invalid_boolean"
+                }
+              },
+              "validation_timestamp": 1758613699.8536003
+            }
+          }
+        ],
+        "all_tests_passed": true,
+        "valid_configs_accepted": true,
+        "invalid_configs_rejected": true,
+        "configuration_validation_working": true
+      }
+    }
+  ]
+}
