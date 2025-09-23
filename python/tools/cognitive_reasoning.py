@@ -6,8 +6,10 @@ Enhanced with new atomspace bindings and cross-tool integration
 
 from python.helpers.tool import Tool, Response
 from python.helpers import files
+from python.helpers.performance_optimizer import get_performance_optimizer, optimize
 import json
 import asyncio
+import time
 from typing import Dict, Any, List, Optional
 
 # Try to import OpenCog components (graceful fallback if not installed)
@@ -343,6 +345,28 @@ class CognitiveReasoningTool(Tool):
         self.memory_bridge = None
         self.pln_reasoning = None  # PLN reasoning tool
         
+        # Initialize performance optimizer
+        optimizer_config = {
+            'cache_size': self.config.get('performance', {}).get('cache_size', 1000),
+            'batch_size': self.config.get('performance', {}).get('batch_size', 50),
+            'batch_wait_time': self.config.get('performance', {}).get('batch_wait_time', 1.0),
+            'thread_pool_size': self.config.get('performance', {}).get('thread_pool_size', 8),
+            'memory_pool_size': self.config.get('performance', {}).get('memory_pool_size', 100)
+        }
+        self.performance_optimizer = get_performance_optimizer(optimizer_config)
+        
+        # Performance monitoring
+        self.operation_stats = {
+            'total_operations': 0,
+            'cached_operations': 0,
+            'batch_operations': 0,
+            'parallel_operations': 0,
+            'avg_response_time': 0.0
+        }
+        
+        # Setup batch processing handlers
+        self._setup_batch_handlers()
+        
         # Initialize with shared or new atomspace
         if OPENCOG_AVAILABLE and self.config.get("opencog_enabled", True):
             try:
@@ -447,6 +471,96 @@ class CognitiveReasoningTool(Tool):
         print("⚠️ Running in fallback mode - limited cognitive reasoning capabilities")
         print("✓ PLN reasoning tool initialized in fallback mode")
     
+    def _setup_batch_handlers(self):
+        """Setup batch processing handlers for cognitive operations."""
+        if hasattr(self, 'performance_optimizer'):
+            # Register batch handlers for different operation types
+            self.performance_optimizer.batch_processor.register_handler(
+                'reasoning', self._batch_reasoning_handler
+            )
+            self.performance_optimizer.batch_processor.register_handler(
+                'atom_creation', self._batch_atom_creation_handler
+            )
+            self.performance_optimizer.batch_processor.register_handler(
+                'pattern_matching', self._batch_pattern_matching_handler
+            )
+    
+    async def _batch_reasoning_handler(self, reasoning_items: List[tuple]) -> List[Any]:
+        """Handle batch reasoning operations for improved performance."""
+        results = []
+        
+        try:
+            # Group related reasoning queries for more efficient processing
+            query_groups = self._group_reasoning_queries(reasoning_items)
+            
+            for group in query_groups:
+                # Process group in parallel if possible
+                if len(group) > 1 and hasattr(self, 'performance_optimizer'):
+                    group_results = await self.performance_optimizer.optimize_parallel_operations(
+                        [lambda item=item: self._single_reasoning_operation(*item) for item in group],
+                        use_threads=True,
+                        max_workers=4
+                    )
+                    results.extend(group_results)
+                else:
+                    # Process individually
+                    for item in group:
+                        result = await self._single_reasoning_operation(*item)
+                        results.append(result)
+            
+            return results
+            
+        except Exception as e:
+            print(f"Batch reasoning error: {e}")
+            # Fallback to individual processing
+            for args, kwargs in reasoning_items:
+                try:
+                    result = await self._single_reasoning_operation(*args, **kwargs)
+                    results.append(result)
+                except Exception as item_error:
+                    results.append({'error': str(item_error), 'status': 'failed'})
+            
+            return results
+    
+    def _group_reasoning_queries(self, reasoning_items: List[tuple]) -> List[List[tuple]]:
+        """Group similar reasoning queries for batch processing."""
+        groups = {}
+        
+        for item in reasoning_items:
+            args, kwargs = item
+            query = args[0] if args else kwargs.get('query', '')
+            
+            # Group by query type/category
+            query_type = self._categorize_query(query)
+            if query_type not in groups:
+                groups[query_type] = []
+            groups[query_type].append(item)
+        
+        return list(groups.values())
+    
+    def _categorize_query(self, query: str) -> str:
+        """Categorize a query for grouping purposes."""
+        query_lower = query.lower()
+        
+        if any(word in query_lower for word in ['learn', 'adapt', 'improve']):
+            return 'learning'
+        elif any(word in query_lower for word in ['reason', 'infer', 'deduce']):
+            return 'reasoning'
+        elif any(word in query_lower for word in ['pattern', 'match', 'similar']):
+            return 'pattern_matching'
+        elif any(word in query_lower for word in ['memory', 'recall', 'remember']):
+            return 'memory'
+        else:
+            return 'general'
+    
+    async def _single_reasoning_operation(self, *args, **kwargs) -> Any:
+        """Perform a single reasoning operation."""
+        try:
+            query = args[0] if args else kwargs.get('query', '')
+            return await self._perform_core_reasoning(query, **kwargs)
+        except Exception as e:
+            return {'error': str(e), 'status': 'failed'}
+    
     def _load_cognitive_config(self):
         """Load cognitive configuration from Agent-Zero settings."""
         try:
@@ -511,6 +625,71 @@ class CognitiveReasoningTool(Tool):
             return await self._perform_reasoning(query, **kwargs)
     
     async def _perform_reasoning(self, query: str, **kwargs):
+        """Perform core cognitive reasoning operations with performance optimization."""
+        self._initialize_if_needed()
+        
+        start_time = time.time()
+        operation_type = kwargs.get('operation_type', 'reasoning')
+        use_cache = kwargs.get('use_cache', True)
+        use_batching = kwargs.get('use_batching', self.batch_reasoning_enabled)
+        
+        try:
+            # Update operation statistics
+            self.operation_stats['total_operations'] += 1
+            
+            # Use performance optimization if available
+            if hasattr(self, 'performance_optimizer') and use_cache:
+                # Try to get cached result first
+                cache_key = f"{operation_type}_{query}_{hash(str(sorted(kwargs.items())))}"
+                cached_result = self.performance_optimizer.cache.get(cache_key)
+                
+                if cached_result is not None:
+                    self.operation_stats['cached_operations'] += 1
+                    return cached_result
+            
+            # Use batching if enabled and multiple items pending
+            if use_batching and hasattr(self, 'performance_optimizer'):
+                result = await self.performance_optimizer.batch_processor.add_item(
+                    operation_type, (query, kwargs)
+                )
+                if result is not None:
+                    self.operation_stats['batch_operations'] += 1
+                    return result
+            
+            # Perform the actual reasoning
+            result = await self._perform_core_reasoning(query, **kwargs)
+            
+            # Cache the result if caching is enabled
+            if hasattr(self, 'performance_optimizer') and use_cache:
+                cache_key = f"{operation_type}_{query}_{hash(str(sorted(kwargs.items())))}"
+                self.performance_optimizer.cache.put(cache_key, result)
+            
+            # Update performance stats
+            operation_time = time.time() - start_time
+            self._update_performance_stats(operation_time)
+            
+            return result
+            
+        except Exception as e:
+            print(f"Enhanced reasoning error: {e}")
+            # Fallback to basic reasoning
+            return await self._fallback_reasoning(query, **kwargs)
+    
+    async def _perform_core_reasoning(self, query: str, **kwargs):
+        """Core reasoning logic extracted for reuse."""
+        if self.initialized and self.atomspace:
+            return await self._reason_with_atomspace(query, **kwargs)
+        else:
+            return await self._fallback_reasoning(query, **kwargs)
+    
+    def _update_performance_stats(self, operation_time: float):
+        """Update internal performance statistics."""
+        if self.operation_stats['total_operations'] > 0:
+            total_time = (self.operation_stats['avg_response_time'] * 
+                         (self.operation_stats['total_operations'] - 1) + operation_time)
+            self.operation_stats['avg_response_time'] = total_time / self.operation_stats['total_operations']
+    
+    async def _reason_with_atomspace(self, query: str, **kwargs):
         """Perform core cognitive reasoning operations."""
         if not self.initialized:
             return await self._fallback_reasoning(query, **kwargs)
@@ -551,12 +730,9 @@ class CognitiveReasoningTool(Tool):
                 await self._share_reasoning_results(query, reasoning_results)
             
             return Response(
-# <<<<<<< copilot/fix-51
+#<<<<<<< copilot/fix-15
+#=======
                 message=f"Enhanced cognitive reasoning completed for: {query}\n"
-# =======
-# <<<<<<< copilot/fix-48
-                message=f"Enhanced cognitive reasoning completed for: {query}\\n"
-# >>>>>>> main
                        f"Data: {json.dumps({
                            'query': query,
                            'operation': 'reason',
@@ -575,6 +751,7 @@ class CognitiveReasoningTool(Tool):
 # <<<<<<< copilot/fix-51
 # =======
 # =======
+#>>>>>>> main
                 message=f"Enhanced cognitive reasoning completed for: {query}",
                 data={
                     "query": query,
@@ -591,8 +768,6 @@ class CognitiveReasoningTool(Tool):
                         "cross_tool_sharing": self.config.get("atomspace_config", {}).get("cross_tool_sharing", True)
                     }
                 }
-# >>>>>>> main
-# >>>>>>> main
             )
             
         except Exception as e:
