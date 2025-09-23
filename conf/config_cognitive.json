@@ -9,12 +9,15 @@
     "cognitive_reasoning",
     "cognitive_memory", 
     "meta_cognition",
-    "neural_symbolic_agent"
+    "neural_symbolic_agent",
+    "ure_tool"
   ],
   "atomspace_config": {
     "persistence_backend": "file",
     "persistence_path": "memory/cognitive_atomspace.pkl",
-    "attention_allocation": "ecan"
+    "attention_allocation": "ecan",
+    "cross_tool_sharing": true,
+    "ure_integration": true
   },
   "neural_config": {
     "embedding_dimension": 128,
@@ -25,6 +28,29 @@
     "pln_enabled": true,
     "pattern_matching": true,
     "forward_chaining": false,
-    "backward_chaining": true
+    "backward_chaining": true,
+    "ure_integration": true
+  },
+  "ure_config": {
+    "ure_enabled": true,
+    "forward_chaining": true,
+    "backward_chaining": true,
+    "max_iterations": 1000,
+    "complexity_penalty": 0.01,
+    "trace_enabled": false,
+    "default_rulebase": "default_rulebase",
+    "available_rules": [
+      "deduction",
+      "modus_ponens", 
+      "syllogism",
+      "abduction",
+      "induction"
+    ]
+  },
+  "cross_tool_integration": {
+    "cognitive_reasoning": true,
+    "ure_chain": true,
+    "atomspace_tool_hub": true,
+    "shared_atomspace": true
   }
 }
