@@ -510,6 +510,7 @@ class CognitiveReasoningTool(Tool):
                 await self._share_reasoning_results(query, reasoning_results)
             
             return Response(
+# <<<<<<< copilot/fix-8
                 message=f"Enhanced cognitive reasoning completed for: {query}",
                 data={
                     "query": query,
@@ -526,6 +527,24 @@ class CognitiveReasoningTool(Tool):
                         "cross_tool_sharing": self.config.get("atomspace_config", {}).get("cross_tool_sharing", True)
                     }
                 }
+# =======
+                message=f"Enhanced cognitive reasoning completed for: {query}\\n"
+                       f"Data: {json.dumps({
+                           'query': query,
+                           'operation': 'reason',
+                           'atoms_created': len(query_atoms),
+                           'reasoning_steps': reasoning_steps,
+                           'context_size': len(reasoning_context.get('related_concepts', [])),
+                           'cross_tool_integration': ATOMSPACE_TOOLS_AVAILABLE,
+                           'status': 'success',
+                           'config': {
+                               'pln_enabled': self.config.get('reasoning_config', {}).get('pln_enabled', True),
+                               'pattern_matching': self.config.get('reasoning_config', {}).get('pattern_matching', True),
+                               'cross_tool_sharing': self.config.get('atomspace_config', {}).get('cross_tool_sharing', True)
+                           }
+                       })}",
+                break_loop=False
+# >>>>>>> main
             )
             
         except Exception as e:
@@ -788,19 +807,20 @@ class CognitiveReasoningTool(Tool):
                     results.append(similarity_link)
             
             # Context-based pattern matching
-            memory_associations = context.get("memory_associations", [])
-            for association in memory_associations[:3]:  # Limit to 3
-                association_node = self.atomspace.add_node(types.ConceptNode, f"memory_{association}")
-                for atom in atoms[:2]:  # Link to first 2 atoms
-                    association_link = self.atomspace.add_link(
-                        types.EvaluationLink,
-                        [
-                            self.atomspace.add_node(types.PredicateNode, "associated_with"),
-                            atom,
-                            association_node
-                        ]
-                    )
-                    results.append(association_link)
+            if hasattr(self, '_current_context'):
+                memory_associations = self._current_context.get("memory_associations", [])
+                for association in memory_associations[:3]:  # Limit to 3
+                    association_node = self.atomspace.add_node(types.ConceptNode, f"memory_{association}")
+                    for atom in atoms[:2]:  # Link to first 2 atoms
+                        association_link = self.atomspace.add_link(
+                            types.EvaluationLink,
+                            [
+                                self.atomspace.add_node(types.PredicateNode, "associated_with"),
+                                atom,
+                                association_node
+                            ]
+                        )
+                        results.append(association_link)
         
         except Exception as e:
             print(f"⚠️ Enhanced pattern matching warning: {e}")
