@@ -1,0 +1,14 @@
+{
+  "component": "attention",
+  "phase": "phase_3_cognitive_systems",
+  "cloned_at": "Tue Sep 23 01:47:44 UTC 2025",
+  "status": "cloned",
+  "tasks_completed": [
+    "python_bindings_validated"
+  ],
+  "dependencies": [
+    "atomspace",
+    "cogserver"
+  ],
+  "last_updated": "Tue Sep 23 01:48:38 UTC 2025"
+}
