@@ -17,12 +17,43 @@
     "persistence_path": "memory/cognitive_atomspace.pkl",
     "attention_allocation": "ecan",
     "cross_tool_sharing": true,
-    "ure_integration": true
+    "ure_integration": true,
+    "ecan_config": {
+      "sti_budget": 1000,
+      "lti_budget": 1000,
+      "min_sti_threshold": 1,
+      "max_sti_threshold": 1000,
+      "min_lti_threshold": 1,
+      "max_lti_threshold": 1000,
+      "sti_decay_rate": 0.1,
+      "lti_decay_rate": 0.05,
+      "attention_focus_boundary": 100,
+      "attention_spreading_rate": 0.2,
+      "rent_collection_frequency": 10,
+      "forgetting_threshold": 0.1,
+      "hebbian_learning_rate": 0.01,
+      "attention_entropy_threshold": 3.0,
+      "max_focus_atoms": 20,
+      "attention_allocation_cycles": 1
+    }
   },
   "neural_config": {
     "embedding_dimension": 128,
     "attention_heads": 8,
-    "device": "auto"
+    "device": "auto",
+    "attention_config": {
+      "dropout_rate": 0.1,
+      "attention_temperature": 1.0,
+      "max_sequence_length": 512,
+      "layer_norm_eps": 1e-5,
+      "residual_dropout": 0.1,
+      "attention_mechanism": "multi_head",
+      "feedforward_dim_multiplier": 4,
+      "use_relative_positions": false,
+      "attention_bias": true,
+      "causal_masking": false,
+      "gradient_checkpointing": false
+    }
   },
   "reasoning_config": {
     "pln_enabled": true,
@@ -52,5 +83,21 @@
     "ure_chain": true,
     "atomspace_tool_hub": true,
     "shared_atomspace": true
+  },
+  "attention_dynamics": {
+    "enabled": true,
+    "meta_cognitive_monitoring": true,
+    "attention_allocation_strategy": "ecan_priority",
+    "attention_history_size": 50,
+    "cognitive_load_monitoring": true,
+    "attention_switching_cost": 0.1,
+    "focus_persistence_factor": 0.8,
+    "distraction_resistance": 0.7,
+    "attention_competition_strength": 1.0,
+    "focus_sharpening_rate": 0.15,
+    "global_inhibition_strength": 0.3,
+    "attention_span_decay": 0.02,
+    "novelty_bias": 0.2,
+    "importance_bias": 0.8
   }
 }
