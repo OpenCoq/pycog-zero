@@ -42,19 +42,19 @@
     },
     "performance": {
       "atoms_5": {
-        "processing_time": 5.245208740234375e-06,
+        "processing_time": 4.5299530029296875e-06,
         "links_created": 4,
-        "atoms_per_second": 953250.9090909091
+        "atoms_per_second": 1103764.2105263157
       },
       "atoms_10": {
-        "processing_time": 4.76837158203125e-06,
+        "processing_time": 6.198883056640625e-06,
         "links_created": 9,
-        "atoms_per_second": 2097152.0
+        "atoms_per_second": 1613193.8461538462
       },
       "atoms_20": {
-        "processing_time": 6.67572021484375e-06,
+        "processing_time": 8.344650268554688e-06,
         "links_created": 19,
-        "atoms_per_second": 2995931.4285714286
+        "atoms_per_second": 2396745.1428571427
       }
     }
   },
