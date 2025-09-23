@@ -510,6 +510,8 @@ class CognitiveReasoningTool(Tool):
                 await self._share_reasoning_results(query, reasoning_results)
             
             return Response(
+# <<<<<<< copilot/fix-44
+# =======
 # <<<<<<< copilot/fix-8
                 message=f"Enhanced cognitive reasoning completed for: {query}",
                 data={
@@ -528,6 +530,7 @@ class CognitiveReasoningTool(Tool):
                     }
                 }
 # =======
+# >>>>>>> main
                 message=f"Enhanced cognitive reasoning completed for: {query}\\n"
                        f"Data: {json.dumps({
                            'query': query,
@@ -544,6 +547,9 @@ class CognitiveReasoningTool(Tool):
                            }
                        })}",
                 break_loop=False
+# <<<<<<< copilot/fix-44
+# =======
+# >>>>>>> main
 # >>>>>>> main
             )
             

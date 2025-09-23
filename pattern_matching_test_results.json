@@ -1,0 +1,62 @@
+{
+  "tests_passed": 7,
+  "tests_failed": 0,
+  "algorithm_results": {
+    "basic_pattern_matching": {
+      "links_created": 2,
+      "success": true,
+      "pattern_type": "inheritance"
+    },
+    "enhanced_pattern_matching": {
+      "inheritance_links": 3,
+      "similarity_links": 2,
+      "evaluation_links": 4,
+      "total_links": 9,
+      "success": true,
+      "context_integration": true
+    },
+    "pln_reasoning": {
+      "evaluation_links": 9,
+      "atoms_processed": 3,
+      "success": true,
+      "probabilistic_evaluation": true
+    },
+    "backward_chaining": {
+      "chain_links": 3,
+      "achievement_links": 1,
+      "total_links": 4,
+      "success": true,
+      "goal_directed": true
+    },
+    "cross_tool_reasoning": {
+      "integration_links": 3,
+      "cross_tool_nodes": 3,
+      "success": true,
+      "tool_integration": true
+    },
+    "integration_test": {
+      "total_results": 22,
+      "algorithms_tested": 5,
+      "success": true,
+      "comprehensive_testing": true
+    },
+    "performance": {
+      "atoms_5": {
+        "processing_time": 5.245208740234375e-06,
+        "links_created": 4,
+        "atoms_per_second": 953250.9090909091
+      },
+      "atoms_10": {
+        "processing_time": 4.76837158203125e-06,
+        "links_created": 9,
+        "atoms_per_second": 2097152.0
+      },
+      "atoms_20": {
+        "processing_time": 6.67572021484375e-06,
+        "links_created": 19,
+        "atoms_per_second": 2995931.4285714286
+      }
+    }
+  },
+  "errors": []
+}
