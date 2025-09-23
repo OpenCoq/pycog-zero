@@ -1,0 +1,61 @@
+{
+  "enabled": true,
+  "network": {
+    "host": "localhost",
+    "port": 17002,
+    "atomspace_port": 18002,
+    "auto_discover": true,
+    "bootstrap_nodes": []
+  },
+  "agents": {
+    "auto_join_network": true,
+    "max_agents_per_task": 5,
+    "capabilities": [
+      "reasoning",
+      "memory",
+      "cognitive_processing",
+      "planning",
+      "analysis",
+      "pattern_recognition",
+      "knowledge_retrieval",
+      "meta_cognition"
+    ],
+    "specializations": [
+      "distributed_reasoning",
+      "atomspace_coordination",
+      "multi_agent_collaboration"
+    ]
+  },
+  "atomspace": {
+    "sync_interval": 5.0,
+    "conflict_resolution": "latest_wins",
+    "max_sync_retries": 3,
+    "replication_strategy": "full_mesh"
+  },
+  "discovery": {
+    "agent_discovery_interval": 10.0,
+    "heartbeat_interval": 5.0,
+    "stale_agent_timeout": 30.0
+  },
+  "tasks": {
+    "task_timeout": 300.0,
+    "max_concurrent_tasks": 10,
+    "coordination_strategy": "distributed_consensus"
+  },
+  "performance": {
+    "connection_pool_size": 10,
+    "message_buffer_size": 4096,
+    "async_operation_timeout": 30.0
+  },
+  "security": {
+    "enable_authentication": false,
+    "allowed_nodes": [],
+    "message_encryption": false
+  },
+  "logging": {
+    "level": "INFO",
+    "distributed_operations": true,
+    "atomspace_sync": true,
+    "agent_discovery": true
+  }
+}
