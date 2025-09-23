@@ -1,0 +1,98 @@
+{
+  "tests_passed": 8,
+  "tests_failed": 0,
+  "advanced_pattern_results": {
+    "hierarchical_engine": {
+      "patterns_detected": 7,
+      "abstraction_levels": [
+        0
+      ],
+      "pattern_types": [
+        "hierarchical"
+      ],
+      "average_confidence": 0.42857142857142855,
+      "success": true
+    },
+    "temporal_engine": {
+      "patterns_detected": 15,
+      "pattern_types": [
+        "temporal"
+      ],
+      "average_confidence": 0.36666666666666664,
+      "pattern_frequencies": [
+        3,
+        3,
+        2,
+        3,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        3,
+        3,
+        3,
+        2
+      ],
+      "success": true
+    },
+    "analogical_engine": {
+      "analogies_found": 2,
+      "analogy_types": [
+        "relation",
+        "structure"
+      ],
+      "average_confidence": 0.8,
+      "domains": [
+        "atomic_structure",
+        "solar_system"
+      ],
+      "success": true
+    },
+    "pattern_structures": {
+      "pattern_creation": true,
+      "pattern_id": "test_pattern_123",
+      "pattern_type": "hierarchical",
+      "confidence": 0.85,
+      "success": true
+    }
+  },
+  "concept_learning_results": {
+    "formation_engine": {
+      "concepts_formed": 1,
+      "concept_names": [
+        "concept_speed_55"
+      ],
+      "average_confidence": 0.7841591955804386,
+      "total_instances": 9,
+      "success": true
+    },
+    "similarity_engine": {
+      "feature_similarity": 0.9999818118258765,
+      "structural_similarity": 0.3333333333333333,
+      "functional_similarity": 0.16666666666666666,
+      "combined_similarity": 0.4999939372752922,
+      "dissimilar_concepts_similarity": 0.47222222222222227,
+      "similarity_range_valid": true,
+      "success": true
+    },
+    "refinement_engine": {
+      "original_instances": 5,
+      "refined_instances": 5,
+      "original_confidence": 0.625,
+      "refined_confidence": 0.625,
+      "feature_ranges_updated": false,
+      "success": true
+    },
+    "concept_structures": {
+      "concept_creation": true,
+      "relation_creation": true,
+      "concept_id": "test_concept_456",
+      "relation_type": "similar_to",
+      "success": true
+    }
+  },
+  "errors": []
+}

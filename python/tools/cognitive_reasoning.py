@@ -7,6 +7,7 @@ Optimized for real-time agent operations with performance enhancements
 
 from python.helpers.tool import Tool, Response
 from python.helpers import files
+from python.helpers.performance_optimizer import get_performance_optimizer, optimize
 import json
 import asyncio
 import time
@@ -22,16 +23,36 @@ try:
     # Try to import PLN components
     try:
         from opencog.pln import PLNChainer
-        from opencog.ure import UREChainer
+        from opencog.ure import UREChainer, BackwardChainer, ForwardChainer
+        from opencog.atomspace import TensorTruthValue
         PLN_AVAILABLE = True
+        
+        # Try to import TorchPLN components for probabilistic reasoning
+        try:
+            import sys
+            import os
+            pln_path = os.path.join(os.getcwd(), 'components', 'pln', 'opencog', 'torchpln')
+            if os.path.exists(pln_path) and pln_path not in sys.path:
+                sys.path.insert(0, pln_path)
+            from pln.common import get_ttv, set_ttv, TTruthValue
+            from pln.rules import propositional
+            TORCHPLN_AVAILABLE = True
+        except ImportError:
+            TORCHPLN_AVAILABLE = False
+            TensorTruthValue = None
+            
     except ImportError:
         PLN_AVAILABLE = False
+        TORCHPLN_AVAILABLE = False
+        TensorTruthValue = None
         print("PLN components not available - install with OpenCog PLN package")
         
 except ImportError:
     print("OpenCog not available - install with: pip install opencog-atomspace opencog-python")
     OPENCOG_AVAILABLE = False
     PLN_AVAILABLE = False
+    TORCHPLN_AVAILABLE = False
+    TensorTruthValue = None
 
 # Import other atomspace tools for enhanced integration
 try:
@@ -80,11 +101,15 @@ class PLNReasoningTool:
     def __init__(self, atomspace=None):
         self.atomspace = atomspace
         self.pln_chainer = None
+        self.backward_chainer = None
+        self.forward_chainer = None
         self.reasoning_rules = []
         self._initialized = False
         self._result_cache = {}  # Cache for frequently accessed reasoning results
         self._cache_max_size = 100  # Limit cache size for memory optimization
         self._performance_metrics = {"cache_hits": 0, "cache_misses": 0, "reasoning_time": []}
+        self.rule_base = None
+        self._initialize_pln()
         
         # Lazy initialization - defer expensive setup until first use
         self._setup_reasoning_rules()
@@ -98,7 +123,13 @@ class PLNReasoningTool:
             try:
                 # Initialize PLN chainer with AtomSpace
                 self.pln_chainer = PLNChainer(self.atomspace)
-                print("PLN chainer lazily initialized with OpenCog")
+#                print("PLN chainer lazily initialized with OpenCog")
+                print("PLN chainer initialized with OpenCog")
+                
+                # Initialize rule-based chainers if available
+                if TORCHPLN_AVAILABLE:
+                    self._initialize_pln_rule_base()
+                    
             except Exception as e:
                 print(f"⚠️ PLN chainer lazy initialization warning: {e}")
                 self.pln_chainer = None
@@ -153,10 +184,112 @@ class PLNReasoningTool:
             "inheritance_rule",
             "similarity_rule",
             "concept_creation_rule",
-            "modus_ponens_rule"
+            "modus_ponens_rule",
+            # Enhanced probabilistic rules
+            "fuzzy_conjunction_rule",
+            "fuzzy_disjunction_rule", 
+            "consequent_disjunction_elimination_rule",
+            "contraposition_rule"
         ]
     
+    def create_probabilistic_atom(self, concept_name: str, strength: float = 0.8, confidence: float = 0.9):
+        """Create an atom with probabilistic truth value."""
+        if not self.atomspace:
+            return None
+            
+        try:
+            from opencog.type_constructors import ConceptNode
+            atom = self.atomspace.add_node(types.ConceptNode, concept_name)
+            
+            # Set probabilistic truth value
+            if TORCHPLN_AVAILABLE:
+                set_ttv(atom, TTruthValue([strength, confidence]))
+            else:
+                # Fallback to regular TruthValue
+                atom.tv = types.TruthValue(strength, confidence)
+                
+            return atom
+        except Exception as e:
+            print(f"⚠️ Error creating probabilistic atom: {e}")
+            return None
+    
+    def probabilistic_modus_ponens(self, premise_a, implication_ab):
+        """Apply probabilistic modus ponens: A, A->B ⊢ B."""
+        try:
+            if TORCHPLN_AVAILABLE and self.rule_base:
+                # Use TorchPLN implementation
+                from pln.rules.propositional import modus_ponens_formula
+                from opencog.type_constructors import ConceptNode
+                
+                # Create conclusion atom
+                conclusion_b = ConceptNode("conclusion_b")
+                return modus_ponens_formula(conclusion_b, implication_ab, premise_a)
+            else:
+                # Fallback implementation
+                return self._fallback_modus_ponens(premise_a, implication_ab)
+        except Exception as e:
+            print(f"⚠️ Probabilistic modus ponens warning: {e}")
+            return self._fallback_modus_ponens(premise_a, implication_ab)
+    
+    def probabilistic_deduction(self, premises):
+        """Apply probabilistic deduction with truth value propagation."""
+        try:
+            if TORCHPLN_AVAILABLE and len(premises) >= 2:
+                # Calculate combined truth value using PLN formulas
+                tvs = []
+                for premise in premises[:2]:  # Take first two premises
+                    if hasattr(premise, 'tv'):
+                        tv = get_ttv(premise) if TORCHPLN_AVAILABLE else premise.tv
+                        tvs.append(tv)
+                
+                if len(tvs) >= 2:
+                    # Combine truth values probabilistically
+                    combined_strength = min(tv.mean if hasattr(tv, 'mean') else tv.mean for tv in tvs)
+                    combined_confidence = min(tv.confidence if hasattr(tv, 'confidence') else tv.confidence for tv in tvs)
+                    
+                    # Create deductive conclusion
+                    if self.atomspace:
+                        conclusion = self.atomspace.add_link(
+                            types.ImplicationLink,
+                            [premises[0], premises[-1]]
+                        )
+                        
+                        if TORCHPLN_AVAILABLE:
+                            set_ttv(conclusion, TTruthValue([combined_strength, combined_confidence]))
+                        else:
+                            conclusion.tv = types.TruthValue(float(combined_strength), float(combined_confidence))
+                        
+                        return conclusion
+                        
+            # Fallback implementation
+            return self._apply_deduction(premises)
+            
+        except Exception as e:
+            print(f"⚠️ Probabilistic deduction warning: {e}")
+            return self._apply_deduction(premises)
+    
+    def fuzzy_conjunction(self, atoms):
+        """Apply fuzzy conjunction with minimum truth values."""
+        try:
+            if TORCHPLN_AVAILABLE and self.atomspace and atoms:
+                from pln.rules.propositional import fuzzy_conjunction_introduction_formula
+                from opencog.type_constructors import SetLink, AndLink
+                
+                # Create conjunction
+                conjunction = self.atomspace.add_link(types.AndLink, atoms)
+                atom_set = SetLink(*atoms)
+                
+                return fuzzy_conjunction_introduction_formula(conjunction, atom_set)
+            else:
+                # Fallback implementation
+                return self._fallback_fuzzy_conjunction(atoms)
+                
+        except Exception as e:
+            print(f"⚠️ Fuzzy conjunction warning: {e}")
+            return self._fallback_fuzzy_conjunction(atoms)
+    
     def forward_chain(self, source_atoms, max_steps=10):
+#<<<<<<< copilot/fix-56
         """Apply forward chaining reasoning from source atoms with performance optimization."""
         
         # Use performance monitoring if available
@@ -185,6 +318,19 @@ class PLNReasoningTool:
         
         result = []
         if self.pln_chainer and PLN_AVAILABLE:
+#=======
+        """Apply forward chaining reasoning from source atoms with probabilistic inference."""
+        if self.rule_base and TORCHPLN_AVAILABLE:
+            try:
+                # Use TorchPLN forward chaining
+                self.forward_chainer = ForwardChainer(self.atomspace, self.rule_base, source_atoms[0] if source_atoms else None)
+                self.forward_chainer.do_chain()
+                return self.forward_chainer.get_results().out if self.forward_chainer.get_results() else []
+            except Exception as e:
+                print(f"⚠️ TorchPLN forward chaining warning: {e}")
+                
+        elif self.pln_chainer and PLN_AVAILABLE:
+#>>>>>>> main
             try:
                 result = self.pln_chainer.forward_chain(source_atoms, max_steps=max_steps)
             except Exception as e:
@@ -197,6 +343,7 @@ class PLNReasoningTool:
         # Cache result for future requests
         self._cache_result(cache_key, result)
         
+#<<<<<<< copilot/fix-56
         end_time = time.perf_counter()
         self._performance_metrics["reasoning_time"].append(end_time - start_time)
         
@@ -231,6 +378,23 @@ class PLNReasoningTool:
         
         result = []
         if self.pln_chainer and PLN_AVAILABLE:
+#=======
+        # Enhanced fallback implementation with probabilistic reasoning
+        return self._enhanced_fallback_forward_chain(source_atoms, max_steps)
+    
+    def backward_chain(self, target_atoms, max_steps=10):
+        """Apply backward chaining reasoning toward target atoms with probabilistic inference."""
+        if self.rule_base and TORCHPLN_AVAILABLE:
+            try:
+                # Use TorchPLN backward chaining
+                self.backward_chainer = BackwardChainer(self.atomspace, self.rule_base, target_atoms[0] if target_atoms else None)
+                self.backward_chainer.do_chain()
+                return self.backward_chainer.get_results().out if self.backward_chainer.get_results() else []
+            except Exception as e:
+                print(f"⚠️ TorchPLN backward chaining warning: {e}")
+                
+        elif self.pln_chainer and PLN_AVAILABLE:
+#>>>>>>> main
             try:
                 result = self.pln_chainer.backward_chain(target_atoms, max_steps=max_steps)
             except Exception as e:
@@ -240,6 +404,7 @@ class PLNReasoningTool:
             # Fallback implementation
             result = self._fallback_backward_chain(target_atoms, max_steps)
         
+#<<<<<<< copilot/fix-56
         # Cache result for future requests
         self._cache_result(cache_key, result)
         
@@ -247,9 +412,164 @@ class PLNReasoningTool:
         self._performance_metrics["reasoning_time"].append(end_time - start_time)
         
         return result
+#=======
+        # Enhanced fallback implementation with probabilistic reasoning
+        return self._enhanced_fallback_backward_chain(target_atoms, max_steps)
+    
+    def _enhanced_fallback_forward_chain(self, source_atoms, max_steps):
+        """Enhanced fallback forward chaining with probabilistic reasoning."""
+        results = []
+        current_atoms = list(source_atoms)
+        
+        for step in range(max_steps):
+            if not current_atoms:
+                break
+                
+            step_results = []
+            for atom in current_atoms:
+                # Apply probabilistic reasoning rules
+                for rule in self.reasoning_rules:
+                    if rule == "modus_ponens_rule":
+                        rule_results = self._apply_probabilistic_modus_ponens([atom])
+                    elif rule == "deduction_rule":
+                        rule_results = self.probabilistic_deduction([atom])
+                        rule_results = [rule_results] if rule_results else []
+                    elif rule == "fuzzy_conjunction_rule":
+                        rule_results = self.fuzzy_conjunction([atom])
+                        rule_results = [rule_results] if rule_results else []
+                    else:
+                        rule_results = self.apply_inference_rule(rule, [atom])
+                    
+                    if rule_results:
+                        step_results.extend(rule_results)
+            
+            if not step_results:
+                break
+                
+            results.extend(step_results)
+            current_atoms = step_results
+            
+        return results
+    
+    def _enhanced_fallback_backward_chain(self, target_atoms, max_steps):
+        """Enhanced fallback backward chaining with probabilistic reasoning."""
+        results = []
+        current_targets = list(target_atoms)
+        
+        for step in range(max_steps):
+            if not current_targets:
+                break
+                
+            step_results = []
+            for target in current_targets:
+                # Try to find premises using probabilistic reasoning
+                for rule in self.reasoning_rules:
+                    if rule == "modus_ponens_rule":
+                        premises = self._find_premises_for_modus_ponens(target)
+                    elif rule == "deduction_rule":
+                        premises = self._find_premises_for_deduction(target)
+                    else:
+                        premises = self._find_premises_for_target(target, rule)
+                    
+                    if premises:
+                        step_results.extend(premises)
+            
+            if not step_results:
+                break
+                
+            results.extend(step_results)
+            current_targets = step_results
+            
+        return results
+    
+    def _apply_probabilistic_modus_ponens(self, premises):
+        """Apply probabilistic modus ponens rule."""
+        if len(premises) >= 1:
+            # Create a simple implication for modus ponens
+            if self.atomspace:
+                try:
+                    from opencog.type_constructors import ConceptNode, ImplicationLink
+                    conclusion = ConceptNode(f"conclusion_from_{premises[0]}")
+                    implication = ImplicationLink(premises[0], conclusion)
+                    result = self.probabilistic_modus_ponens(premises[0], implication)
+                    return [result] if result else []
+                except:
+                    pass
+        return []
+    
+    def _fallback_modus_ponens(self, premise_a, implication_ab):
+        """Fallback implementation for modus ponens."""
+        if self.atomspace and premise_a and implication_ab:
+            try:
+                # Simple fallback: create a conclusion with combined truth values
+                conclusion = self.atomspace.add_node(types.ConceptNode, "modus_ponens_conclusion")
+                
+                # Combine truth values (simplified)
+                if hasattr(premise_a, 'tv') and hasattr(implication_ab, 'tv'):
+                    strength = premise_a.tv.mean * implication_ab.tv.mean
+                    confidence = min(premise_a.tv.confidence, implication_ab.tv.confidence)
+                    conclusion.tv = types.TruthValue(strength, confidence)
+                    
+                return conclusion
+            except Exception as e:
+                print(f"⚠️ Fallback modus ponens warning: {e}")
+        return None
+    
+    def _fallback_fuzzy_conjunction(self, atoms):
+        """Fallback implementation for fuzzy conjunction."""
+        if not atoms or not self.atomspace:
+            return None
+            
+        try:
+            conjunction = self.atomspace.add_link(types.AndLink, atoms)
+            
+            # Calculate minimum truth values
+            min_strength = 1.0
+            min_confidence = 1.0
+            
+            for atom in atoms:
+                if hasattr(atom, 'tv'):
+                    min_strength = min(min_strength, atom.tv.mean)
+                    min_confidence = min(min_confidence, atom.tv.confidence)
+            
+            conjunction.tv = types.TruthValue(min_strength, min_confidence)
+            return conjunction
+            
+        except Exception as e:
+            print(f"⚠️ Fallback fuzzy conjunction warning: {e}")
+            return None
+    
+    def _find_premises_for_modus_ponens(self, target):
+        """Find premises that could lead to target using modus ponens."""
+        premises = []
+        if self.atomspace:
+            try:
+                # Look for implication links involving the target
+                links = [atom for atom in self.atomspace if atom.type == types.ImplicationLink]
+                for link in links[:5]:  # Limit search
+                    if len(link.out) >= 2 and link.out[1] == target:
+                        premises.append(link.out[0])  # Add antecedent
+            except:
+                pass
+        return premises
+    
+    def _find_premises_for_deduction(self, target):
+        """Find premises for deductive reasoning toward target."""
+        premises = []
+        if self.atomspace:
+            try:
+                # Look for chains of implications
+                implications = [atom for atom in self.atomspace if atom.type == types.ImplicationLink]
+                for impl in implications[:3]:  # Limit search
+                    if len(impl.out) >= 2:
+                        premises.append(impl.out[0])
+            except:
+                pass
+        return premises
+#>>>>>>> main
     
     def apply_inference_rule(self, rule_name, premises):
-        """Apply specific inference rule to premises."""
+        """Apply specific inference rule to premises with probabilistic enhancements."""
         if not premises:
             return []
             
@@ -257,7 +577,13 @@ class PLNReasoningTool:
         
         try:
             if rule_name == "deduction_rule":
-                results = self._apply_deduction(premises)
+                result = self.probabilistic_deduction(premises)
+                results = [result] if result else []
+            elif rule_name == "modus_ponens_rule":
+                results = self._apply_probabilistic_modus_ponens(premises)
+            elif rule_name == "fuzzy_conjunction_rule":
+                result = self.fuzzy_conjunction(premises)
+                results = [result] if result else []
             elif rule_name == "induction_rule":
                 results = self._apply_induction(premises)
             elif rule_name == "abduction_rule":
@@ -268,13 +594,108 @@ class PLNReasoningTool:
                 results = self._apply_similarity(premises)
             elif rule_name == "concept_creation_rule":
                 results = self._apply_concept_creation(premises)
-            elif rule_name == "modus_ponens_rule":
-                results = self._apply_modus_ponens(premises)
+            elif rule_name == "fuzzy_disjunction_rule":
+                results = self._apply_fuzzy_disjunction(premises)
+            elif rule_name == "consequent_disjunction_elimination_rule":
+                results = self._apply_consequent_disjunction_elimination(premises)
+            elif rule_name == "contraposition_rule":
+                results = self._apply_contraposition(premises)
                 
         except Exception as e:
             print(f"⚠️ Inference rule application warning for {rule_name}: {e}")
             
         return results
+    
+    def _apply_fuzzy_disjunction(self, premises):
+        """Apply fuzzy disjunction rule using maximum truth values."""
+        if not premises or not self.atomspace:
+            return []
+            
+        try:
+            if TORCHPLN_AVAILABLE and len(premises) > 1:
+                # Use TorchPLN fuzzy disjunction if available
+                from opencog.type_constructors import OrLink
+                disjunction = OrLink(*premises[:5])  # Limit to first 5 premises
+                
+                # Calculate maximum truth values
+                max_strength = 0.0
+                max_confidence = 0.0
+                
+                for premise in premises:
+                    if hasattr(premise, 'tv'):
+                        tv = get_ttv(premise) if TORCHPLN_AVAILABLE else premise.tv
+                        max_strength = max(max_strength, tv.mean if hasattr(tv, 'mean') else tv.mean)
+                        max_confidence = max(max_confidence, tv.confidence if hasattr(tv, 'confidence') else tv.confidence)
+                
+                if TORCHPLN_AVAILABLE:
+                    set_ttv(disjunction, TTruthValue([max_strength, max_confidence]))
+                else:
+                    disjunction.tv = types.TruthValue(float(max_strength), float(max_confidence))
+                    
+                return [disjunction]
+            
+            # Fallback implementation
+            if len(premises) >= 2:
+                disjunction = self.atomspace.add_link(types.OrLink, premises[:2])
+                return [disjunction]
+                
+        except Exception as e:
+            print(f"⚠️ Fuzzy disjunction warning: {e}")
+            
+        return []
+    
+    def _apply_consequent_disjunction_elimination(self, premises):
+        """Apply consequent disjunction elimination rule."""
+        if len(premises) < 2 or not self.atomspace:
+            return []
+            
+        try:
+            if TORCHPLN_AVAILABLE:
+                from pln.rules.propositional import consequent_disjunction_elimination_formula
+                from opencog.type_constructors import ConceptNode
+                
+                conclusion = ConceptNode("consequent_elimination_conclusion")
+                return [consequent_disjunction_elimination_formula(conclusion, *premises[:2])]
+            
+            # Fallback implementation
+            conclusion = self.atomspace.add_link(types.ImplicationLink, [premises[0], premises[1]])
+            return [conclusion]
+            
+        except Exception as e:
+            print(f"⚠️ Consequent disjunction elimination warning: {e}")
+            return []
+    
+    def _apply_contraposition(self, premises):
+        """Apply contraposition rule: (A -> B) ⊢ (~B -> ~A)."""
+        if len(premises) < 1 or not self.atomspace:
+            return []
+            
+        try:
+            if TORCHPLN_AVAILABLE:
+                from pln.rules.propositional import contraposition_formula
+                from opencog.type_constructors import ConceptNode
+                
+                conclusion = ConceptNode("contraposition_conclusion")
+                if len(premises) >= 3:
+                    return [contraposition_formula(conclusion, *premises[:3])]
+            
+            # Fallback implementation
+            premise = premises[0]
+            if premise.type == types.ImplicationLink and len(premise.out) >= 2:
+                # Create ~B -> ~A from A -> B
+                antecedent = premise.out[0] 
+                consequent = premise.out[1]
+                
+                not_consequent = self.atomspace.add_link(types.NotLink, [consequent])
+                not_antecedent = self.atomspace.add_link(types.NotLink, [antecedent])
+                contrapositive = self.atomspace.add_link(types.ImplicationLink, [not_consequent, not_antecedent])
+                
+                return [contrapositive]
+                
+        except Exception as e:
+            print(f"⚠️ Contraposition warning: {e}")
+            
+        return []
     
     def _fallback_forward_chain(self, source_atoms, max_steps):
         """Fallback forward chaining implementation."""
@@ -493,6 +914,28 @@ class CognitiveReasoningTool(Tool):
         self.pln_reasoning = None  # PLN reasoning tool
         self._performance_monitor = {"total_operations": 0, "avg_response_time": 0.0}
         
+        # Initialize performance optimizer
+        optimizer_config = {
+            'cache_size': self.config.get('performance', {}).get('cache_size', 1000),
+            'batch_size': self.config.get('performance', {}).get('batch_size', 50),
+            'batch_wait_time': self.config.get('performance', {}).get('batch_wait_time', 1.0),
+            'thread_pool_size': self.config.get('performance', {}).get('thread_pool_size', 8),
+            'memory_pool_size': self.config.get('performance', {}).get('memory_pool_size', 100)
+        }
+        self.performance_optimizer = get_performance_optimizer(optimizer_config)
+        
+        # Performance monitoring
+        self.operation_stats = {
+            'total_operations': 0,
+            'cached_operations': 0,
+            'batch_operations': 0,
+            'parallel_operations': 0,
+            'avg_response_time': 0.0
+        }
+        
+        # Setup batch processing handlers
+        self._setup_batch_handlers()
+        
         # Initialize with shared or new atomspace
         if OPENCOG_AVAILABLE and self.config.get("opencog_enabled", True):
             try:
@@ -597,6 +1040,96 @@ class CognitiveReasoningTool(Tool):
         print("⚠️ Running in fallback mode - limited cognitive reasoning capabilities")
         print("✓ PLN reasoning tool initialized in fallback mode")
     
+    def _setup_batch_handlers(self):
+        """Setup batch processing handlers for cognitive operations."""
+        if hasattr(self, 'performance_optimizer'):
+            # Register batch handlers for different operation types
+            self.performance_optimizer.batch_processor.register_handler(
+                'reasoning', self._batch_reasoning_handler
+            )
+            self.performance_optimizer.batch_processor.register_handler(
+                'atom_creation', self._batch_atom_creation_handler
+            )
+            self.performance_optimizer.batch_processor.register_handler(
+                'pattern_matching', self._batch_pattern_matching_handler
+            )
+    
+    async def _batch_reasoning_handler(self, reasoning_items: List[tuple]) -> List[Any]:
+        """Handle batch reasoning operations for improved performance."""
+        results = []
+        
+        try:
+            # Group related reasoning queries for more efficient processing
+            query_groups = self._group_reasoning_queries(reasoning_items)
+            
+            for group in query_groups:
+                # Process group in parallel if possible
+                if len(group) > 1 and hasattr(self, 'performance_optimizer'):
+                    group_results = await self.performance_optimizer.optimize_parallel_operations(
+                        [lambda item=item: self._single_reasoning_operation(*item) for item in group],
+                        use_threads=True,
+                        max_workers=4
+                    )
+                    results.extend(group_results)
+                else:
+                    # Process individually
+                    for item in group:
+                        result = await self._single_reasoning_operation(*item)
+                        results.append(result)
+            
+            return results
+            
+        except Exception as e:
+            print(f"Batch reasoning error: {e}")
+            # Fallback to individual processing
+            for args, kwargs in reasoning_items:
+                try:
+                    result = await self._single_reasoning_operation(*args, **kwargs)
+                    results.append(result)
+                except Exception as item_error:
+                    results.append({'error': str(item_error), 'status': 'failed'})
+            
+            return results
+    
+    def _group_reasoning_queries(self, reasoning_items: List[tuple]) -> List[List[tuple]]:
+        """Group similar reasoning queries for batch processing."""
+        groups = {}
+        
+        for item in reasoning_items:
+            args, kwargs = item
+            query = args[0] if args else kwargs.get('query', '')
+            
+            # Group by query type/category
+            query_type = self._categorize_query(query)
+            if query_type not in groups:
+                groups[query_type] = []
+            groups[query_type].append(item)
+        
+        return list(groups.values())
+    
+    def _categorize_query(self, query: str) -> str:
+        """Categorize a query for grouping purposes."""
+        query_lower = query.lower()
+        
+        if any(word in query_lower for word in ['learn', 'adapt', 'improve']):
+            return 'learning'
+        elif any(word in query_lower for word in ['reason', 'infer', 'deduce']):
+            return 'reasoning'
+        elif any(word in query_lower for word in ['pattern', 'match', 'similar']):
+            return 'pattern_matching'
+        elif any(word in query_lower for word in ['memory', 'recall', 'remember']):
+            return 'memory'
+        else:
+            return 'general'
+    
+    async def _single_reasoning_operation(self, *args, **kwargs) -> Any:
+        """Perform a single reasoning operation."""
+        try:
+            query = args[0] if args else kwargs.get('query', '')
+            return await self._perform_core_reasoning(query, **kwargs)
+        except Exception as e:
+            return {'error': str(e), 'status': 'failed'}
+    
     def _load_cognitive_config(self):
         """Load cognitive configuration from Agent-Zero settings."""
         try:
@@ -696,6 +1229,71 @@ class CognitiveReasoningTool(Tool):
             return await self._perform_reasoning(query, **kwargs)
     
     async def _perform_reasoning(self, query: str, **kwargs):
+        """Perform core cognitive reasoning operations with performance optimization."""
+        self._initialize_if_needed()
+        
+        start_time = time.time()
+        operation_type = kwargs.get('operation_type', 'reasoning')
+        use_cache = kwargs.get('use_cache', True)
+        use_batching = kwargs.get('use_batching', self.batch_reasoning_enabled)
+        
+        try:
+            # Update operation statistics
+            self.operation_stats['total_operations'] += 1
+            
+            # Use performance optimization if available
+            if hasattr(self, 'performance_optimizer') and use_cache:
+                # Try to get cached result first
+                cache_key = f"{operation_type}_{query}_{hash(str(sorted(kwargs.items())))}"
+                cached_result = self.performance_optimizer.cache.get(cache_key)
+                
+                if cached_result is not None:
+                    self.operation_stats['cached_operations'] += 1
+                    return cached_result
+            
+            # Use batching if enabled and multiple items pending
+            if use_batching and hasattr(self, 'performance_optimizer'):
+                result = await self.performance_optimizer.batch_processor.add_item(
+                    operation_type, (query, kwargs)
+                )
+                if result is not None:
+                    self.operation_stats['batch_operations'] += 1
+                    return result
+            
+            # Perform the actual reasoning
+            result = await self._perform_core_reasoning(query, **kwargs)
+            
+            # Cache the result if caching is enabled
+            if hasattr(self, 'performance_optimizer') and use_cache:
+                cache_key = f"{operation_type}_{query}_{hash(str(sorted(kwargs.items())))}"
+                self.performance_optimizer.cache.put(cache_key, result)
+            
+            # Update performance stats
+            operation_time = time.time() - start_time
+            self._update_performance_stats(operation_time)
+            
+            return result
+            
+        except Exception as e:
+            print(f"Enhanced reasoning error: {e}")
+            # Fallback to basic reasoning
+            return await self._fallback_reasoning(query, **kwargs)
+    
+    async def _perform_core_reasoning(self, query: str, **kwargs):
+        """Core reasoning logic extracted for reuse."""
+        if self.initialized and self.atomspace:
+            return await self._reason_with_atomspace(query, **kwargs)
+        else:
+            return await self._fallback_reasoning(query, **kwargs)
+    
+    def _update_performance_stats(self, operation_time: float):
+        """Update internal performance statistics."""
+        if self.operation_stats['total_operations'] > 0:
+            total_time = (self.operation_stats['avg_response_time'] * 
+                         (self.operation_stats['total_operations'] - 1) + operation_time)
+            self.operation_stats['avg_response_time'] = total_time / self.operation_stats['total_operations']
+    
+    async def _reason_with_atomspace(self, query: str, **kwargs):
         """Perform core cognitive reasoning operations."""
         if not self.initialized:
             return await self._fallback_reasoning(query, **kwargs)
@@ -736,6 +1334,7 @@ class CognitiveReasoningTool(Tool):
                 await self._share_reasoning_results(query, reasoning_results)
             
             return Response(
+#<<<<<<< copilot/fix-56
                 message=f"Enhanced cognitive reasoning completed for: {query}",
                 data={
                     "query": query,
@@ -752,13 +1351,31 @@ class CognitiveReasoningTool(Tool):
                         "cross_tool_sharing": self.config.get("atomspace_config", {}).get("cross_tool_sharing", True)
                     }
                 },
+#=======
+                message=f"Enhanced cognitive reasoning completed for: {query}\n"
+                       f"Data: {json.dumps({
+                           'query': query,
+                           'operation': 'reason',
+                           'atoms_created': len(query_atoms),
+                           'reasoning_steps': reasoning_steps,
+                           'context_size': len(reasoning_context.get('related_concepts', [])),
+                           'cross_tool_integration': ATOMSPACE_TOOLS_AVAILABLE,
+                           'storage_optimization': storage_optimization,
+                           'status': 'success',
+                           'config': {
+                               'pln_enabled': self.config.get('reasoning_config', {}).get('pln_enabled', True),
+                               'pattern_matching': self.config.get('reasoning_config', {}).get('pattern_matching', True),
+                               'cross_tool_sharing': self.config.get('atomspace_config', {}).get('cross_tool_sharing', True)
+                           }
+                       })}",
+#>>>>>>> main
                 break_loop=False
             )
             
         except Exception as e:
             return Response(
-                message=f"Enhanced cognitive reasoning error: {str(e)}\\n"
-                       f"Data: {json.dumps({'error': str(e), 'status': 'error', 'fallback_available': True})}",
+                message=f"Enhanced cognitive reasoning error: {str(e)}",
+                data={'error': str(e), 'status': 'error', 'fallback_available': True},
                 break_loop=False
             )
     
