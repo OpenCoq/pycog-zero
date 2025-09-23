@@ -551,8 +551,12 @@ class CognitiveReasoningTool(Tool):
                 await self._share_reasoning_results(query, reasoning_results)
             
             return Response(
+# <<<<<<< copilot/fix-51
+                message=f"Enhanced cognitive reasoning completed for: {query}\n"
+# =======
 # <<<<<<< copilot/fix-48
                 message=f"Enhanced cognitive reasoning completed for: {query}\\n"
+# >>>>>>> main
                        f"Data: {json.dumps({
                            'query': query,
                            'operation': 'reason',
@@ -568,6 +572,8 @@ class CognitiveReasoningTool(Tool):
                            }
                        })}",
                 break_loop=False
+# <<<<<<< copilot/fix-51
+# =======
 # =======
                 message=f"Enhanced cognitive reasoning completed for: {query}",
                 data={
@@ -585,6 +591,7 @@ class CognitiveReasoningTool(Tool):
                         "cross_tool_sharing": self.config.get("atomspace_config", {}).get("cross_tool_sharing", True)
                     }
                 }
+# >>>>>>> main
 # >>>>>>> main
             )
             

@@ -10,6 +10,15 @@ To begin with Agent Zero, follow the links below for detailed guides on various 
 - **[Contributing](contribution.md):** Learn how to contribute to the Agent Zero project.
 - **[Troubleshooting and FAQ](troubleshooting.md):** Find answers to common issues and questions.
 
+### Cognitive Architecture & Advanced Features
+
+- **[Neural-Symbolic Bridge](neural_symbolic_bridge.md):** Understand the integration between neural networks and symbolic reasoning.
+- **[Enhanced Cognitive Reasoning](enhanced_cognitive_reasoning.md):** Learn about advanced cognitive reasoning capabilities.
+- **[Attention-Based Reasoning](attention_based_reasoning.md):** Explore attention mechanisms and ECAN integration patterns.
+- **[Logic Systems Integration](logic_systems_integration_patterns.md):** Learn about PLN and URE integration patterns.
+- **[URE Integration Guide](ure_integration.md):** Comprehensive guide to Unified Rule Engine integration.
+- **[Performance Benchmarking](performance_benchmarking.md):** Performance analysis and optimization techniques.
+
 ### Your experience with Agent Zero starts now!
 
 - **Download Agent Zero:** Follow the [installation guide](installation.md) to download and run Agent Zero.
