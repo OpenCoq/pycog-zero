@@ -289,6 +289,7 @@ class PLNReasoningTool:
             return self._fallback_fuzzy_conjunction(atoms)
     
     def forward_chain(self, source_atoms, max_steps=10):
+#<<<<<<< copilot/fix-56
         """Apply forward chaining reasoning from source atoms with performance optimization."""
         
         # Use performance monitoring if available
@@ -373,22 +374,9 @@ class PLNReasoningTool:
         
         result = []
         if self.pln_chainer and PLN_AVAILABLE:
-            try:
-                result = self.pln_chainer.forward_chain(source_atoms, max_steps=max_steps)
-            except Exception as e:
-                print(f"⚠️ PLN forward chaining warning: {e}")
-                result = self._enhanced_fallback_forward_chain(source_atoms, max_steps)
-        else:
-            # Enhanced fallback implementation with probabilistic reasoning
-            result = self._enhanced_fallback_forward_chain(source_atoms, max_steps)
-        
-        # Cache result for future requests
-        self._cache_result(cache_key, result)
-        
-        end_time = time.perf_counter()
-        self._performance_metrics["reasoning_time"].append(end_time - start_time)
-        
-        return result
+#=======
+        # Enhanced fallback implementation with probabilistic reasoning
+        return self._enhanced_fallback_forward_chain(source_atoms, max_steps)
     
     def backward_chain(self, target_atoms, max_steps=10):
         """Apply backward chaining reasoning toward target atoms with probabilistic inference."""
@@ -402,14 +390,22 @@ class PLNReasoningTool:
                 print(f"⚠️ TorchPLN backward chaining warning: {e}")
                 
         elif self.pln_chainer and PLN_AVAILABLE:
+#>>>>>>> main
             try:
                 result = self.pln_chainer.backward_chain(target_atoms, max_steps=max_steps)
             except Exception as e:
                 print(f"⚠️ PLN backward chaining warning: {e}")
-                result = self._enhanced_fallback_backward_chain(target_atoms, max_steps)
+                result = self._fallback_backward_chain(target_atoms, max_steps)
         else:
-            # Enhanced fallback implementation with probabilistic reasoning
-            result = self._enhanced_fallback_backward_chain(target_atoms, max_steps)
+            # Fallback implementation
+            result = self._fallback_backward_chain(target_atoms, max_steps)
+        
+#<<<<<<< copilot/fix-56
+        # Cache result for future requests
+        self._cache_result(cache_key, result)
+        
+        end_time = time.perf_counter()
+        self._performance_metrics["reasoning_time"].append(end_time - start_time)
         
         return result
     
@@ -563,7 +559,7 @@ class PLNReasoningTool:
             except:
                 pass
         return premises
-    
+#>>>>>>> main
     
     def apply_inference_rule(self, rule_name, premises):
         """Apply specific inference rule to premises with probabilistic enhancements."""
@@ -1331,6 +1327,7 @@ class CognitiveReasoningTool(Tool):
                 await self._share_reasoning_results(query, reasoning_results)
             
             return Response(
+#<<<<<<< copilot/fix-56
                 message=f"Enhanced cognitive reasoning completed for: {query}",
                 data={
                     "query": query,
@@ -1347,6 +1344,24 @@ class CognitiveReasoningTool(Tool):
                         "cross_tool_sharing": self.config.get("atomspace_config", {}).get("cross_tool_sharing", True)
                     }
                 },
+#=======
+                message=f"Enhanced cognitive reasoning completed for: {query}\n"
+                       f"Data: {json.dumps({
+                           'query': query,
+                           'operation': 'reason',
+                           'atoms_created': len(query_atoms),
+                           'reasoning_steps': reasoning_steps,
+                           'context_size': len(reasoning_context.get('related_concepts', [])),
+                           'cross_tool_integration': ATOMSPACE_TOOLS_AVAILABLE,
+                           'storage_optimization': storage_optimization,
+                           'status': 'success',
+                           'config': {
+                               'pln_enabled': self.config.get('reasoning_config', {}).get('pln_enabled', True),
+                               'pattern_matching': self.config.get('reasoning_config', {}).get('pattern_matching', True),
+                               'cross_tool_sharing': self.config.get('atomspace_config', {}).get('cross_tool_sharing', True)
+                           }
+                       })}",
+#>>>>>>> main
                 break_loop=False
             )
             
