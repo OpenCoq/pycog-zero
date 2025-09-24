@@ -38,9 +38,75 @@
   "Learning Agent": {
     "initial_knowledge": 5,
     "observations": 4,
-    "learning_steps": [],
-    "learned_knowledge": [],
-    "knowledge_growth": 0
+    "learning_steps": [
+      {
+        "rule": "pattern_recognition_rule",
+        "observation": [
+          "python_code",
+          "has_indentation_rules",
+          0.85
+        ],
+        "learned": [
+          "python",
+          "has_syntax_constraints",
+          0.765
+        ],
+        "confidence": 0.765
+      },
+      {
+        "rule": "pattern_recognition_rule",
+        "observation": [
+          "javascript_code",
+          "has_bracket_rules",
+          0.87
+        ],
+        "learned": [
+          "javascript",
+          "has_syntax_constraints",
+          0.783
+        ],
+        "confidence": 0.783
+      },
+      {
+        "rule": "generalization_rule",
+        "specific_cases": [
+          [
+            "python",
+            "has_syntax_constraints",
+            0.765
+          ],
+          [
+            "javascript",
+            "has_syntax_constraints",
+            0.783
+          ]
+        ],
+        "generalization": [
+          "programming_languages",
+          "have_specific_syntax_rules",
+          0.75
+        ],
+        "confidence": 0.75
+      }
+    ],
+    "learned_knowledge": [
+      [
+        "python",
+        "has_syntax_constraints",
+        0.765
+      ],
+      [
+        "javascript",
+        "has_syntax_constraints",
+        0.783
+      ],
+      [
+        "programming_languages",
+        "have_specific_syntax_rules",
+        0.75
+      ]
+    ],
+    "knowledge_growth": 3
   },
   "Multi-Modal Reasoning": {
     "modalities": 3,
@@ -314,15 +380,15 @@
     "collaboration_success": true
   },
   "_summary": {
-    "start_time": "2025-09-24T04:12:10.475856",
-    "end_time": "2025-09-24T04:12:10.477625",
-    "duration_seconds": 0.001769,
+    "start_time": "2025-09-24T04:16:26.860282",
+    "end_time": "2025-09-24T04:16:26.861616",
+    "duration_seconds": 0.001334,
     "examples_run": 6,
     "successful_examples": 6,
-    "total_reasoning_steps": 24,
-    "successful_inferences": 24,
+    "total_reasoning_steps": 27,
+    "successful_inferences": 27,
     "pln_available": false,
     "success_rate": 1.0,
-    "avg_steps_per_example": 4.0
+    "avg_steps_per_example": 4.5
   }
 }
