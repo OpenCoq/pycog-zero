@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import timedelta, datetime
 import os
 import secrets
 import sys
@@ -18,6 +18,14 @@ from python.helpers import runtime, dotenv, process
 from python.helpers.extract_tools import load_classes_from_folder
 from python.helpers.api import ApiHandler
 from python.helpers.print_style import PrintStyle
+
+# Import production monitoring for health checks
+try:
+    from python.helpers.production_monitoring import get_production_monitor, start_production_monitoring
+    PRODUCTION_MONITORING_AVAILABLE = True
+except ImportError:
+    PRODUCTION_MONITORING_AVAILABLE = False
+    PrintStyle.error("Production monitoring not available")
 
 
 # Set the new timezone to 'UTC'
@@ -213,6 +221,38 @@ def run():
     handlers = load_classes_from_folder("python/api", "*.py", ApiHandler)
     for handler in handlers:
         register_api_handler(webapp, handler)
+    
+    # Add production health check endpoints
+    @webapp.route('/health', methods=['GET'])
+    def health_check():
+        """Health check endpoint for production monitoring."""
+        if PRODUCTION_MONITORING_AVAILABLE:
+            monitor = get_production_monitor()
+            health_status = monitor.get_health_status()
+            status_code = 200 if health_status["overall_status"] == "healthy" else 503
+            return health_status, status_code
+        else:
+            return {"status": "healthy", "message": "Basic health check", "timestamp": datetime.now().isoformat()}, 200
+    
+    @webapp.route('/metrics', methods=['GET'])
+    def metrics_endpoint():
+        """Metrics endpoint for production monitoring."""
+        if PRODUCTION_MONITORING_AVAILABLE:
+            monitor = get_production_monitor()
+            return monitor.get_metrics_summary()
+        else:
+            return {"error": "Production monitoring not available"}, 503
+    
+    @webapp.route('/cognitive/metrics', methods=['GET'])
+    def cognitive_metrics_endpoint():
+        """Cognitive system metrics endpoint."""
+        if PRODUCTION_MONITORING_AVAILABLE:
+            monitor = get_production_monitor()
+            metrics = monitor.get_metrics_summary()
+            cognitive_data = metrics.get("cognitive_metrics", {})
+            return cognitive_data if cognitive_data else {"error": "No cognitive metrics available"}
+        else:
+            return {"error": "Cognitive monitoring not available"}, 503
 
     # add the webapp and mcp to the app
     app = DispatcherMiddleware(
@@ -237,6 +277,11 @@ def run():
     # Start init_a0 in a background thread when server starts
     # threading.Thread(target=init_a0, daemon=True).start()
     init_a0()
+    
+    # Start production monitoring if available and in production mode
+    if PRODUCTION_MONITORING_AVAILABLE and os.getenv("PYCOG_ZERO_MODE") == "production":
+        start_production_monitoring()
+        PrintStyle.success("Production monitoring started")
 
     # run the server
     server.serve_forever()

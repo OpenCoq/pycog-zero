@@ -1,0 +1,47 @@
+groups:
+  - name: pycog-zero-alerts
+    rules:
+      - alert: PyCogZeroDown
+        expr: up{job="pycog-zero-web"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "PyCog-Zero web service is down"
+          description: "PyCog-Zero web service has been down for more than 1 minute."
+
+      - alert: HighMemoryUsage
+        expr: (container_memory_usage_bytes{name="pycog-zero-production"} / container_spec_memory_limit_bytes{name="pycog-zero-production"}) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage in PyCog-Zero"
+          description: "Memory usage is above 80% for more than 5 minutes."
+
+      - alert: HighCPUUsage
+        expr: (rate(container_cpu_usage_seconds_total{name="pycog-zero-production"}[5m]) / container_spec_cpu_quota{name="pycog-zero-production"}) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage in PyCog-Zero"
+          description: "CPU usage is above 80% for more than 5 minutes."
+
+      - alert: CognitiveSystemFailure
+        expr: up{job="pycog-zero-cognitive"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Cognitive system failure detected"
+          description: "PyCog-Zero cognitive system has been unresponsive for more than 2 minutes."
+
+      - alert: DiskSpaceHigh
+        expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) < 0.1
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Low disk space"
+          description: "Disk space is below 10% available."

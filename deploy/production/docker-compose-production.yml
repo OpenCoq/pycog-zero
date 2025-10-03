@@ -1,0 +1,112 @@
+version: '3.8'
+
+services:
+  pycog-zero-web:
+    build:
+      context: ../..
+      dockerfile: DockerfileLocal
+      args:
+        BRANCH: production
+        CACHE_DATE: "2024-01-01"
+    container_name: pycog-zero-production
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - FLASK_ENV=production
+      - PYCOG_ZERO_MODE=production
+      - COGNITIVE_MODE=true
+      - OPENCOG_ENABLED=true
+      - NEURAL_SYMBOLIC_BRIDGE=true
+      - ECAN_ATTENTION=true
+      - PLN_REASONING=true
+      - MONITORING_ENABLED=true
+      - BACKUP_ENABLED=true
+      - LOG_LEVEL=INFO
+    ports:
+      - "80:80"
+      - "443:443"
+      - "50001:80"  # Alternative port for direct access
+    volumes:
+      - pycog-zero-data:/a0/memory
+      - pycog-zero-logs:/a0/logs
+      - pycog-zero-knowledge:/a0/knowledge
+      - pycog-zero-config:/a0/conf
+      - ./production-config:/production-config:ro
+    networks:
+      - pycog-zero-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: '4.0'
+          memory: 8G
+        reservations:
+          cpus: '2.0'
+          memory: 4G
+    depends_on:
+      - pycog-zero-monitor
+      - pycog-zero-backup
+
+  pycog-zero-monitor:
+    image: prom/prometheus:latest
+    container_name: pycog-zero-monitor
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    networks:
+      - pycog-zero-network
+
+  pycog-zero-backup:
+    image: alpine:latest
+    container_name: pycog-zero-backup
+    restart: unless-stopped
+    command: >
+      sh -c "
+        apk add --no-cache rsync &&
+        while true; do
+          rsync -av --delete /data/ /backup/$(date +%Y%m%d_%H%M%S)/
+          find /backup -type d -mtime +7 -exec rm -rf {} +
+          sleep 3600
+        done
+      "
+    volumes:
+      - pycog-zero-data:/data:ro
+      - pycog-zero-backup:/backup
+    networks:
+      - pycog-zero-network
+
+volumes:
+  pycog-zero-data:
+    driver: local
+  pycog-zero-logs:
+    driver: local
+  pycog-zero-knowledge:
+    driver: local
+  pycog-zero-config:
+    driver: local
+  pycog-zero-backup:
+    driver: local
+  prometheus-data:
+    driver: local
+
+networks:
+  pycog-zero-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
