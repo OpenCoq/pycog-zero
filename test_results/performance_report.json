@@ -1,15 +1,15 @@
 {
   "benchmark_suite": "performance",
-  "timestamp": 1758613699.852188,
+  "timestamp": 1759457009.3619738,
   "system_info": {
     "cpu_count": 4,
     "cpu_freq": {
-      "current": 3242.3957499999997,
+      "current": 3244.3244999999997,
       "min": 0.0,
       "max": 0.0
     },
     "memory_total": 16772579328,
-    "memory_available": 15285551104,
+    "memory_available": 15103471616,
     "python_version": "3.12.3 (main, Aug 14 2025, 17:47:21) [GCC 13.3.0]",
     "platform": "linux"
   },
@@ -17,128 +17,128 @@
   "benchmark_results": [
     {
       "benchmark_name": "reasoning_speed",
-      "timestamp": 1758613692.470183,
+      "timestamp": 1759457001.8504336,
       "system_info": {
         "cpu_count": 4,
         "cpu_freq": {
-          "current": 3242.3957499999997,
+          "current": 3244.3244999999997,
           "min": 0.0,
           "max": 0.0
         },
         "memory_total": 16772579328,
-        "memory_available": 15285551104,
+        "memory_available": 15103471616,
         "python_version": "3.12.3 (main, Aug 14 2025, 17:47:21) [GCC 13.3.0]",
         "platform": "linux"
       },
       "metrics": {
         "total_queries_tested": 3,
-        "average_processing_time": 0.42967514991760253,
+        "average_processing_time": 0.3890775839487712,
         "performance_meets_expectations": true,
-        "consistency_score": 0.7314490618404892,
-        "queries_per_second": 2.3273396196912177,
+        "consistency_score": 0.7383720618789735,
+        "queries_per_second": 2.570181478590829,
         "detailed_results": [
           {
             "complexity": "simple",
             "query_length": 10,
             "expected_time": 0.1,
-            "actual_avg_time": 0.05439524650573731,
-            "min_time": 0.05125927925109863,
-            "max_time": 0.06017041206359863,
-            "warmup_time": 0.053223609924316406,
-            "performance_ratio": 1.8383959339066984,
+            "actual_avg_time": 0.049184322357177734,
+            "min_time": 0.04520249366760254,
+            "max_time": 0.0532224178314209,
+            "warmup_time": 0.055966854095458984,
+            "performance_ratio": 2.033168196845279,
             "meets_expectations": true,
-            "consistency": 0.1638219032900256
+            "consistency": 0.16305854750986457
           },
           {
             "complexity": "medium",
             "query_length": 29,
             "expected_time": 0.5,
-            "actual_avg_time": 0.20542631149291993,
-            "min_time": 0.17236971855163574,
-            "max_time": 0.23149776458740234,
-            "warmup_time": 0.19040989875793457,
-            "performance_ratio": 2.4339627984667027,
+            "actual_avg_time": 0.20098376274108887,
+            "min_time": 0.1733694076538086,
+            "max_time": 0.2314164638519287,
+            "warmup_time": 0.16742944717407227,
+            "performance_ratio": 2.4877631564899576,
             "meets_expectations": true,
-            "consistency": 0.28783092879416505
+            "consistency": 0.28881465550477053
           },
           {
             "complexity": "complex",
             "query_length": 97,
             "expected_time": 2.0,
-            "actual_avg_time": 1.0292038917541504,
-            "min_time": 0.8161945343017578,
-            "max_time": 1.180532693862915,
-            "warmup_time": 1.070363998413086,
-            "performance_ratio": 1.9432495504765805,
+            "actual_avg_time": 0.9170646667480469,
+            "min_time": 0.814183235168457,
+            "max_time": 1.1195755004882812,
+            "warmup_time": 1.0551092624664307,
+            "performance_ratio": 2.180871286963973,
             "meets_expectations": true,
-            "consistency": 0.3539999823943417
+            "consistency": 0.33301061134844406
           }
         ]
       }
     },
     {
       "benchmark_name": "memory_usage",
-      "timestamp": 1758613695.5389373,
+      "timestamp": 1759457005.0511236,
       "system_info": {
         "cpu_count": 4,
         "cpu_freq": {
-          "current": 3242.3957499999997,
+          "current": 3244.3244999999997,
           "min": 0.0,
           "max": 0.0
         },
         "memory_total": 16772579328,
-        "memory_available": 15285551104,
+        "memory_available": 15103471616,
         "python_version": "3.12.3 (main, Aug 14 2025, 17:47:21) [GCC 13.3.0]",
         "platform": "linux"
       },
       "metrics": {
-        "initial_memory_mb": 34.375,
-        "final_memory_mb": 35.09375,
-        "total_memory_change_mb": 0.71875,
+        "initial_memory_mb": 30.91015625,
+        "final_memory_mb": 32.03515625,
+        "total_memory_change_mb": 1.125,
         "memory_tests": [
           {
             "test": "reasoning_operations",
             "operations": 1000,
-            "memory_before": 36044800,
-            "memory_after": 36569088,
-            "memory_used": 524288,
-            "memory_per_operation": 524.288
+            "memory_before": 32411648,
+            "memory_after": 33329152,
+            "memory_used": 917504,
+            "memory_per_operation": 917.504
           },
           {
             "test": "memory_cleanup",
-            "gc_objects_before": 35965,
-            "gc_objects_after": 31724,
-            "memory_before_gc": 36798464,
-            "memory_after_gc": 36798464,
+            "gc_objects_before": 35358,
+            "gc_objects_after": 31187,
+            "memory_before_gc": 33591296,
+            "memory_after_gc": 33591296,
             "memory_freed": 0,
-            "gc_efficiency": 0.11792020019463367
+            "gc_efficiency": 0.11796481701453702
           },
           {
             "test": "sustained_load",
             "batches_processed": 10,
-            "memory_start": 36798464,
-            "memory_end": 36798464,
+            "memory_start": 33591296,
+            "memory_end": 33591296,
             "memory_growth": 0,
             "memory_stable": true
           }
         ],
-        "memory_efficiency_score": 0.9790909090909091,
+        "memory_efficiency_score": 0.9636041956274485,
         "memory_stable_under_load": true,
         "garbage_collection_effective": false
       }
     },
     {
       "benchmark_name": "scalability_under_load",
-      "timestamp": 1758613699.801244,
+      "timestamp": 1759457009.3028593,
       "system_info": {
         "cpu_count": 4,
         "cpu_freq": {
-          "current": 3242.3957499999997,
+          "current": 3244.3244999999997,
           "min": 0.0,
           "max": 0.0
         },
         "memory_total": 16772579328,
-        "memory_available": 15285551104,
+        "memory_available": 15103471616,
         "python_version": "3.12.3 (main, Aug 14 2025, 17:47:21) [GCC 13.3.0]",
         "platform": "linux"
       },
@@ -150,11 +150,11 @@
             "total_tasks": 1,
             "successful_tasks": 1,
             "failed_tasks": 0,
-            "total_time": 0.2735564708709717,
-            "average_time_per_task": 0.2735564708709717,
-            "throughput_tasks_per_second": 3.655552350182459,
+            "total_time": 0.2714848518371582,
+            "average_time_per_task": 0.2714848518371582,
+            "throughput_tasks_per_second": 3.683446767777007,
             "cpu_usage_percent": 0.0,
-            "memory_usage_mb": 35.09375,
+            "memory_usage_mb": 32.03515625,
             "success_rate": 1.0
           },
           {
@@ -162,11 +162,11 @@
             "total_tasks": 5,
             "successful_tasks": 5,
             "failed_tasks": 0,
-            "total_time": 0.3130803108215332,
-            "average_time_per_task": 0.06261606216430664,
-            "throughput_tasks_per_second": 15.970343158532815,
+            "total_time": 0.3660905361175537,
+            "average_time_per_task": 0.07321810722351074,
+            "throughput_tasks_per_second": 13.657823698546723,
             "cpu_usage_percent": 0.0,
-            "memory_usage_mb": 35.09375,
+            "memory_usage_mb": 32.03515625,
             "success_rate": 1.0
           },
           {
@@ -174,11 +174,11 @@
             "total_tasks": 10,
             "successful_tasks": 10,
             "failed_tasks": 0,
-            "total_time": 0.3740217685699463,
-            "average_time_per_task": 0.03740217685699463,
-            "throughput_tasks_per_second": 26.736411728746443,
+            "total_time": 0.3128492832183838,
+            "average_time_per_task": 0.03128492832183838,
+            "throughput_tasks_per_second": 31.96427333036119,
             "cpu_usage_percent": 0.0,
-            "memory_usage_mb": 35.09375,
+            "memory_usage_mb": 32.03515625,
             "success_rate": 1.0
           },
           {
@@ -186,11 +186,11 @@
             "total_tasks": 20,
             "successful_tasks": 20,
             "failed_tasks": 0,
-            "total_time": 0.39822864532470703,
-            "average_time_per_task": 0.019911432266235353,
-            "throughput_tasks_per_second": 50.222404226326894,
+            "total_time": 0.3970222473144531,
+            "average_time_per_task": 0.019851112365722658,
+            "throughput_tasks_per_second": 50.37501080930465,
             "cpu_usage_percent": 0.0,
-            "memory_usage_mb": 35.09375,
+            "memory_usage_mb": 32.03515625,
             "success_rate": 1.0
           },
           {
@@ -198,32 +198,32 @@
             "total_tasks": 50,
             "successful_tasks": 50,
             "failed_tasks": 0,
-            "total_time": 0.39871668815612793,
-            "average_time_per_task": 0.007974333763122558,
-            "throughput_tasks_per_second": 125.4023257246288,
+            "total_time": 0.399730920791626,
+            "average_time_per_task": 0.00799461841583252,
+            "throughput_tasks_per_second": 125.08414385602231,
             "cpu_usage_percent": 0.0,
-            "memory_usage_mb": 35.09375,
+            "memory_usage_mb": 32.03515625,
             "success_rate": 1.0
           }
         ],
         "throughput_degradation": 0.0,
-        "resource_efficiency": 12954.712795351847,
+        "resource_efficiency": 14369.154277191963,
         "system_stable_under_load": true,
         "optimal_concurrency": 50
       }
     },
     {
       "benchmark_name": "storage_and_retrieval",
-      "timestamp": 1758613699.849709,
+      "timestamp": 1759457009.3587835,
       "system_info": {
         "cpu_count": 4,
         "cpu_freq": {
-          "current": 3242.3957499999997,
+          "current": 3244.3244999999997,
           "min": 0.0,
           "max": 0.0
         },
         "memory_total": 16772579328,
-        "memory_available": 15285551104,
+        "memory_available": 15103471616,
         "python_version": "3.12.3 (main, Aug 14 2025, 17:47:21) [GCC 13.3.0]",
         "platform": "linux"
       },
@@ -234,50 +234,50 @@
           {
             "data_type": "small_concepts",
             "data_size": 100,
-            "storage_time": 4.76837158203125e-05,
-            "retrieval_time": 4.1961669921875e-05,
-            "search_time": 0.0001327991485595703,
-            "storage_rate_items_per_second": 2097152.0,
-            "retrieval_rate_items_per_second": 2383127.272727273,
+            "storage_time": 2.9087066650390625e-05,
+            "retrieval_time": 2.3126602172851562e-05,
+            "search_time": 0.00011205673217773438,
+            "storage_rate_items_per_second": 3437954.098360656,
+            "retrieval_rate_items_per_second": 4324024.742268041,
             "search_efficiency": 0.0,
             "data_integrity": true
           },
           {
             "data_type": "medium_knowledge",
             "data_size": 1000,
-            "storage_time": 0.00019860267639160156,
-            "retrieval_time": 0.00019979476928710938,
-            "search_time": 0.006664752960205078,
-            "storage_rate_items_per_second": 5035178.871548619,
-            "retrieval_rate_items_per_second": 5005136.038186157,
+            "storage_time": 0.00029397010803222656,
+            "retrieval_time": 0.00023365020751953125,
+            "search_time": 0.009409666061401367,
+            "storage_rate_items_per_second": 3401706.4071370643,
+            "retrieval_rate_items_per_second": 4279902.040816327,
             "search_efficiency": 0.0,
             "data_integrity": true
           },
           {
             "data_type": "large_memories",
             "data_size": 5000,
-            "storage_time": 0.001056671142578125,
-            "retrieval_time": 0.0009770393371582031,
-            "search_time": 0.012805938720703125,
-            "storage_rate_items_per_second": 4731841.155234657,
-            "retrieval_rate_items_per_second": 5117501.220107369,
-            "search_efficiency": 390443.84867441165,
+            "storage_time": 0.0011546611785888672,
+            "retrieval_time": 0.0009620189666748047,
+            "search_time": 0.013076305389404297,
+            "storage_rate_items_per_second": 4330274.623167458,
+            "retrieval_rate_items_per_second": 5197402.72614622,
+            "search_efficiency": 382371.00244320463,
             "data_integrity": true
           },
           {
             "data_type": "complex_relationships",
             "data_size": 2000,
-            "storage_time": 0.00041294097900390625,
-            "retrieval_time": 0.0004458427429199219,
-            "search_time": 0.003398895263671875,
-            "storage_rate_items_per_second": 4843307.159353348,
-            "retrieval_rate_items_per_second": 4485886.631016043,
-            "search_efficiency": 588426.4870931538,
+            "storage_time": 0.0005152225494384766,
+            "retrieval_time": 0.0004477500915527344,
+            "search_time": 0.0034029483795166016,
+            "storage_rate_items_per_second": 3881817.6770013883,
+            "retrieval_rate_items_per_second": 4466777.422790202,
+            "search_efficiency": 587725.6358158762,
             "data_integrity": true
           }
         ],
-        "average_storage_rate": 4176869.7965341564,
-        "average_retrieval_rate": 4247912.790509211,
+        "average_storage_rate": 3762938.2014166415,
+        "average_retrieval_rate": 4567026.733005198,
         "data_integrity_maintained": true,
         "storage_system_efficient": true
       }
