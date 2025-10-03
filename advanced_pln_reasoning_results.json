@@ -1,0 +1,394 @@
+{
+  "Problem-Solving Agent": {
+    "goal": "agent_can_complete_project",
+    "initial_facts": 8,
+    "reasoning_steps": [
+      {
+        "rule": "deduction_rule",
+        "premises": [
+          "agent_has_javascript_knowledge",
+          "ui_framework_requires_javascript_knowledge"
+        ],
+        "conclusion": "agent_can_develop_frontend",
+        "confidence": 0.9
+      },
+      {
+        "rule": "deduction_rule",
+        "premises": [
+          "agent_has_sql_knowledge",
+          "database_requires_sql_knowledge"
+        ],
+        "conclusion": "agent_can_develop_backend",
+        "confidence": 0.9
+      },
+      {
+        "rule": "fuzzy_conjunction_rule",
+        "premises": [
+          "agent_can_develop_frontend",
+          "agent_can_develop_backend"
+        ],
+        "conclusion": "agent_can_complete_project",
+        "confidence": 0.85
+      }
+    ],
+    "final_facts": 11,
+    "goal_achieved": true,
+    "confidence": 0.85
+  },
+  "Learning Agent": {
+    "initial_knowledge": 5,
+    "observations": 4,
+    "learning_steps": [
+      {
+        "rule": "pattern_recognition_rule",
+        "observation": [
+          "python_code",
+          "has_indentation_rules",
+          0.85
+        ],
+        "learned": [
+          "python",
+          "has_syntax_constraints",
+          0.765
+        ],
+        "confidence": 0.765
+      },
+      {
+        "rule": "pattern_recognition_rule",
+        "observation": [
+          "javascript_code",
+          "has_bracket_rules",
+          0.87
+        ],
+        "learned": [
+          "javascript",
+          "has_syntax_constraints",
+          0.783
+        ],
+        "confidence": 0.783
+      },
+      {
+        "rule": "generalization_rule",
+        "specific_cases": [
+          [
+            "python",
+            "has_syntax_constraints",
+            0.765
+          ],
+          [
+            "javascript",
+            "has_syntax_constraints",
+            0.783
+          ]
+        ],
+        "generalization": [
+          "programming_languages",
+          "have_specific_syntax_rules",
+          0.75
+        ],
+        "confidence": 0.75
+      }
+    ],
+    "learned_knowledge": [
+      [
+        "python",
+        "has_syntax_constraints",
+        0.765
+      ],
+      [
+        "javascript",
+        "has_syntax_constraints",
+        0.783
+      ],
+      [
+        "programming_languages",
+        "have_specific_syntax_rules",
+        0.75
+      ]
+    ],
+    "knowledge_growth": 3
+  },
+  "Multi-Modal Reasoning": {
+    "modalities": 3,
+    "reasoning_chain": [
+      {
+        "modality": "textual",
+        "conclusion": "message_requires_urgent_response",
+        "confidence": 0.6732
+      },
+      {
+        "modality": "temporal",
+        "conclusion": "system_can_process_immediately",
+        "confidence": 0.874
+      },
+      {
+        "modality": "contextual",
+        "conclusion": "user_deserves_priority_response",
+        "confidence": 0.6120000000000001
+      },
+      {
+        "rule": "multi_modal_conjunction",
+        "modalities": [
+          "textual",
+          "temporal",
+          "contextual"
+        ],
+        "conclusion": "agent_should_provide_immediate_priority_response",
+        "confidence": 0.36008660160000006
+      }
+    ],
+    "final_conclusion": {
+      "rule": "multi_modal_conjunction",
+      "modalities": [
+        "textual",
+        "temporal",
+        "contextual"
+      ],
+      "conclusion": "agent_should_provide_immediate_priority_response",
+      "confidence": 0.36008660160000006
+    },
+    "confidence": 0.36008660160000006,
+    "decision": "standard_response"
+  },
+  "Causal Inference": {
+    "causal_observations": 7,
+    "causal_inferences": [
+      {
+        "rule": "causal_chain",
+        "chain": "lectures \u2192 engagement \u2192 comprehension \u2192 test_scores",
+        "probability": 0.459,
+        "student": "alice"
+      },
+      {
+        "rule": "causal_chain",
+        "chain": "study \u2192 retention \u2192 test_scores",
+        "probability": 0.54366,
+        "student": "alice"
+      },
+      {
+        "rule": "causal_chain",
+        "chain": "sleep \u2192 cognitive \u2192 comprehension \u2192 test_scores",
+        "probability": 0.26775,
+        "student": "alice"
+      },
+      {
+        "rule": "causal_combination",
+        "method": "noisy_or",
+        "individual_factors": {
+          "test_scores_via_lectures": 0.459,
+          "test_scores_via_study": 0.54366,
+          "test_scores_via_sleep": 0.26775
+        },
+        "combined_probability": 0.819222163935
+      }
+    ],
+    "predictions": {
+      "test_scores_via_lectures": 0.459,
+      "test_scores_via_study": 0.54366,
+      "test_scores_via_sleep": 0.26775
+    },
+    "combined_probability": 0.819222163935,
+    "interventions": [
+      {
+        "target": "sleep_improvement",
+        "expected_boost": 0.17849999999999994,
+        "action": "recommend_better_sleep_schedule"
+      }
+    ]
+  },
+  "Meta-Cognitive Reasoning": {
+    "strategies_evaluated": 4,
+    "meta_reasoning_steps": [
+      {
+        "rule": "strategy_evaluation",
+        "strategy": "deductive_reasoning",
+        "base_effectiveness": 0.9,
+        "problem_fit": 0.4,
+        "past_performance": 0.65,
+        "combined_score": 0.6625
+      },
+      {
+        "rule": "strategy_evaluation",
+        "strategy": "inductive_reasoning",
+        "base_effectiveness": 0.85,
+        "problem_fit": 0.7,
+        "past_performance": 0.75,
+        "combined_score": 0.7725
+      },
+      {
+        "rule": "strategy_evaluation",
+        "strategy": "abductive_reasoning",
+        "base_effectiveness": 0.8,
+        "problem_fit": 0.85,
+        "past_performance": 0.82,
+        "combined_score": 0.8225
+      },
+      {
+        "rule": "strategy_evaluation",
+        "strategy": "analogical_reasoning",
+        "base_effectiveness": 0.75,
+        "problem_fit": 0.6,
+        "past_performance": 0.58,
+        "combined_score": 0.655
+      },
+      {
+        "rule": "strategy_selection",
+        "selected_strategy": "abductive_reasoning",
+        "selection_confidence": 0.8225,
+        "alternatives": {
+          "deductive_reasoning": 0.6625,
+          "inductive_reasoning": 0.7725,
+          "analogical_reasoning": 0.655
+        }
+      },
+      {
+        "rule": "confidence_assessment",
+        "confidence_level": "low_confidence",
+        "confidence_gap": 0.050000000000000044,
+        "recommendation": "gather_more_info"
+      }
+    ],
+    "strategy_scores": {
+      "deductive_reasoning": 0.6625,
+      "inductive_reasoning": 0.7725,
+      "abductive_reasoning": 0.8225,
+      "analogical_reasoning": 0.655
+    },
+    "selected_strategy": "abductive_reasoning",
+    "selection_confidence": 0.8225,
+    "confidence_assessment": "low_confidence"
+  },
+  "Collaborative Agent Network": {
+    "agents_involved": 3,
+    "task_allocations": [
+      {
+        "requirement": "analyze_customer_behavior_patterns",
+        "assigned_agent": "agent_alpha",
+        "match_score": 0.955
+      },
+      {
+        "requirement": "validate_recommendation_logic",
+        "assigned_agent": "agent_beta",
+        "match_score": 0.865
+      },
+      {
+        "requirement": "generate_creative_recommendation_strategies",
+        "assigned_agent": "agent_gamma",
+        "match_score": 0.68
+      }
+    ],
+    "collaboration_steps": [
+      {
+        "rule": "capability_matching",
+        "requirement": "analyze_customer_behavior_patterns",
+        "assigned_to": "agent_alpha",
+        "confidence": 0.955
+      },
+      {
+        "rule": "capability_matching",
+        "requirement": "validate_recommendation_logic",
+        "assigned_to": "agent_beta",
+        "confidence": 0.865
+      },
+      {
+        "rule": "capability_matching",
+        "requirement": "generate_creative_recommendation_strategies",
+        "assigned_to": "agent_gamma",
+        "confidence": 0.68
+      },
+      {
+        "rule": "result_integration",
+        "contributor": "agent_alpha",
+        "contribution": "customer_segments_identified",
+        "confidence": 0.88
+      },
+      {
+        "rule": "result_integration",
+        "contributor": "agent_beta",
+        "contribution": "recommendation_logic_validated",
+        "confidence": 0.92
+      },
+      {
+        "rule": "result_integration",
+        "contributor": "agent_gamma",
+        "contribution": "creative_strategies_generated",
+        "confidence": 0.85
+      },
+      {
+        "rule": "collaborative_conjunction",
+        "contributors": [
+          "agent_alpha",
+          "agent_beta",
+          "agent_gamma"
+        ],
+        "integrated_solution": [
+          "segment_A_prefers_electronics",
+          "segment_B_prefers_books",
+          "segment_C_prefers_clothing",
+          "collaborative_filtering_sound",
+          "content_based_filtering_sound",
+          "hybrid_approach_optimal",
+          "seasonal_theme_recommendations",
+          "social_influence_recommendations",
+          "surprise_serendipity_recommendations"
+        ],
+        "overall_confidence": 0.68816,
+        "synergy_bonus": 0.05
+      }
+    ],
+    "agent_results": {
+      "agent_alpha": {
+        "findings": "customer_segments_identified",
+        "confidence": 0.88,
+        "data": [
+          "segment_A_prefers_electronics",
+          "segment_B_prefers_books",
+          "segment_C_prefers_clothing"
+        ]
+      },
+      "agent_beta": {
+        "findings": "recommendation_logic_validated",
+        "confidence": 0.92,
+        "data": [
+          "collaborative_filtering_sound",
+          "content_based_filtering_sound",
+          "hybrid_approach_optimal"
+        ]
+      },
+      "agent_gamma": {
+        "findings": "creative_strategies_generated",
+        "confidence": 0.85,
+        "data": [
+          "seasonal_theme_recommendations",
+          "social_influence_recommendations",
+          "surprise_serendipity_recommendations"
+        ]
+      }
+    },
+    "integrated_solution": [
+      "segment_A_prefers_electronics",
+      "segment_B_prefers_books",
+      "segment_C_prefers_clothing",
+      "collaborative_filtering_sound",
+      "content_based_filtering_sound",
+      "hybrid_approach_optimal",
+      "seasonal_theme_recommendations",
+      "social_influence_recommendations",
+      "surprise_serendipity_recommendations"
+    ],
+    "final_confidence": 0.73816,
+    "collaboration_success": true
+  },
+  "_summary": {
+    "start_time": "2025-09-24T04:16:26.860282",
+    "end_time": "2025-09-24T04:16:26.861616",
+    "duration_seconds": 0.001334,
+    "examples_run": 6,
+    "successful_examples": 6,
+    "total_reasoning_steps": 27,
+    "successful_inferences": 27,
+    "pln_available": false,
+    "success_rate": 1.0,
+    "avg_steps_per_example": 4.5
+  }
+}
