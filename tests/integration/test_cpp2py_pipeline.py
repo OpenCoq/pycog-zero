@@ -273,6 +273,38 @@ class TestEndToEndWorkflow:
         # Should not include Python binding validation output
         assert "Python Bindings Validation Results" not in result.stdout
         assert result.returncode in [0, 1]  # 0 if deps found, 1 if missing
+    
+    def test_phase_5_final_integration_status(self):
+        """Test Phase 5 final integration testing using status command."""
+        script_path = project_root / "scripts" / "cpp2py_conversion_pipeline.py"
+        
+        # Test overall status shows complete integration
+        result = subprocess.run([
+            "python", str(script_path), "status"
+        ], capture_output=True, text=True, cwd=project_root)
+        
+        assert result.returncode == 0
+        assert "Overall Status" in result.stdout
+        assert "phase_5_language_integration" in result.stdout
+        
+        # Verify all phases show completion status
+        phase_lines = [line for line in result.stdout.split('\n') 
+                      if 'phase_' in line and '/' in line]
+        assert len(phase_lines) == 6  # All 6 phases should be shown
+        
+        # Test Phase 5 specific status
+        result_phase5 = subprocess.run([
+            "python", str(script_path), "status", "--phase", "phase_5_language_integration"
+        ], capture_output=True, text=True, cwd=project_root)
+        
+        assert result_phase5.returncode == 0
+        assert "Phase: phase_5_language_integration" in result_phase5.stdout
+        assert "Total components: 1" in result_phase5.stdout
+        assert "opencog:" in result_phase5.stdout
+        
+        # The opencog component should either be cloned or show a valid status
+        # This validates the final integration testing capability
+        assert "Component status:" in result_phase5.stdout
 
 
 @pytest.mark.integration
