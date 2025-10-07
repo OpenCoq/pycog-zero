@@ -1,0 +1,38 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - "alert_rules.yml"
+
+scrape_configs:
+  - job_name: 'pycog-zero-web'
+    static_configs:
+      - targets: ['pycog-zero-web:80']
+    scrape_interval: 30s
+    metrics_path: '/metrics'
+    scrape_timeout: 10s
+    
+  - job_name: 'pycog-zero-cognitive'
+    static_configs:
+      - targets: ['pycog-zero-web:80']
+    scrape_interval: 60s
+    metrics_path: '/cognitive/metrics'
+    scrape_timeout: 15s
+    
+  - job_name: 'pycog-zero-health'
+    static_configs:
+      - targets: ['pycog-zero-web:80']
+    scrape_interval: 10s
+    metrics_path: '/health'
+    scrape_timeout: 5s
+
+  - job_name: 'docker'
+    static_configs:
+      - targets: ['localhost:9323']
+    scrape_interval: 30s
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
