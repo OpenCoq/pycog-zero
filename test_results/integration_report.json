@@ -1,6 +1,6 @@
 {
   "test_suite": "integration",
-  "timestamp": 1758613684.7100086,
+  "timestamp": 1759456848.752998,
   "environment": {
     "opencog_available": false,
     "agent_zero_available": false,
@@ -8,134 +8,15 @@
     "multi_agent_coordination": true,
     "test_mode": true
   },
-  "total_tests": 5,
-  "passed_tests": 4,
+  "total_tests": 1,
+  "passed_tests": 0,
   "failed_tests": 1,
-  "success_rate": 0.8,
+  "success_rate": 0.0,
   "test_results": [
-    {
-      "test_name": "opencog_atomspace_integration",
-      "success": true,
-      "timestamp": 1758613684.7096584,
-      "details": {
-        "atomspace_created": true,
-        "nodes_created": 5,
-        "links_created": 3,
-        "query_successful": true,
-        "persistence_working": false,
-        "status": "mock_success"
-      }
-    },
-    {
-      "test_name": "agent_zero_framework_compatibility",
-      "success": true,
-      "timestamp": 1758613684.709715,
-      "details": {
-        "agent_created": true,
-        "capabilities_accessible": true,
-        "message_processing": true,
-        "tool_interface_working": true,
-        "agent_zero_compatible": true,
-        "status": "success"
-      }
-    },
-    {
-      "test_name": "neural_symbolic_bridge",
-      "success": true,
-      "timestamp": 1758613684.7097511,
-      "details": {
-        "neural_data_processing": true,
-        "symbolic_data_processing": true,
-        "bridge_functionality": {
-          "neural_to_symbolic": true,
-          "symbolic_to_neural": true,
-          "bidirectional_conversion": true,
-          "data_integrity_preserved": true,
-          "real_time_conversion": true
-        },
-        "conversion_successful": true,
-        "performance_acceptable": true,
-        "status": "success"
-      }
-    },
-    {
-      "test_name": "multi_agent_cognitive_coordination",
-      "success": true,
-      "timestamp": 1758613684.709825,
-      "details": {
-        "agents_created": 4,
-        "coordination_tests": [
-          {
-            "agent": "reasoner_1",
-            "task_processed": true,
-            "specialization_applied": true
-          },
-          {
-            "agent": "memory_1",
-            "task_processed": true,
-            "specialization_applied": true
-          },
-          {
-            "agent": "learner_1",
-            "task_processed": true,
-            "specialization_applied": true
-          },
-          {
-            "agent": "coordinator_1",
-            "task_processed": true,
-            "specialization_applied": true
-          }
-        ],
-        "knowledge_sharing_results": [
-          {
-            "agent": "reasoner_1",
-            "sharing_successful": true,
-            "knowledge_received": true
-          },
-          {
-            "agent": "memory_1",
-            "sharing_successful": true,
-            "knowledge_received": true
-          },
-          {
-            "agent": "learner_1",
-            "sharing_successful": true,
-            "knowledge_received": true
-          },
-          {
-            "agent": "coordinator_1",
-            "sharing_successful": true,
-            "knowledge_received": true
-          }
-        ],
-        "communication_results": [
-          {
-            "from": "reasoner_1",
-            "to": "memory_1",
-            "communication_successful": true
-          },
-          {
-            "from": "memory_1",
-            "to": "learner_1",
-            "communication_successful": true
-          },
-          {
-            "from": "learner_1",
-            "to": "coordinator_1",
-            "communication_successful": true
-          }
-        ],
-        "multi_agent_system_functional": true,
-        "coordination_effective": true,
-        "knowledge_sharing_working": true,
-        "communication_working": true,
-        "status": "success"
-      }
-    },
     {
       "test_name": "cognitive_persistence_integration",
       "success": false,
-      "timestamp": 1758613684.7099876,
+      "timestamp": 1759456848.735989,
       "details": {
         "persistence_operations": [
           {
