@@ -62,6 +62,13 @@ try:
 except ImportError:
     ATOMSPACE_TOOLS_AVAILABLE = False
 
+# Import AtomSpace-Rocks optimizer for performance-optimized storage
+try:
+    from python.tools.atomspace_rocks_optimizer import AtomSpaceRocksOptimizer
+    ATOMSPACE_ROCKS_AVAILABLE = True
+except ImportError:
+    ATOMSPACE_ROCKS_AVAILABLE = False
+
 # Import URE tools for rule-based reasoning
 try:
     from python.tools.ure_tool import UREChainTool
@@ -958,6 +965,9 @@ class CognitiveReasoningTool(Tool):
                     # Initialize cross-tool integration
                     self._setup_cross_tool_integration()
                     
+                    # Initialize AtomSpace-Rocks optimization if available
+                    self._setup_atomspace_rocks_integration()
+                    
                     # Register with ECAN coordinator for attention management
                     if ECAN_COORDINATOR_AVAILABLE:
                         register_tool_with_ecan("cognitive_reasoning", default_priority=1.5)
@@ -1026,6 +1036,62 @@ class CognitiveReasoningTool(Tool):
             )
         except Exception as e:
             print(f"⚠️ Tool registration failed: {e}")
+    
+    def _setup_atomspace_rocks_integration(self):
+        """Setup AtomSpace-Rocks performance optimization integration."""
+        if not ATOMSPACE_ROCKS_AVAILABLE:
+            print("⚠️ AtomSpace-Rocks optimizer not available")
+            return
+        
+        try:
+            # Initialize the AtomSpace-Rocks optimizer
+            self.rocks_optimizer = AtomSpaceRocksOptimizer()
+            
+            # Check if the rocks optimizer is functional
+            if hasattr(self.rocks_optimizer, '_initialize_if_needed'):
+                if self.rocks_optimizer._initialize_if_needed():
+                    print("✓ AtomSpace-Rocks optimization enabled for cognitive reasoning")
+                    
+                    # Set up performance monitoring integration
+                    self._setup_rocks_performance_monitoring()
+                else:
+                    print("⚠️ AtomSpace-Rocks optimizer initialization failed")
+                    self.rocks_optimizer = None
+            
+        except Exception as e:
+            print(f"⚠️ AtomSpace-Rocks integration setup failed: {e}")
+            self.rocks_optimizer = None
+    
+    def _setup_rocks_performance_monitoring(self):
+        """Setup performance monitoring for AtomSpace-Rocks operations."""
+        if not hasattr(self, 'rocks_optimizer') or not self.rocks_optimizer:
+            return
+        
+        try:
+            # Add performance metrics for rocks operations
+            self.operation_stats.update({
+                'rocks_operations': 0,
+                'rocks_cached_operations': 0,
+                'rocks_avg_latency': 0.0
+            })
+            
+            # Configure rocks optimizer for cognitive operations
+            rocks_config = {
+                "performance_optimization": {
+                    "cognitive_reasoning": True,
+                    "batch_size": 100,
+                    "cache_results": True
+                }
+            }
+            
+            # Apply configuration if the optimizer supports it
+            if hasattr(self.rocks_optimizer, '_config'):
+                self.rocks_optimizer._config.update(rocks_config)
+                
+            print("✓ AtomSpace-Rocks performance monitoring configured")
+            
+        except Exception as e:
+            print(f"⚠️ Rocks performance monitoring setup failed: {e}")
     
     def _setup_fallback_mode(self):
         """Setup fallback mode when OpenCog is not available."""
@@ -1317,8 +1383,10 @@ class CognitiveReasoningTool(Tool):
             # Convert natural language query to AtomSpace representation
             query_atoms = self.parse_query_to_atoms(query, reasoning_context)
             
-            # Check if atomspace-rocks optimization is available
+            # Check if atomspace-rocks optimization is available and apply optimizations
             storage_optimization = self._get_storage_optimization_info()
+            if hasattr(self, 'rocks_optimizer') and self.rocks_optimizer:
+                reasoning_context = await self._apply_rocks_optimizations(reasoning_context, query_atoms)
             
             # Perform multi-modal reasoning based on configuration
             reasoning_results = await self._execute_enhanced_reasoning(query_atoms, reasoning_context)
@@ -1615,6 +1683,40 @@ class CognitiveReasoningTool(Tool):
         
         # Limit to most relevant concepts
         return concepts[:8]  # Limit to 8 concepts for attention management
+    
+    async def _apply_rocks_optimizations(self, reasoning_context: Dict, query_atoms: List) -> Dict:
+        """Apply AtomSpace-Rocks optimizations to reasoning context."""
+        if not hasattr(self, 'rocks_optimizer') or not self.rocks_optimizer:
+            return reasoning_context
+        
+        try:
+            # Update operation statistics for rocks
+            if 'rocks_operations' in self.operation_stats:
+                self.operation_stats['rocks_operations'] += 1
+            
+            # Check if rocks optimizer can accelerate atom operations
+            optimized_context = reasoning_context.copy()
+            
+            # Apply batch optimization for atom queries if we have many atoms
+            if len(query_atoms) > 10:
+                optimized_context['use_batch_operations'] = True
+                optimized_context['batch_size'] = min(100, len(query_atoms))
+            
+            # Enable performance monitoring for this reasoning session
+            optimized_context['rocks_performance_monitoring'] = True
+            
+            # Add storage optimization hints
+            optimized_context['storage_optimization'] = {
+                'use_rocks_cache': True,
+                'enable_compression': True,
+                'parallel_queries': len(query_atoms) > 5
+            }
+            
+            return optimized_context
+            
+        except Exception as e:
+            print(f"⚠️ AtomSpace-Rocks optimization failed: {e}")
+            return reasoning_context
     
     def _get_storage_optimization_info(self):
         """Get information about atomspace-rocks storage optimization availability."""
