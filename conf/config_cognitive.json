@@ -11,7 +11,8 @@
     "meta_cognition",
     "neural_symbolic_agent",
     "ure_tool",
-    "self_modifying_architecture"
+    "self_modifying_architecture",
+    "external_cognitive_databases"
   ],
   "atomspace_config": {
     "persistence_backend": "file",
@@ -189,6 +190,40 @@
       "success_metrics": true,
       "failure_analysis": true,
       "alert_on_failures": true
+    }
+  },
+  "external_databases": {
+    "enabled": true,
+    "neo4j": {
+      "enabled": false,
+      "uri": "bolt://localhost:7687",
+      "username": "neo4j", 
+      "password": "password",
+      "database": "neo4j"
+    },
+    "sparql": {
+      "enabled": true,
+      "endpoints": [
+        "https://dbpedia.org/sparql",
+        "https://query.wikidata.org/sparql"
+      ],
+      "default_graphs": [],
+      "timeout": 30
+    },
+    "sql_databases": {
+      "enabled": false,
+      "connections": {}
+    },
+    "synchronization": {
+      "auto_sync": false,
+      "sync_interval": 300,
+      "bidirectional": true,
+      "conflict_resolution": "latest_wins"
+    },
+    "knowledge_mapping": {
+      "auto_map_concepts": true,
+      "create_missing_relations": true,
+      "confidence_threshold": 0.7
     }
   }
 }
