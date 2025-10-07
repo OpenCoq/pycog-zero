@@ -1108,6 +1108,8 @@ if __name__ == "__main__":
    - [x] Self-modifying cognitive architectures within Agent-Zero
    - [ ] Production deployment tools for cognitive Agent-Zero systems
    - [x] Integration with external cognitive databases and knowledge graphs
+   - [x] Production deployment tools for cognitive Agent-Zero systems
+   - [ ] Integration with external cognitive databases and knowledge graphs
 
 ## Contributing
 

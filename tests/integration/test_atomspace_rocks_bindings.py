@@ -139,7 +139,7 @@ class TestAtomSpaceRocksOptimizer(unittest.TestCase):
         self.assertIsInstance(optimizer, AtomSpaceRocksOptimizer)
         self.assertFalse(optimizer._initialized)
     
-    @unittest.skipUnless(BINDINGS_AVAILABLE, "AtomSpace-Rocks optimizer not available")
+    @unittest.skipUnless(BINDINGS_AVAILABLE and OPENCOG_AVAILABLE, "AtomSpace-Rocks optimizer or OpenCog not available")
     def test_optimizer_status(self):
         """Test optimizer status reporting."""
         optimizer = AtomSpaceRocksOptimizer()
@@ -153,7 +153,7 @@ class TestAtomSpaceRocksOptimizer(unittest.TestCase):
         self.assertIn('rocks_storage_available', status)
         self.assertIn('initialized', status)
     
-    @unittest.skipUnless(BINDINGS_AVAILABLE, "AtomSpace-Rocks optimizer not available")
+    @unittest.skipUnless(BINDINGS_AVAILABLE and OPENCOG_AVAILABLE, "AtomSpace-Rocks optimizer or OpenCog not available")
     def test_optimizer_help(self):
         """Test optimizer help functionality."""
         optimizer = AtomSpaceRocksOptimizer()
