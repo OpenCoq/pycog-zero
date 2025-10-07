@@ -232,6 +232,10 @@ pycog-zero/
    - [ ] Performance optimize PLN integration for real-time agent operations
 
 6. **Complete Integration and Deployment (Phase 5)**:
+   - [ ] Final integration testing using `python3 scripts/cpp2py_conversion_pipeline.py status`
+   - [ ] Validate end-to-end OpenCog stack with `python3 -m pytest tests/integration/ -v`
+   - [x] Create production deployment scripts based on `scripts/build_cpp2py_pipeline.sh`
+   - [ ] Generate comprehensive documentation covering all integrated components
    - [x] **Final integration testing using `python3 scripts/cpp2py_conversion_pipeline.py status`** ✅ COMPLETED
      - [x] All 6 phases (0-5) showing 100% component completion
      - [x] Phase 5 opencog component successfully cloned and integrated
