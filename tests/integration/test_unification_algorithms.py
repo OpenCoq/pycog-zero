@@ -2,14 +2,35 @@
 Unification Algorithm Integration Tests
 ======================================
 
-Specific tests for unification algorithms and pattern matching capabilities
-in the OpenCog unify component integration with PyCog-Zero.
+Comprehensive test suite for validating unification algorithm integration with PyCog-Zero.
+Tests pattern matching, term unification, and cognitive tool integration with existing cognitive tools.
 """
 
 import pytest
 import json
+import asyncio
 from pathlib import Path
-from typing import Dict, List, Tuple, Any
+from typing import Dict, List, Tuple, Any, Optional
+
+# Project paths
+project_root = Path(__file__).parent.parent.parent
+components_dir = project_root / "components"
+unify_path = components_dir / "unify"
+
+# Test AtomSpace availability for unification tests
+try:
+    from opencog.atomspace import AtomSpace, types
+    from opencog.type_constructors import *
+    ATOMSPACE_AVAILABLE = True
+except ImportError:
+    ATOMSPACE_AVAILABLE = False
+
+# Test unification bindings availability (may not be directly available)
+try:
+    from opencog.unify import Unifier  # This may not exist yet
+    UNIFY_BINDINGS_AVAILABLE = True
+except ImportError:
+    UNIFY_BINDINGS_AVAILABLE = False
 
 
 class TestUnificationAlgorithms:
