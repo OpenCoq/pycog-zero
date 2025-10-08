@@ -358,9 +358,9 @@
     "examples_completed": 3
   },
   "_summary": {
-    "start_time": "2025-10-08T08:11:54.018873",
-    "end_time": "2025-10-08T08:11:58.430681",
-    "duration_seconds": 4.411808,
+    "start_time": "2025-10-08T08:14:17.738648",
+    "end_time": "2025-10-08T08:14:22.148350",
+    "duration_seconds": 4.409702,
     "phases_completed": 6,
     "total_phases": 5,
     "examples_run": 6,
