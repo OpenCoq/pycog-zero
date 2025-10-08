@@ -380,9 +380,9 @@
     "collaboration_success": true
   },
   "_summary": {
-    "start_time": "2025-10-08T07:40:10.224936",
-    "end_time": "2025-10-08T07:40:10.225393",
-    "duration_seconds": 0.000457,
+    "start_time": "2025-10-08T07:41:51.259000",
+    "end_time": "2025-10-08T07:41:51.259473",
+    "duration_seconds": 0.000473,
     "examples_run": 6,
     "successful_examples": 6,
     "total_reasoning_steps": 27,

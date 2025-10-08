@@ -121,6 +121,17 @@ class PLNReasoningTool:
         # Lazy initialization - defer expensive setup until first use
         self._setup_reasoning_rules()
         
+    def _initialize_pln(self):
+        """Initialize PLN components with fallback handling."""
+        try:
+            # Use lazy initialization for performance optimization
+            # Actual initialization deferred until first use
+            self._initialized = False
+            print("PLN system initialized (lazy loading enabled)")
+        except Exception as e:
+            print(f"⚠️ PLN initialization warning: {e}")
+            self._initialized = False
+        
     def _initialize_pln_lazy(self):
         """Lazy initialize PLN chainer only when first needed for performance."""
         if self._initialized:
