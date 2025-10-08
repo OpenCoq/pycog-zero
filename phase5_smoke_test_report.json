@@ -12,7 +12,7 @@
       },
       "integration_tests": {
         "status": "PASS",
-        "message": "\u2705 Integration tests running: ============ 1 failed, 92 passed, 27 skipped, 10 warnings in 0.75s ============="
+        "message": "\u2705 Integration tests running: ============ 1 failed, 92 passed, 27 skipped, 10 warnings in 0.77s ============="
       },
       "deployment_scripts": {
         "status": "PASS",
