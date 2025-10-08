@@ -314,9 +314,240 @@ heatmap_path = visualize_attention_heatmap(
     "Scientific Reasoning Attention Pattern"
 )
 print(f"Attention heatmap saved to: {heatmap_path}")
+
+## Agent-Zero Integration Examples
+
+### Agent-Zero Cognitive Task Prioritization
+
+```python
+async def agent_zero_task_prioritization():
+    """Example of using attention mechanisms for Agent-Zero task prioritization."""
+    
+    # Define Agent-Zero cognitive tasks with different priorities
+    cognitive_tasks = {
+        "high_priority": [
+            "critical_system_monitoring",
+            "urgent_problem_solving",
+            "real_time_decision_making"
+        ],
+        "medium_priority": [
+            "knowledge_base_updates",
+            "performance_optimization",
+            "learning_consolidation"
+        ],
+        "low_priority": [
+            "routine_maintenance",
+            "background_processing",
+            "archival_operations"
+        ]
+    }
+    
+    # Load attention configuration
+    with open('conf/config_cognitive.json', 'r') as f:
+        config = json.load(f)
+    
+    attention_config = config['attention_config']
+    ecan_config = attention_config['ecan_config']
+    
+    # Simulate ECAN-based task prioritization
+    prioritized_tasks = []
+    
+    for priority_level, tasks in cognitive_tasks.items():
+        base_weight = {
+            "high_priority": 0.9,
+            "medium_priority": 0.6, 
+            "low_priority": 0.3
+        }[priority_level]
+        
+        for i, task in enumerate(tasks):
+            # Apply ECAN attention allocation principles
+            sti_factor = base_weight * (1 - i * ecan_config['sti_decay_factor'])
+            lti_factor = base_weight * ecan_config.get('lti_decay_factor', 0.01)
+            
+            attention_weight = max(0.1, sti_factor + lti_factor)
+            
+            prioritized_tasks.append({
+                "task": task,
+                "priority_level": priority_level,
+                "attention_weight": attention_weight,
+                "sti_component": sti_factor,
+                "lti_component": lti_factor
+            })
+    
+    # Sort by attention weight
+    prioritized_tasks.sort(key=lambda x: x["attention_weight"], reverse=True)
+    
+    print("Agent-Zero Task Prioritization Results:")
+    print("=" * 50)
+    
+    for task_info in prioritized_tasks:
+        weight_bar = "█" * int(task_info["attention_weight"] * 20) + "░" * (20 - int(task_info["attention_weight"] * 20))
+        print(f"{task_info['task']:<30} │{weight_bar}│ {task_info['attention_weight']:.3f}")
+    
+    return prioritized_tasks
+
+# Execute prioritization
+results = asyncio.run(agent_zero_task_prioritization())
 ```
 
-### Example 7: Dynamic Attention Evolution
+### Agent-Zero Learning Attention Adaptation
+
+```python
+def agent_zero_learning_attention():
+    """Demonstrate adaptive attention for Agent-Zero learning scenarios."""
+    
+    learning_scenarios = [
+        {
+            "scenario": "New Domain Learning",
+            "concepts": ["domain_vocabulary", "core_principles", "application_patterns", "edge_cases"],
+            "learning_phase": "acquisition",
+            "attention_strategy": "broad_exploration"
+        },
+        {
+            "scenario": "Skill Refinement", 
+            "concepts": ["technique_optimization", "error_correction", "performance_metrics", "best_practices"],
+            "learning_phase": "optimization",
+            "attention_strategy": "focused_improvement"
+        },
+        {
+            "scenario": "Knowledge Integration",
+            "concepts": ["cross_domain_connections", "pattern_synthesis", "abstract_principles", "transfer_learning"],
+            "learning_phase": "integration", 
+            "attention_strategy": "connection_building"
+        }
+    ]
+    
+    print("Agent-Zero Learning Attention Adaptation:")
+    print("=" * 50)
+    
+    for scenario in learning_scenarios:
+        print(f"\n📚 Scenario: {scenario['scenario']}")
+        print(f"   Phase: {scenario['learning_phase']}")
+        print(f"   Strategy: {scenario['attention_strategy']}")
+        
+        # Simulate attention allocation based on learning phase
+        strategy_weights = {
+            "broad_exploration": [0.25, 0.25, 0.25, 0.25],  # Equal attention
+            "focused_improvement": [0.1, 0.6, 0.2, 0.1],    # Focus on main skill
+            "connection_building": [0.3, 0.2, 0.3, 0.2]     # Balance synthesis
+        }
+        
+        weights = strategy_weights[scenario["attention_strategy"]]
+        
+        print("   Attention Distribution:")
+        for concept, weight in zip(scenario["concepts"], weights):
+            bar = "█" * int(weight * 30) + "░" * (30 - int(weight * 30))
+            print(f"     {concept:<25} │{bar}│ {weight:.3f}")
+    
+    return learning_scenarios
+```
+
+### Example 7: Agent-Zero Integration Pattern
+
+```python
+from python.tools.meta_cognition import MetaCognitionTool
+from python.helpers.tool import Response
+import asyncio
+
+async def agent_zero_attention_workflow():
+    """Demonstrate Agent-Zero specific attention allocation workflow."""
+    
+    # Initialize with mock agent (replace with real Agent-Zero instance)
+    from unittest.mock import Mock
+    agent = Mock()
+    agent.agent_name = "agent_zero_cognitive"
+    
+    # Create meta-cognition tool for attention allocation
+    meta_tool = MetaCognitionTool(
+        agent=agent,
+        name="meta_cognition",
+        args={}
+    )
+    
+    # Define Agent-Zero specific cognitive tasks
+    cognitive_goals = [
+        "enhance_reasoning_capability",
+        "improve_memory_efficiency", 
+        "optimize_learning_process",
+        "increase_adaptation_speed"
+    ]
+    
+    cognitive_tasks = [
+        "analyze_current_performance",
+        "identify_improvement_areas",
+        "implement_optimizations",
+        "validate_enhancements",
+        "update_knowledge_base"
+    ]
+    
+    # Execute attention-focused cognitive processing
+    response = await meta_tool.execute(
+        operation="attention_focus",
+        goals=cognitive_goals,
+        tasks=cognitive_tasks,
+        importance=90
+    )
+    
+    return response
+
+# Usage in Agent-Zero workflow
+response = asyncio.run(agent_zero_attention_workflow())
+print("Agent-Zero Attention Allocation Result:")
+print(response.message)
+```
+
+### Example 8: Multi-Agent Attention Coordination
+
+```python
+async def multi_agent_attention_coordination():
+    """Demonstrate attention coordination between multiple Agent-Zero instances."""
+    
+    # Define multi-agent coordination scenario
+    coordination_scenario = {
+        "primary_agent": {
+            "goals": ["coordinate_task_distribution", "monitor_agent_performance"],
+            "tasks": ["assign_work_units", "track_progress", "handle_conflicts"]
+        },
+        "worker_agents": [
+            {
+                "id": "worker_1",
+                "goals": ["complete_assigned_tasks", "report_status"],
+                "tasks": ["process_data_chunk", "validate_results"]
+            },
+            {
+                "id": "worker_2", 
+                "goals": ["optimize_processing_speed", "maintain_quality"],
+                "tasks": ["parallel_computation", "quality_checks"]
+            }
+        ]
+    }
+    
+    # Allocate attention for coordination
+    coordination_results = {}
+    
+    for agent_config in [coordination_scenario["primary_agent"]] + coordination_scenario["worker_agents"]:
+        agent_id = agent_config.get("id", "primary")
+        
+        # Mock attention allocation (replace with real meta-cognition tool)
+        attention_result = {
+            "agent_id": agent_id,
+            "allocated_goals": len(agent_config["goals"]),
+            "allocated_tasks": len(agent_config["tasks"]),
+            "attention_focus": agent_config["goals"][0] if agent_config["goals"] else None,
+            "coordination_priority": 0.9 if agent_id == "primary" else 0.7
+        }
+        
+        coordination_results[agent_id] = attention_result
+    
+    return coordination_results
+
+# Execute multi-agent coordination
+results = asyncio.run(multi_agent_attention_coordination())
+for agent_id, result in results.items():
+    print(f"Agent {agent_id}: Focus on '{result['attention_focus']}' (Priority: {result['coordination_priority']})")
+```
+
+### Example 9: Dynamic Attention Evolution
 
 ```python
 def track_attention_evolution(initial_concepts, reasoning_steps, max_steps=5):
