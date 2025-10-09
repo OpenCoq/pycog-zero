@@ -189,8 +189,76 @@
     "examples_completed": 3
   },
   "phase_4_advanced_learning": {
-    "status": "failed",
-    "error": "Tool.__init__() missing 3 required positional arguments: 'method', 'message', and 'loop_data'"
+    "status": "success",
+    "pln_reasoning": {
+      "pln_available": false,
+      "probabilistic_inferences": [
+        {
+          "premise": "Learning improves performance",
+          "confidence": 0.85
+        },
+        {
+          "premise": "Practice leads to mastery",
+          "confidence": 0.78
+        },
+        {
+          "premise": "Knowledge transfers across domains",
+          "confidence": 0.62
+        }
+      ],
+      "average_confidence": 0.75
+    },
+    "uncertainty_handling": {
+      "uncertainty_types": [
+        {
+          "type": "epistemic",
+          "description": "Knowledge uncertainty",
+          "handling": "Bayesian updating"
+        },
+        {
+          "type": "aleatory",
+          "description": "Inherent randomness",
+          "handling": "Monte Carlo simulation"
+        },
+        {
+          "type": "linguistic",
+          "description": "Vague concepts",
+          "handling": "Fuzzy logic"
+        }
+      ],
+      "confidence_ranges": {
+        "high_confidence": [
+          0.8,
+          1.0
+        ],
+        "medium_confidence": [
+          0.5,
+          0.8
+        ],
+        "low_confidence": [
+          0.0,
+          0.5
+        ]
+      },
+      "uncertainty_mechanisms": 3
+    },
+    "adaptive_learning": {
+      "learning_mechanisms": [
+        "Experience-based knowledge update",
+        "Pattern recognition and generalization",
+        "Feedback incorporation",
+        "Meta-learning strategy adaptation",
+        "Transfer learning across domains"
+      ],
+      "learning_metrics": {
+        "knowledge_growth_rate": 0.23,
+        "accuracy_improvement": 0.15,
+        "adaptation_speed": 0.67,
+        "transfer_efficiency": 0.54
+      },
+      "overall_learning_score": 0.3975
+    },
+    "examples_completed": 3
   },
   "phase_5_complete_integration": {
     "status": "success",
@@ -290,21 +358,21 @@
     "examples_completed": 3
   },
   "_summary": {
-    "start_time": "2025-10-03T02:09:50.670346",
-    "end_time": "2025-10-03T02:09:54.494490",
-    "duration_seconds": 3.824144,
-    "phases_completed": 5,
+    "start_time": "2025-10-08T08:17:31.762842",
+    "end_time": "2025-10-08T08:17:36.172843",
+    "duration_seconds": 4.410001,
+    "phases_completed": 6,
     "total_phases": 5,
     "examples_run": 6,
-    "successful_examples": 5,
-    "success_rate": 0.8333333333333334,
-    "cognitive_architecture_complete": true,
+    "successful_examples": 6,
+    "success_rate": 1.0,
+    "cognitive_architecture_complete": false,
     "capabilities_demonstrated": 8,
-    "agent_zero_available": true,
+    "agent_zero_available": false,
     "cognitive_tools_available": {
-      "reasoning": true,
-      "memory": true,
-      "meta_cognition": true
+      "reasoning": false,
+      "memory": false,
+      "meta_cognition": false
     }
   }
 }
