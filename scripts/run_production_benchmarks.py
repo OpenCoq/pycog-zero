@@ -250,10 +250,10 @@ class ProductionBenchmarkOrchestrator:
             ])
         
         # Add specific recommendations based on failures
-        if not self.results["performance_benchmarks"]["success"]:
+        if self.results and self.results.get("performance_benchmarks") and not self.results["performance_benchmarks"]["success"]:
             next_steps.append("🚀 Focus on core performance optimization")
         
-        if not self.results["production_readiness"]["success"]:
+        if self.results and self.results.get("production_readiness") and not self.results["production_readiness"]["success"]:
             next_steps.append("🏭 Address production readiness concerns")
         
         next_steps.extend([
