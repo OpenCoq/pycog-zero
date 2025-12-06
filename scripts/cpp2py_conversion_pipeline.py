@@ -920,24 +920,48 @@ class CPP2PyConversionPipeline:
         
         return integration_success and performance_success
 
-    def generate_performance_report(self, output_file: str = None) -> dict:
-        """Generate a comprehensive performance report."""
+    def generate_performance_report(self, output_file: str = None, use_existing_results: bool = True) -> dict:
+        """Generate a comprehensive performance report.
+        
+        Args:
+            output_file: Optional file path to save the report
+            use_existing_results: If True, use existing benchmark_results.json if available (default: True)
+        
+        Returns:
+            Dictionary containing the performance report
+        """
         logger.info("Generating performance report...")
         
-        # Run performance tests with JSON output
-        benchmark_options = ["--benchmark-json=benchmark_results.json"]
+        results_file = self.root_dir / "benchmark_results.json"
         
-        try:
-            cmd = [
-                sys.executable, "-m", "pytest", 
-                str(self.tests_dir / "performance"), 
-                "--benchmark-only"
-            ] + benchmark_options
-            subprocess.run(cmd, check=True, capture_output=True)
+        # Check if we should use existing results
+        if use_existing_results and results_file.exists():
+            logger.info("Using existing benchmark results from benchmark_results.json")
+        else:
+            # Run performance tests with JSON output
+            benchmark_options = ["--benchmark-json=benchmark_results.json"]
             
-            # Load benchmark results
-            results_file = self.root_dir / "benchmark_results.json"
-            if results_file.exists():
+            try:
+                cmd = [
+                    sys.executable, "-m", "pytest", 
+                    str(self.tests_dir / "performance"), 
+                    "--benchmark-only"
+                ] + benchmark_options
+                # Don't check=True because some tests may fail (e.g., missing dependencies)
+                # We want to generate a report from successful tests
+                result = subprocess.run(cmd, capture_output=True)
+                
+                if result.returncode != 0:
+                    logger.warning("Some performance tests failed, but will generate report from successful tests")
+                    
+            except Exception as e:
+                logger.error(f"Error running performance tests: {e}")
+                if not results_file.exists():
+                    return {}
+        
+        # Load and process benchmark results
+        if results_file.exists():
+            try:
                 with open(results_file, 'r') as f:
                     benchmark_data = json.load(f)
                 
@@ -951,16 +975,21 @@ class CPP2PyConversionPipeline:
                         json.dump(report, f, indent=2)
                     logger.info(f"Performance report saved to {output_path}")
                 
-                # Clean up temporary results file
-                results_file.unlink()
+                # Clean up temporary results file only if not using existing
+                if not use_existing_results:
+                    results_file.unlink()
+                    logger.info("Cleaned up temporary benchmark_results.json")
                 
                 return report
-            else:
-                logger.error("Benchmark results file not found")
-                return {}
                 
-        except subprocess.CalledProcessError:
-            logger.error("Failed to generate performance report")
+            except json.JSONDecodeError as e:
+                logger.error(f"Failed to parse benchmark results: {e}")
+                return {}
+            except Exception as e:
+                logger.error(f"Error processing benchmark results: {e}")
+                return {}
+        else:
+            logger.error("Benchmark results file not found")
             return {}
 
     def _process_benchmark_results(self, benchmark_data: dict) -> dict:
