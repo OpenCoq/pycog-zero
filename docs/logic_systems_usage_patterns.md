@@ -56,6 +56,7 @@ These systems integrate with Agent-Zero's cognitive architecture through:
 **Implementation**:
 
 ```python
+import json
 from python.tools.ure_tool import UREChainTool
 
 # Initialize tool
@@ -104,6 +105,8 @@ except (json.JSONDecodeError, KeyError) as e:
 **Implementation**:
 
 ```python
+import json
+
 # Define goal to prove
 query = "if A implies B and B implies C, then prove A implies C"
 
@@ -146,6 +149,8 @@ except (json.JSONDecodeError, KeyError) as e:
 **Implementation**:
 
 ```python
+import json
+
 # Step 1: Forward chain from facts
 facts_query = "facts: X and Y, rule: X and Y implies Z"
 forward_result = await ure_tool.execute(facts_query, "forward_chain")
@@ -186,6 +191,8 @@ combined_insights = {
 **Implementation**:
 
 ```python
+import json
+
 # Create custom rulebase
 response = await ure_tool.execute(
     query="create reasoning rules for task planning",
@@ -229,6 +236,8 @@ result = await ure_tool.execute(
 **Implementation**:
 
 ```python
+import json
+
 # Get URE status
 response = await ure_tool.execute("", "status")
 
@@ -265,6 +274,7 @@ else:
 **Implementation**:
 
 ```python
+import json
 from python.tools.cognitive_reasoning import CognitiveReasoningTool
 
 cognitive_tool = CognitiveReasoningTool(agent)
@@ -296,6 +306,8 @@ for match in matches:
 **Implementation**:
 
 ```python
+import json
+
 # User query
 user_query = "I want to learn Python programming"
 
@@ -374,6 +386,7 @@ print(f"Reasoning steps: {response.data['reasoning_steps']}")
 **Implementation**:
 
 ```python
+import json
 from python.tools.atomspace_tool_hub import AtomSpaceToolHub
 
 # URE tool shares results automatically
@@ -410,6 +423,7 @@ memory_tool = CognitiveMemoryTool(agent)
 **Implementation**:
 
 ```python
+import json
 from python.tools.meta_cognition import MetaCognitionTool
 
 meta_tool = MetaCognitionTool(agent)
@@ -511,6 +525,8 @@ When OpenCog URE is not available, the system automatically falls back to:
 ### Use Case 1: Task Planning with URE
 
 ```python
+import json
+
 def calculate_plan_confidence(plan_steps, validation_data):
     """Calculate confidence in the generated plan."""
     if not plan_steps:
@@ -555,6 +571,8 @@ async def plan_task_with_ure(task_description: str):
 ### Use Case 2: Knowledge Base Expansion
 
 ```python
+import json
+
 async def expand_knowledge_base(seed_facts: list):
     """Expand knowledge base using forward chaining."""
     
@@ -582,6 +600,8 @@ async def expand_knowledge_base(seed_facts: list):
 ### Use Case 3: Multi-Agent Collaborative Reasoning
 
 ```python
+import json
+
 def measure_synergy(individual_results, synthesis):
     """Measure collaboration benefit from multi-agent reasoning."""
     # Count total individual insights
@@ -634,6 +654,8 @@ async def collaborative_reasoning(problem: str, agents: list):
 ### Use Case 4: Automated Debugging with Logic
 
 ```python
+import json
+
 async def debug_with_logic(code_issue: str, symptoms: list):
     """Debug code issues using logical reasoning."""
     
@@ -669,6 +691,8 @@ async def debug_with_logic(code_issue: str, symptoms: list):
 ### Use Case 5: Learning Rule Discovery
 
 ```python
+import json
+
 async def discover_learning_rules(training_examples: list):
     """Discover learning rules from examples using URE."""
     
@@ -709,6 +733,8 @@ async def discover_learning_rules(training_examples: list):
 ### 1. Always Check URE Availability
 
 ```python
+import json
+
 # Check status before intensive operations
 status = await ure_tool.execute("", "status")
 status_data = json.loads(status.message.split("Data: ")[1])
@@ -743,6 +769,8 @@ response = await ure_tool.execute(
 ### 4. Leverage Shared AtomSpace
 
 ```python
+import json
+
 # Store intermediate results for reuse
 await memory_tool.execute(
     operation="store",
@@ -759,6 +787,7 @@ cached = await memory_tool.execute(
 ### 5. Monitor Performance
 
 ```python
+import json
 import time
 
 start_time = time.time()
@@ -772,6 +801,8 @@ if elapsed > 5.0:
 ### 6. Handle Fallback Gracefully
 
 ```python
+import json
+
 response = await ure_tool.execute(query, "forward_chain")
 data = json.loads(response.message.split("Data: ")[1])
 
@@ -795,6 +826,8 @@ Trace mode provides detailed reasoning steps but impacts performance.
 ### 8. Validate Reasoning Results
 
 ```python
+import json
+
 # Always validate critical reasoning
 if len(response.data['results']) == 0:
     print("Warning: No results from reasoning - check query format")
@@ -870,6 +903,8 @@ elif response.data.get('status') == 'error':
 The following helper functions are used in the patterns above and can be customized for your specific needs:
 
 ```python
+import json
+
 def calculate_confidence(forward_result, backward_result):
     """Calculate combined confidence from forward and backward reasoning."""
     forward_count = len(forward_result.data.get('results', []))
@@ -926,6 +961,7 @@ def safe_parse_response(response):
 ### Pattern 14: Attention-Guided URE
 
 ```python
+import json
 from python.tools.meta_cognition import MetaCognitionTool
 
 # Allocate attention to important atoms
@@ -942,6 +978,8 @@ response = await ure_tool.execute(query, "forward_chain")
 ### Pattern 15: Incremental Reasoning
 
 ```python
+import json
+
 # Build up reasoning incrementally
 facts = ["fact1", "fact2", "fact3"]
 accumulated_knowledge = []
@@ -959,6 +997,7 @@ print(f"Final knowledge base: {len(accumulated_knowledge)} facts")
 ### Pattern 16: Probabilistic Logic Integration
 
 ```python
+import json
 # Combine URE with PLN for probabilistic reasoning
 from python.tools.cognitive_reasoning import CognitiveReasoningTool
 
