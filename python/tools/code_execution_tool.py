@@ -82,8 +82,8 @@ class CodeExecution(Tool):
                 try:
                     from opencog.atomspace import types
                     
-                    # Create execution node
-                    exec_id = f"exec_{runtime}_{int(time.time())}"
+                    # Create execution node with unique ID
+                    exec_id = f"exec_{runtime}_{time.time_ns()}"
                     exec_node = atomspace_hub.add_node(types.ConceptNode, exec_id)
                     runtime_node = atomspace_hub.add_node(types.ConceptNode, f"runtime_{runtime}")
                     

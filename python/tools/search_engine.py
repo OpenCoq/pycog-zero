@@ -58,8 +58,8 @@ class SearchEngine(Tool):
                     from opencog.atomspace import types
                     import time
                     
-                    # Create search query node
-                    search_id = f"search_{int(time.time())}"
+                    # Create search query node with unique ID
+                    search_id = f"search_{time.time_ns()}"
                     search_node = atomspace_hub.add_node(types.ConceptNode, search_id)
                     
                     # Store query terms as concepts
