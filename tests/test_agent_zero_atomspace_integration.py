@@ -99,9 +99,11 @@ def test_integration_is_optional():
             
             with open(tool_path, 'r') as f:
                 content = f.read()
-                # Verify try/except pattern for optional integration
-                assert content.count('try:') >= 2, f"{tool_file} should have multiple try blocks for fallback"
-                assert content.count('except') >= 2, f"{tool_file} should have multiple except blocks for fallback"
+                # Verify key integration patterns
+                assert 'ATOMSPACE_HUB_AVAILABLE' in content, f"{tool_file} should check atomspace availability"
+                assert 'except ImportError:' in content, f"{tool_file} should handle import errors"
+                assert 'except Exception' in content, f"{tool_file} should handle general exceptions"
+                assert 'if ATOMSPACE_HUB_AVAILABLE' in content, f"{tool_file} should conditionally use atomspace"
             
             tools_tested.append(tool_file)
         

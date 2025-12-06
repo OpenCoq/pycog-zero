@@ -1,5 +1,6 @@
 import os
 import asyncio
+import time
 from python.helpers import dotenv, memory, perplexity_search, duckduckgo_search
 from python.helpers.tool import Tool, Response
 from python.helpers.print_style import PrintStyle
@@ -56,7 +57,6 @@ class SearchEngine(Tool):
                 # Import atomspace types only if available
                 try:
                     from opencog.atomspace import types
-                    import time
                     
                     # Create search query node with unique ID
                     search_id = f"search_{time.time_ns()}"
