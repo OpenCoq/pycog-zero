@@ -18,7 +18,7 @@ The updated implementation now supports OpenCog's new Value API, providing riche
 
 ### 2. Type Constructors API
 
-Cleaner, more Pythonic atom creation using type constructors:
+Cleaner, more Pythonic atom creation using specific type constructors:
 
 ```python
 from opencog.type_constructors import ConceptNode, PredicateNode, InheritanceLink
@@ -26,9 +26,11 @@ from opencog.type_constructors import ConceptNode, PredicateNode, InheritanceLin
 # Old way
 atom = atomspace.add_node(types.ConceptNode, "machine_learning")
 
-# New way
+# New way - explicit imports (no wildcards)
 atom = ConceptNode("machine_learning")
 ```
+
+**Note**: We explicitly import only needed type constructors to avoid namespace pollution and maintain code clarity.
 
 ### 3. Value Attachment Methods
 
@@ -93,7 +95,7 @@ Creates an atom that encapsulates reasoning context:
 
 ```python
 context_atom = pln_tool.create_reasoning_context_atom({
-    'name': 'research_context',
+    'name': 'research_context',  # Optional, auto-generated if omitted
     'confidence': 0.9,
     'priority': 2.5,
     'concepts': ['AI', 'machine_learning', 'cognition'],
@@ -101,6 +103,8 @@ context_atom = pln_tool.create_reasoning_context_atom({
     'timestamp': '2024-12-06T10:00:00Z'
 })
 ```
+
+**Note**: If 'name' is not provided, a deterministic hash-based name is generated using MD5 for predictable behavior across Python sessions.
 
 **Parameters:**
 - `context_data`: Dictionary containing context information

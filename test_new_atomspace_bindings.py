@@ -123,15 +123,13 @@ def test_cognitive_reasoning_enhancements():
     """Test the enhanced cognitive reasoning methods"""
     print("\nTesting cognitive reasoning enhancements...")
     try:
-        # Import without triggering full Agent initialization
-        import importlib.util
-        spec = importlib.util.spec_from_file_location(
-            "cognitive_reasoning", 
-            "python/tools/cognitive_reasoning.py"
-        )
+        # Construct path dynamically relative to this test file
+        import pathlib
+        test_dir = pathlib.Path(__file__).parent
+        cognitive_reasoning_path = test_dir / "python" / "tools" / "cognitive_reasoning.py"
         
         # Check if the new methods exist in the file
-        with open("python/tools/cognitive_reasoning.py", 'r') as f:
+        with open(cognitive_reasoning_path, 'r') as f:
             content = f.read()
             
         required_methods = [
@@ -185,7 +183,11 @@ def test_backward_compatibility():
     """Test that fallback modes work when OpenCog is not available"""
     print("\nTesting backward compatibility and fallback modes...")
     try:
-        with open("python/tools/cognitive_reasoning.py", 'r') as f:
+        import pathlib
+        test_dir = pathlib.Path(__file__).parent
+        cognitive_reasoning_path = test_dir / "python" / "tools" / "cognitive_reasoning.py"
+        
+        with open(cognitive_reasoning_path, 'r') as f:
             content = f.read()
         
         # Check for fallback handling

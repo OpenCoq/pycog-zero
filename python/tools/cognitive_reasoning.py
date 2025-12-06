@@ -20,7 +20,11 @@ try:
     from opencog.utilities import initialize_opencog
     # Import new Value types for enhanced atomspace bindings
     from opencog.atomspace import FloatValue, StringValue, LinkValue, BoolValue
-    from opencog.type_constructors import *
+    # Import specific type constructors for cleaner atom creation
+    from opencog.type_constructors import (
+        ConceptNode, PredicateNode, InheritanceLink, SimilarityLink,
+        EdgeLink, ListLink, EvaluationLink, set_default_atomspace
+    )
     OPENCOG_AVAILABLE = True
     VALUE_TYPES_AVAILABLE = True
     
@@ -1007,8 +1011,16 @@ class PLNReasoningTool:
             return None
         
         try:
-            # Create context atom
-            context_name = context_data.get('name', f"reasoning_context_{hash(str(context_data)) % 10000}")
+            import hashlib
+            
+            # Create context atom with deterministic naming
+            context_name = context_data.get('name')
+            if not context_name:
+                # Use deterministic hash for predictable naming
+                context_str = str(sorted(context_data.items()))
+                context_hash = hashlib.md5(context_str.encode()).hexdigest()[:8]
+                context_name = f"reasoning_context_{context_hash}"
+            
             context_atom = ConceptNode(context_name)
             
             # Attach various context values
@@ -1807,7 +1819,9 @@ class CognitiveReasoningTool(Tool):
                         atoms.append(context_node)
                 
                 # Create query concept for the entire query
-                query_concept = ConceptNode(f"query_{hash(query) % 10000}")
+                import hashlib
+                query_hash = hashlib.md5(query.encode()).hexdigest()[:8]
+                query_concept = ConceptNode(f"query_{query_hash}")
                 
                 # Attach query metadata using FloatValue and StringValue
                 query_metadata_key = PredicateNode("query_metadata")
@@ -1840,7 +1854,9 @@ class CognitiveReasoningTool(Tool):
                         atoms.append(context_node)
                 
                 # Create query concept for the entire query
-                query_concept = self.atomspace.add_node(types.ConceptNode, f"query_{hash(query) % 10000}")
+                import hashlib
+                query_hash = hashlib.md5(query.encode()).hexdigest()[:8]
+                query_concept = self.atomspace.add_node(types.ConceptNode, f"query_{query_hash}")
                 atoms.append(query_concept)
                 
                 # Link query concept to component words
