@@ -77,9 +77,9 @@ class TestPhase2LogicSystemsComplete:
         integration_aspects = {
             "unify_integration_ready": (components_dir / "unify").exists(),
             "ure_integration_ready": (components_dir / "ure").exists(),
-            "pattern_matching_implemented": True,  # Tests exist
-            "forward_chaining_implemented": True,  # Tests exist
-            "backward_chaining_implemented": True,  # Tests exist
+            "pattern_matching_implemented": (project_root / "tests" / "integration" / "test_unification_algorithms.py").exists(),
+            "forward_chaining_implemented": (project_root / "tests" / "integration" / "test_rule_engine_ure.py").exists(),
+            "backward_chaining_implemented": (project_root / "tests" / "integration" / "test_rule_engine_ure.py").exists(),
             "agent_zero_tool_integration": (tools_dir / "ure_tool.py").exists(),
             "cognitive_memory_integration": (tools_dir / "cognitive_memory.py").exists(),
             "atomspace_integration": ATOMSPACE_AVAILABLE or (components_dir / "atomspace").exists()
@@ -210,13 +210,35 @@ class TestPhase2LogicSystemsComplete:
     
     def test_agent_zero_logic_tool_integration(self):
         """Test Agent-Zero tool integration with logic systems."""
+        # Check for async tool interface in URE tool
+        ure_tool_path = tools_dir / "ure_tool.py"
+        tool_async_support = False
+        if ure_tool_path.exists():
+            with open(ure_tool_path, 'r') as f:
+                content = f.read()
+                tool_async_support = "async def execute" in content or "asyncio" in content
+        
+        # Check for error handling with try/except blocks
+        tool_error_handling = False
+        if ure_tool_path.exists():
+            with open(ure_tool_path, 'r') as f:
+                content = f.read()
+                tool_error_handling = "try:" in content and "except" in content
+        
+        # Check for cross-tool integration via shared atomspace
+        tool_cross_integration = False
+        if ure_tool_path.exists():
+            with open(ure_tool_path, 'r') as f:
+                content = f.read()
+                tool_cross_integration = "_shared_atomspace" in content or "shared_atomspace" in content
+        
         tool_integration_requirements = {
             "ure_tool_exists": (tools_dir / "ure_tool.py").exists(),
             "cognitive_reasoning_exists": (tools_dir / "cognitive_reasoning.py").exists(),
             "cognitive_memory_exists": (tools_dir / "cognitive_memory.py").exists(),
-            "tool_async_support": True,  # All tools support async operations
-            "tool_error_handling": True,  # Graceful fallbacks implemented
-            "tool_cross_integration": True  # Tools can share AtomSpace
+            "tool_async_support": tool_async_support,
+            "tool_error_handling": tool_error_handling,
+            "tool_cross_integration": tool_cross_integration
         }
         
         integration_score = sum(1 for met in tool_integration_requirements.values() if met)
@@ -456,12 +478,21 @@ class TestPhase2IntegrationQuality:
     
     def test_phase2_roadmap_completion(self):
         """Test Phase 2 roadmap item completion status."""
+        # Check if cpp2py pipeline script exists and can clone repos
+        pipeline_script = project_root / "scripts" / "cpp2py_conversion_pipeline.py"
+        clone_unify_capable = False
+        if pipeline_script.exists():
+            with open(pipeline_script, 'r') as f:
+                content = f.read()
+                # Check if pipeline has clone command and unify component definition
+                clone_unify_capable = "def clone" in content and '"unify"' in content
+        
         roadmap_items = {
-            "clone_unify_repo": False,  # Can be done with cpp2py pipeline
-            "implement_ure_bindings": True,  # URE tool exists with bindings support
-            "test_pattern_matching": True,  # Tests exist and passing
-            "create_integration_tests": True,  # This file and others exist
-            "document_usage_patterns": True  # Documentation exists
+            "clone_unify_repo": clone_unify_capable and (components_dir / "unify").exists(),
+            "implement_ure_bindings": (tools_dir / "ure_tool.py").exists(),
+            "test_pattern_matching": (project_root / "tests" / "integration" / "test_unification_algorithms.py").exists(),
+            "create_integration_tests": Path(__file__).exists(),
+            "document_usage_patterns": (project_root / "docs" / "logic_systems_integration_patterns.md").exists()
         }
         
         completed_count = sum(1 for completed in roadmap_items.values() if completed)
