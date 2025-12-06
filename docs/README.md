@@ -31,6 +31,7 @@ Welcome to the comprehensive documentation for **PyCog-Zero** - the cognitive ag
 ### Advanced Reasoning
 - **[Enhanced Cognitive Reasoning](./enhanced_cognitive_reasoning.md)** - Advanced reasoning capabilities
 - **[Advanced PLN Reasoning](./ADVANCED_PLN_REASONING_EXAMPLES.md)** - Probabilistic Logic Networks
+- **[Logic Systems Usage Patterns](./logic_systems_usage_patterns.md)** - Complete usage patterns for URE and logic systems (NEW)
 - **[Logic Systems Integration](./logic_systems_integration_patterns.md)** - URE and unification patterns
 - **[URE Integration Guide](./ure_integration.md)** - Unified Rule Engine integration
 

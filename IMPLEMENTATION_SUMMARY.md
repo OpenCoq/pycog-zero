@@ -229,6 +229,14 @@ pycog-zero/
      - [x] Roadmap completion tracking (80%+ Phase 2 complete)
      - [x] Updated documentation (`README_logic_systems.md`)
    - [x] Document logic system usage patterns for Agent-Zero integration
+   - [ ] Create logic system integration tests in `tests/integration/`
+   - [x] **Document logic system usage patterns for Agent-Zero integration** ✅ COMPLETED
+     - [x] Created comprehensive usage patterns documentation (`docs/logic_systems_usage_patterns.md`)
+     - [x] Documented 16 distinct usage patterns for URE and logic systems
+     - [x] Included 5 detailed use cases with code examples
+     - [x] Added configuration patterns and best practices
+     - [x] Provided troubleshooting guide and advanced patterns
+     - [x] Cross-referenced with existing tools and demos
 
 4. **Cognitive Systems Enhancement (Phase 3)**:
    - [x] Clone attention system using `python3 scripts/cpp2py_conversion_pipeline.py clone attention`
