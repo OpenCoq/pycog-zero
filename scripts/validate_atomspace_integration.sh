@@ -25,6 +25,7 @@ echo "Running atomspace validation..."
 echo ""
 
 python3 scripts/cpp2py_conversion_pipeline.py validate atomspace
+# Capture exit code immediately to avoid it being overwritten
 validation_result=$?
 
 # Check exit code
