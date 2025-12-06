@@ -12,6 +12,13 @@ from python.helpers.strings import truncate_text as truncate_text_string
 from python.helpers.messages import truncate_text as truncate_text_agent
 import re
 
+# Try to import AtomSpace tool hub for tracking code execution (optional)
+try:
+    from python.tools.atomspace_tool_hub import AtomSpaceToolHub
+    ATOMSPACE_HUB_AVAILABLE = True
+except ImportError:
+    ATOMSPACE_HUB_AVAILABLE = False
+
 
 @dataclass
 class State:
@@ -59,7 +66,61 @@ class CodeExecution(Tool):
             response = self.agent.read_prompt(
                 "fw.code.info.md", info=self.agent.read_prompt("fw.code.no_output.md")
             )
+        
+        # Optional: Track code execution in atomspace for learning
+        if ATOMSPACE_HUB_AVAILABLE and runtime in ["python", "nodejs", "terminal"]:
+            await self._track_execution_in_atomspace(runtime, self.args.get("code", ""), response)
+        
         return Response(message=response, break_loop=False)
+    
+    async def _track_execution_in_atomspace(self, runtime: str, code: str, result: str):
+        """Track code execution in atomspace for cross-tool learning (optional)."""
+        try:
+            atomspace_hub = AtomSpaceToolHub.get_shared_atomspace()
+            if atomspace_hub is not None:
+                # Import atomspace types only if available
+                try:
+                    from opencog.atomspace import types
+                    
+                    # Create execution node
+                    exec_id = f"exec_{runtime}_{int(time.time())}"
+                    exec_node = atomspace_hub.add_node(types.ConceptNode, exec_id)
+                    runtime_node = atomspace_hub.add_node(types.ConceptNode, f"runtime_{runtime}")
+                    
+                    # Link execution to runtime type
+                    atomspace_hub.add_link(types.InheritanceLink, [exec_node, runtime_node])
+                    
+                    # Store success/failure information
+                    success = "error" not in result.lower() and "exception" not in result.lower()
+                    status_node = atomspace_hub.add_node(
+                        types.ConceptNode, 
+                        f"status_{'success' if success else 'failure'}"
+                    )
+                    atomspace_hub.add_link(
+                        types.EvaluationLink,
+                        [
+                            atomspace_hub.add_node(types.PredicateNode, "has_status"),
+                            exec_node,
+                            status_node
+                        ]
+                    )
+                    
+                    # Extract key patterns from code (e.g., function names, imports)
+                    code_patterns = re.findall(r'\b(import|def|class|from)\s+(\w+)', code)
+                    for pattern_type, pattern_name in code_patterns[:5]:  # Limit to 5 patterns
+                        pattern_node = atomspace_hub.add_node(types.ConceptNode, f"{pattern_type}_{pattern_name}")
+                        atomspace_hub.add_link(
+                            types.EvaluationLink,
+                            [
+                                atomspace_hub.add_node(types.PredicateNode, "uses_pattern"),
+                                exec_node,
+                                pattern_node
+                            ]
+                        )
+                except ImportError:
+                    pass  # OpenCog not available, skip tracking
+        except Exception:
+            pass  # Gracefully ignore atomspace errors
 
     def get_log_object(self):
         return self.agent.context.log.log(
