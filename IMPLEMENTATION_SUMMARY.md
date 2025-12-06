@@ -188,8 +188,14 @@ pycog-zero/
    - [ ] Test cogserver multi-agent functionality with existing scripts
    - [ ] Create atomspace-rocks Python bindings for performance optimization
    - [ ] Integrate Agent-Zero tools with atomspace components
-   - [ ] Add performance benchmarking using `scripts/cpp2py_conversion_pipeline.py test`
+   - [x] Add performance benchmarking using `scripts/cpp2py_conversion_pipeline.py test`
+     - [x] Enhanced `generate_performance_report()` to handle test failures gracefully
+     - [x] Added support for `--benchmark-only`, `--report`, `--benchmark-save`, `--benchmark-compare` flags
+     - [x] Implemented comprehensive performance report generation with test categorization
+     - [x] Integrated pytest-benchmark for detailed performance metrics
+     - [x] Updated documentation in `docs/cpp2py/README.md`
    - [ ] Update `python/tools/cognitive_reasoning.py` with new atomspace bindings
+
 
 3. **Logic Systems Integration (Phase 2)**:
    - [ ] Clone and validate unify repository using `python3 scripts/cpp2py_conversion_pipeline.py clone unify`

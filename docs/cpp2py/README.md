@@ -261,15 +261,77 @@ python3 -m pytest tests/integration/test_cpp2py_pipeline.py::TestComponentIntegr
 
 ### Performance Benchmarks
 
-Performance testing for cognitive operations:
+The pipeline includes comprehensive performance benchmarking capabilities using pytest-benchmark:
 
-```python
-# Benchmark AtomSpace operations
-from tests.performance.benchmark_cognitive import CognitiveBenchmark
+**Run Performance Benchmarks**
+```bash
+# Run all performance benchmarks
+python3 scripts/cpp2py_conversion_pipeline.py test --benchmark-only
 
-benchmark = CognitiveBenchmark()
-benchmark.benchmark_atomspace_operations(1000)
-benchmark.benchmark_neural_symbolic_bridge(100)
+# Run benchmarks with custom settings
+python3 scripts/cpp2py_conversion_pipeline.py test --benchmark-only \
+  --benchmark-rounds 10 \
+  --benchmark-warmup 2
+
+# Save benchmark results to file
+python3 scripts/cpp2py_conversion_pipeline.py test --benchmark-only \
+  --benchmark-save my_benchmarks.json
+
+# Compare benchmarks with previous results
+python3 scripts/cpp2py_conversion_pipeline.py test --benchmark-only \
+  --benchmark-compare previous_benchmarks.json
+```
+
+**Generate Performance Reports**
+```bash
+# Generate comprehensive performance report
+python3 scripts/cpp2py_conversion_pipeline.py test --benchmark-only \
+  --report performance_report.json
+
+# The report includes:
+# - Total benchmarks run
+# - Machine information (CPU, memory, OS)
+# - Test categorization (pipeline, component, CLI, memory, scalability)
+# - Performance metrics (fastest/slowest tests)
+# - Detailed timing statistics
+```
+
+**Run Integration Tests with Performance Benchmarks**
+```bash
+# Run both integration tests and performance benchmarks
+python3 scripts/cpp2py_conversion_pipeline.py test --performance
+
+# Run verbose output
+python3 scripts/cpp2py_conversion_pipeline.py test --benchmark-only -v
+```
+
+**Performance Test Categories**
+
+The benchmark suite includes:
+
+1. **Pipeline Performance**: Tests for pipeline initialization and component management
+2. **Component Performance**: Benchmarks for individual OpenCog components
+3. **CLI Performance**: Command-line interface responsiveness tests
+4. **Memory Tests**: Memory usage and efficiency tests
+5. **Scalability Tests**: Multi-component processing and concurrent operations
+
+**Example Report Output**
+```json
+{
+  "summary": {
+    "total_benchmarks": 31,
+    "machine_info": { "cpu": "AMD EPYC", "python_version": "3.12.3" }
+  },
+  "categories": {
+    "pipeline_performance": 2,
+    "component_performance": 19,
+    "cli_performance": 2
+  },
+  "performance_metrics": {
+    "fastest_tests": [...],
+    "slowest_tests": [...]
+  }
+}
 ```
 
 ## Configuration
