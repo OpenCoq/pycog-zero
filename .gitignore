@@ -42,6 +42,15 @@ instruments/**
 
 # Global rule to include .gitkeep files anywhere
 !**/.gitkeep
-agent_history.gif# Ignore CMake build artifacts
+agent_history.gif
+
+# Ignore CMake build artifacts
 components/*/build/
 components/*/test_build/
+components/*/conversion_status.json
+
+# Ignore benchmark results and reports
+benchmark_results.json
+benchmark_save.json
+*_benchmark_report.json
+performance_*.json
