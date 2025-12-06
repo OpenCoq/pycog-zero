@@ -68,8 +68,16 @@ query = "given A is true and A implies B, derive consequences"
 response = await ure_tool.execute(query, "forward_chain")
 
 # Access results
-data = json.loads(response.message.split("Data: ")[1])
-print(f"Inferences: {data['results']}")
+try:
+    # Parse response data safely
+    if "Data: " in response.message:
+        data = json.loads(response.message.split("Data: ")[1])
+        print(f"Inferences: {data['results']}")
+    else:
+        # Fallback: access data directly
+        print(f"Inferences: {response.data.get('results', [])}")
+except (json.JSONDecodeError, KeyError) as e:
+    print(f"Error parsing response: {e}")
 ```
 
 **Configuration**:
@@ -103,9 +111,15 @@ query = "if A implies B and B implies C, then prove A implies C"
 response = await ure_tool.execute(query, "backward_chain")
 
 # Extract proof steps
-data = json.loads(response.message.split("Data: ")[1])
-proof_steps = data['results']
-print(f"Proof completed in {len(proof_steps)} steps")
+try:
+    if "Data: " in response.message:
+        data = json.loads(response.message.split("Data: ")[1])
+        proof_steps = data['results']
+    else:
+        proof_steps = response.data.get('results', [])
+    print(f"Proof completed in {len(proof_steps)} steps")
+except (json.JSONDecodeError, KeyError) as e:
+    print(f"Error parsing response: {e}")
 ```
 
 **Configuration**:
@@ -141,9 +155,21 @@ goal_query = "prove goal G given derived facts"
 backward_result = await ure_tool.execute(goal_query, "backward_chain")
 
 # Step 3: Synthesize results
+def calculate_confidence(forward_result, backward_result):
+    """Calculate combined confidence from forward and backward reasoning."""
+    forward_count = len(forward_result.data.get('results', []))
+    backward_count = len(backward_result.data.get('results', []))
+    
+    # Confidence increases with successful results from both directions
+    forward_conf = min(1.0, forward_count / 10.0)
+    backward_conf = min(1.0, backward_count / 10.0)
+    
+    # Weighted average (backward chaining more reliable for proofs)
+    return (forward_conf * 0.4 + backward_conf * 0.6)
+
 combined_insights = {
-    "forward_inferences": forward_result.data['results'],
-    "backward_proofs": backward_result.data['results'],
+    "forward_inferences": forward_result.data.get('results', []),
+    "backward_proofs": backward_result.data.get('results', []),
     "reasoning_confidence": calculate_confidence(forward_result, backward_result)
 }
 ```
@@ -205,10 +231,19 @@ result = await ure_tool.execute(
 ```python
 # Get URE status
 response = await ure_tool.execute("", "status")
-status_data = json.loads(response.message.split("Data: ")[1])
+
+# Parse status safely
+try:
+    if "Data: " in response.message:
+        status_data = json.loads(response.message.split("Data: ")[1])
+    else:
+        status_data = response.data
+except (json.JSONDecodeError, AttributeError) as e:
+    print(f"Error parsing status: {e}")
+    status_data = {"status": {"ure_initialized": False}}
 
 # Check status
-if status_data['status']['ure_initialized']:
+if status_data.get('status', {}).get('ure_initialized'):
     print("URE fully operational")
     print(f"AtomSpace size: {status_data['status']['atomspace_size']}")
 else:
@@ -476,6 +511,23 @@ When OpenCog URE is not available, the system automatically falls back to:
 ### Use Case 1: Task Planning with URE
 
 ```python
+def calculate_plan_confidence(plan_steps, validation_data):
+    """Calculate confidence in the generated plan."""
+    if not plan_steps:
+        return 0.0
+    
+    # Base confidence on plan completeness
+    plan_confidence = min(1.0, len(plan_steps) / 5.0)
+    
+    # Adjust based on validation results
+    validation_results = validation_data.get('results', [])
+    if validation_results:
+        validation_confidence = min(1.0, len(validation_results) / 3.0)
+        # Weighted average
+        return plan_confidence * 0.6 + validation_confidence * 0.4
+    
+    return plan_confidence * 0.7  # Reduce confidence if no validation
+
 async def plan_task_with_ure(task_description: str):
     """Plan task execution using URE backward chaining."""
     
@@ -485,8 +537,8 @@ async def plan_task_with_ure(task_description: str):
     # Step 2: Backward chain to find requirements
     ure_response = await ure_tool.execute(goal_query, "backward_chain")
     
-    # Step 3: Extract plan steps
-    plan_steps = ure_response.data['results']
+    # Step 3: Extract plan steps safely
+    plan_steps = ure_response.data.get('results', [])
     
     # Step 4: Validate plan
     validation_query = f"validate plan: {plan_steps}"
@@ -495,7 +547,7 @@ async def plan_task_with_ure(task_description: str):
     return {
         "task": task_description,
         "plan": plan_steps,
-        "validation": validation.data['results'],
+        "validation": validation.data.get('results', []),
         "confidence": calculate_plan_confidence(plan_steps, validation.data)
     }
 ```
@@ -530,6 +582,24 @@ async def expand_knowledge_base(seed_facts: list):
 ### Use Case 3: Multi-Agent Collaborative Reasoning
 
 ```python
+def measure_synergy(individual_results, synthesis):
+    """Measure collaboration benefit from multi-agent reasoning."""
+    # Count total individual insights
+    total_individual = sum(len(r.get('insights', [])) for r in individual_results)
+    
+    # Count synthesized insights
+    synthesized_count = len(synthesis.data.get('results', []))
+    
+    # Synergy metric: synthesized insights beyond simple combination
+    if total_individual == 0:
+        return 0.0
+    
+    # Positive synergy when synthesis produces more value than sum of parts
+    synergy_ratio = synthesized_count / total_individual
+    
+    # Synergy is highest when synthesis creates new insights (ratio > 1)
+    return min(1.0, synergy_ratio)
+
 async def collaborative_reasoning(problem: str, agents: list):
     """Multiple agents collaborate using shared URE reasoning."""
     
@@ -547,7 +617,7 @@ async def collaborative_reasoning(problem: str, agents: list):
         
         results.append({
             "agent": agent.name,
-            "insights": response.data['results']
+            "insights": response.data.get('results', [])
         })
     
     # Synthesize insights using backward chaining
@@ -556,7 +626,7 @@ async def collaborative_reasoning(problem: str, agents: list):
     
     return {
         "individual_insights": results,
-        "synthesized_solution": synthesis.data['results'],
+        "synthesized_solution": synthesis.data.get('results', []),
         "collaboration_benefit": measure_synergy(results, synthesis)
     }
 ```
@@ -794,6 +864,64 @@ elif response.data.get('status') == 'error':
 4. Review cross-tool integration logs
 
 ## Advanced Patterns
+
+### Helper Functions
+
+The following helper functions are used in the patterns above and can be customized for your specific needs:
+
+```python
+def calculate_confidence(forward_result, backward_result):
+    """Calculate combined confidence from forward and backward reasoning."""
+    forward_count = len(forward_result.data.get('results', []))
+    backward_count = len(backward_result.data.get('results', []))
+    
+    # Confidence increases with successful results from both directions
+    forward_conf = min(1.0, forward_count / 10.0)
+    backward_conf = min(1.0, backward_count / 10.0)
+    
+    # Weighted average (backward chaining more reliable for proofs)
+    return (forward_conf * 0.4 + backward_conf * 0.6)
+
+def calculate_plan_confidence(plan_steps, validation_data):
+    """Calculate confidence in a generated plan."""
+    if not plan_steps:
+        return 0.0
+    
+    # Base confidence on plan completeness
+    plan_confidence = min(1.0, len(plan_steps) / 5.0)
+    
+    # Adjust based on validation results
+    validation_results = validation_data.get('results', [])
+    if validation_results:
+        validation_confidence = min(1.0, len(validation_results) / 3.0)
+        return plan_confidence * 0.6 + validation_confidence * 0.4
+    
+    return plan_confidence * 0.7
+
+def measure_synergy(individual_results, synthesis):
+    """Measure collaboration benefit from multi-agent reasoning."""
+    total_individual = sum(len(r.get('insights', [])) for r in individual_results)
+    synthesized_count = len(synthesis.data.get('results', []))
+    
+    if total_individual == 0:
+        return 0.0
+    
+    synergy_ratio = synthesized_count / total_individual
+    return min(1.0, synergy_ratio)
+
+def safe_parse_response(response):
+    """Safely parse URE tool response data."""
+    try:
+        if hasattr(response, 'data') and response.data:
+            return response.data
+        elif "Data: " in str(response.message):
+            return json.loads(response.message.split("Data: ")[1])
+        else:
+            return {"error": "No data available", "results": []}
+    except (json.JSONDecodeError, AttributeError, KeyError) as e:
+        print(f"Error parsing response: {e}")
+        return {"error": str(e), "results": []}
+```
 
 ### Pattern 14: Attention-Guided URE
 
