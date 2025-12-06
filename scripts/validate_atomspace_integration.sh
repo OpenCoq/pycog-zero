@@ -25,9 +25,10 @@ echo "Running atomspace validation..."
 echo ""
 
 python3 scripts/cpp2py_conversion_pipeline.py validate atomspace
+validation_result=$?
 
 # Check exit code
-if [ $? -eq 0 ]; then
+if [ $validation_result -eq 0 ]; then
     echo ""
     echo "=================================="
     echo "✅ VALIDATION SUCCESSFUL"

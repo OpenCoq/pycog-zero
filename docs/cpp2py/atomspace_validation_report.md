@@ -109,6 +109,9 @@ The atomspace component passed all Python binding readiness checks:
 - **Validation Status:** ✅ Validated
 
 ### Status File
+
+The atomspace component status file contains the following information (as recorded in the repository):
+
 ```json
 {
   "component": "atomspace",
@@ -121,9 +124,11 @@ The atomspace component passed all Python binding readiness checks:
   "dependencies": [
     "cogutil"
   ],
-  "last_updated": "Sat Dec  6 05:14:05 UTC 2025"
+  "last_updated": "Sat Dec  6 05:19:10 UTC 2025"
 }
 ```
+
+*Note: The `cloned_at` timestamp reflects when the component was initially cloned in the repository. The `last_updated` timestamp shows when validation was most recently performed.*
 
 ## Integration Tests
 
