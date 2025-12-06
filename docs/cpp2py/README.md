@@ -323,13 +323,20 @@ The benchmark suite includes:
     "machine_info": { "cpu": "AMD EPYC", "python_version": "3.12.3" }
   },
   "categories": {
-    "pipeline_performance": 2,
-    "component_performance": 19,
-    "cli_performance": 2
+    "pipeline_performance": [
+      {"name": "test_pipeline_initialization_performance", "min_time": 1.06, ...},
+      {"name": "test_component_definitions_loading_performance", "min_time": 0.15, ...}
+    ],
+    "component_performance": [...],
+    "cli_performance": [...]
   },
   "performance_metrics": {
-    "fastest_tests": [...],
-    "slowest_tests": [...]
+    "fastest_tests": [
+      {"name": "test_cogutil_validation_performance", "mean_time": 0.000000459}
+    ],
+    "slowest_tests": [
+      {"name": "test_status_command_performance", "mean_time": 0.062334}
+    ]
   }
 }
 ```

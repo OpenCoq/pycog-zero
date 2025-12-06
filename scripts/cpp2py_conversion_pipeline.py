@@ -952,7 +952,12 @@ class CPP2PyConversionPipeline:
                 result = subprocess.run(cmd, capture_output=True)
                 
                 if result.returncode != 0:
-                    logger.warning("Some performance tests failed, but will generate report from successful tests")
+                    # Distinguish between different types of failures
+                    stderr = result.stderr.decode('utf-8') if result.stderr else ""
+                    if "ModuleNotFoundError" in stderr or "ImportError" in stderr:
+                        logger.warning("Some tests failed due to missing dependencies (e.g., nest_asyncio), but will generate report from successful tests")
+                    else:
+                        logger.warning(f"Some performance tests failed (exit code: {result.returncode}), but will generate report from successful tests")
                     
             except Exception as e:
                 logger.error(f"Error running performance tests: {e}")
@@ -977,8 +982,11 @@ class CPP2PyConversionPipeline:
                 
                 # Clean up temporary results file only if not using existing
                 if not use_existing_results:
-                    results_file.unlink()
-                    logger.info("Cleaned up temporary benchmark_results.json")
+                    try:
+                        results_file.unlink()
+                        logger.info("Cleaned up temporary benchmark_results.json")
+                    except OSError as e:
+                        logger.warning(f"Could not delete temporary benchmark results file: {e}")
                 
                 return report
                 
