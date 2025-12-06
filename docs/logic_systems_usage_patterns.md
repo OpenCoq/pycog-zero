@@ -998,8 +998,9 @@ print(f"Final knowledge base: {len(accumulated_knowledge)} facts")
 
 ```python
 import json
-# Combine URE with PLN for probabilistic reasoning
 from python.tools.cognitive_reasoning import CognitiveReasoningTool
+
+# Combine URE with PLN for probabilistic reasoning
 
 # Use URE for logical structure
 logical_structure = await ure_tool.execute(query, "backward_chain")
