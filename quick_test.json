@@ -1,0 +1,422 @@
+{
+  "summary": {
+    "total_benchmarks": 31,
+    "test_session_start": "2025-12-06T05:26:55.489885+00:00",
+    "machine_info": {
+      "node": "runnervmoqczp",
+      "processor": "x86_64",
+      "machine": "x86_64",
+      "python_compiler": "GCC 13.3.0",
+      "python_implementation": "CPython",
+      "python_implementation_version": "3.12.3",
+      "python_version": "3.12.3",
+      "python_build": [
+        "main",
+        "Nov  6 2025 13:44:16"
+      ],
+      "release": "6.11.0-1018-azure",
+      "system": "Linux",
+      "cpu": {
+        "python_version": "3.12.3.final.0 (64 bit)",
+        "cpuinfo_version": [
+          9,
+          0,
+          0
+        ],
+        "cpuinfo_version_string": "9.0.0",
+        "arch": "X86_64",
+        "bits": 64,
+        "count": 4,
+        "arch_string_raw": "x86_64",
+        "vendor_id_raw": "AuthenticAMD",
+        "brand_raw": "AMD EPYC 7763 64-Core Processor",
+        "hz_advertised_friendly": "3.2432 GHz",
+        "hz_actual_friendly": "3.2432 GHz",
+        "hz_advertised": [
+          3243166000,
+          0
+        ],
+        "hz_actual": [
+          3243166000,
+          0
+        ],
+        "stepping": 1,
+        "model": 1,
+        "family": 25,
+        "flags": [
+          "3dnowext",
+          "3dnowprefetch",
+          "abm",
+          "adx",
+          "aes",
+          "aperfmperf",
+          "apic",
+          "arat",
+          "avx",
+          "avx2",
+          "bmi1",
+          "bmi2",
+          "clflush",
+          "clflushopt",
+          "clwb",
+          "clzero",
+          "cmov",
+          "cmp_legacy",
+          "constant_tsc",
+          "cpuid",
+          "cr8_legacy",
+          "cx16",
+          "cx8",
+          "de",
+          "decodeassists",
+          "erms",
+          "extd_apicid",
+          "f16c",
+          "flushbyasid",
+          "fma",
+          "fpu",
+          "fsgsbase",
+          "fsrm",
+          "fxsr",
+          "fxsr_opt",
+          "ht",
+          "hypervisor",
+          "invpcid",
+          "lahf_lm",
+          "lm",
+          "mca",
+          "mce",
+          "misalignsse",
+          "mmx",
+          "mmxext",
+          "movbe",
+          "msr",
+          "mtrr",
+          "nonstop_tsc",
+          "nopl",
+          "npt",
+          "nrip_save",
+          "nx",
+          "osvw",
+          "osxsave",
+          "pae",
+          "pat",
+          "pausefilter",
+          "pcid",
+          "pclmulqdq",
+          "pdpe1gb",
+          "pfthreshold",
+          "pge",
+          "pni",
+          "popcnt",
+          "pse",
+          "pse36",
+          "rdpid",
+          "rdpru",
+          "rdrand",
+          "rdrnd",
+          "rdseed",
+          "rdtscp",
+          "rep_good",
+          "sep",
+          "sha",
+          "sha_ni",
+          "smap",
+          "smep",
+          "sse",
+          "sse2",
+          "sse4_1",
+          "sse4_2",
+          "sse4a",
+          "ssse3",
+          "svm",
+          "syscall",
+          "topoext",
+          "tsc",
+          "tsc_known_freq",
+          "tsc_reliable",
+          "tsc_scale",
+          "umip",
+          "user_shstk",
+          "v_vmsave_vmload",
+          "vaes",
+          "vmcb_clean",
+          "vme",
+          "vmmcall",
+          "vpclmulqdq",
+          "xgetbv1",
+          "xsave",
+          "xsavec",
+          "xsaveerptr",
+          "xsaveopt",
+          "xsaves"
+        ],
+        "l3_cache_size": 524288,
+        "l2_cache_size": 1048576,
+        "l1_data_cache_size": 65536,
+        "l1_instruction_cache_size": 65536,
+        "l2_cache_line_size": 512,
+        "l2_cache_associativity": 6
+      }
+    },
+    "commit_info": {
+      "id": "06ef523d0e8acc220a206a83962510e19f3756da",
+      "time": "2025-12-06T05:24:26Z",
+      "author_time": "2025-12-06T05:24:26Z",
+      "dirty": true,
+      "project": "pycog-zero",
+      "branch": "copilot/add-performance-benchmarking"
+    }
+  },
+  "categories": {
+    "pipeline_performance": [
+      {
+        "name": "test_pipeline_initialization_performance",
+        "min_time": 0.0010669150000239824,
+        "max_time": 0.0016340949999857912,
+        "mean_time": 0.0011174782804544317,
+        "stddev": 4.919016184197267e-05,
+        "rounds": 706
+      },
+      {
+        "name": "test_repeated_pipeline_operations",
+        "min_time": 0.0021474976666316556,
+        "max_time": 0.0021875423333691892,
+        "mean_time": 0.0021675200000004224,
+        "stddev": 2.831585540046539e-05,
+        "rounds": 2
+      }
+    ],
+    "component_performance": [
+      {
+        "name": "test_cogutil_validation_performance",
+        "min_time": 4.3000000005122274e-07,
+        "max_time": 2.3083999963091628e-05,
+        "mean_time": 4.593064209042827e-07,
+        "stddev": 2.0839275769869302e-07,
+        "rounds": 120106
+      },
+      {
+        "name": "test_cogutil_python_bindings_validation_performance",
+        "min_time": 0.004120617000012317,
+        "max_time": 0.012715514999968036,
+        "mean_time": 0.004559531756306669,
+        "stddev": 0.001123625837104811,
+        "rounds": 119
+      },
+      {
+        "name": "test_cogutil_status_reporting_performance",
+        "min_time": 3.69289999753164e-05,
+        "max_time": 9.959699991668458e-05,
+        "mean_time": 4.0023623259223e-05,
+        "stddev": 4.34503210427603e-06,
+        "rounds": 13569
+      },
+      {
+        "name": "test_atomspace_validation_performance",
+        "min_time": 9.66699997206888e-06,
+        "max_time": 4.769899999246263e-05,
+        "mean_time": 1.0193017572320237e-05,
+        "stddev": 1.3136835223547401e-06,
+        "rounds": 45412
+      },
+      {
+        "name": "test_atomspace_python_bindings_validation_performance",
+        "min_time": 0.011005556999975852,
+        "max_time": 0.015696965999950407,
+        "mean_time": 0.011663017278469622,
+        "stddev": 0.0006871809541425493,
+        "rounds": 79
+      },
+      {
+        "name": "test_atomspace_dependency_chain_performance",
+        "min_time": 5.809999947814504e-07,
+        "max_time": 4.813299995021225e-05,
+        "mean_time": 6.77509574377459e-07,
+        "stddev": 3.620067817483945e-07,
+        "rounds": 193799
+      },
+      {
+        "name": "test_ure_validation_performance",
+        "min_time": 1.8343999954595347e-05,
+        "max_time": 7.796600004894572e-05,
+        "mean_time": 1.9615648494381077e-05,
+        "stddev": 2.586923618007743e-06,
+        "rounds": 30284
+      },
+      {
+        "name": "test_ure_complex_dependency_validation_performance",
+        "min_time": 1.9025000028705108e-05,
+        "max_time": 6.710600007409084e-05,
+        "mean_time": 2.0520223522067554e-05,
+        "stddev": 3.357600288086274e-06,
+        "rounds": 28552
+      },
+      {
+        "name": "test_pln_validation_performance",
+        "min_time": 1.8745000033959514e-05,
+        "max_time": 7.157400000323833e-05,
+        "mean_time": 1.9578616008287648e-05,
+        "stddev": 1.8310168607351523e-06,
+        "rounds": 32683
+      },
+      {
+        "name": "test_pln_advanced_dependency_performance",
+        "min_time": 2.8955000061614555e-05,
+        "max_time": 0.0001251679999541011,
+        "mean_time": 3.0362350490790106e-05,
+        "stddev": 3.4739095861305156e-06,
+        "rounds": 19136
+      },
+      {
+        "name": "test_opencog_validation_performance",
+        "min_time": 3.70689999726892e-05,
+        "max_time": 0.000254598000083206,
+        "mean_time": 3.910307792372982e-05,
+        "stddev": 6.274706451560908e-06,
+        "rounds": 18608
+      },
+      {
+        "name": "test_opencog_complete_dependency_chain_performance",
+        "min_time": 0.00010858400003144197,
+        "max_time": 0.00020526499997686187,
+        "mean_time": 0.00011266813147091452,
+        "stddev": 5.1703012234844e-06,
+        "rounds": 7165
+      },
+      {
+        "name": "test_component_python_validation_performance[cogutil]",
+        "min_time": 0.0041317679999792745,
+        "max_time": 0.007134452000059355,
+        "mean_time": 0.004411636227979531,
+        "stddev": 0.0003999871903614901,
+        "rounds": 193
+      },
+      {
+        "name": "test_component_python_validation_performance[atomspace]",
+        "min_time": 0.011025360000076034,
+        "max_time": 0.01696052099998724,
+        "mean_time": 0.01154029759769615,
+        "stddev": 0.0006495460423256993,
+        "rounds": 87
+      },
+      {
+        "name": "test_component_python_validation_performance[ure]",
+        "min_time": 0.006898873000068306,
+        "max_time": 0.009907600000019556,
+        "mean_time": 0.007146573394159725,
+        "stddev": 0.0003950406714982385,
+        "rounds": 137
+      },
+      {
+        "name": "test_component_python_validation_performance[pln]",
+        "min_time": 0.007157867000046281,
+        "max_time": 0.010686395999982778,
+        "mean_time": 0.0073835121119332344,
+        "stddev": 0.0004401483254425254,
+        "rounds": 134
+      },
+      {
+        "name": "test_component_python_validation_performance[opencog]",
+        "min_time": 0.0015738440000632181,
+        "max_time": 0.013836809000054018,
+        "mean_time": 0.0017285530146261675,
+        "stddev": 0.0005581065336870972,
+        "rounds": 547
+      },
+      {
+        "name": "test_validation_command_performance[cogutil]",
+        "min_time": 0.061185718999922756,
+        "max_time": 0.06346005599993987,
+        "mean_time": 0.062140182529413536,
+        "stddev": 0.0007364083572640097,
+        "rounds": 17
+      },
+      {
+        "name": "test_validation_command_performance[atomspace]",
+        "min_time": 0.061215944000082345,
+        "max_time": 0.06497186499996133,
+        "mean_time": 0.06244287382354982,
+        "stddev": 0.0011487169924228001,
+        "rounds": 17
+      }
+    ],
+    "cli_performance": [
+      {
+        "name": "test_status_command_performance",
+        "min_time": 0.06046305000006669,
+        "max_time": 0.06356231699999171,
+        "mean_time": 0.06233436541177686,
+        "stddev": 0.0007497952117039311,
+        "rounds": 17
+      },
+      {
+        "name": "test_help_command_performance",
+        "min_time": 0.06084216600004311,
+        "max_time": 0.0697647000000643,
+        "mean_time": 0.06294943194117263,
+        "stddev": 0.0020159138723410516,
+        "rounds": 17
+      }
+    ],
+    "memory_tests": [],
+    "scalability_tests": [
+      {
+        "name": "test_concurrent_phase_report_generation",
+        "min_time": 0.0005033199998933924,
+        "max_time": 0.0008201419999522841,
+        "mean_time": 0.0005282350068137517,
+        "stddev": 1.848163402499402e-05,
+        "rounds": 1468
+      }
+    ]
+  },
+  "performance_metrics": {
+    "fastest_tests": [
+      {
+        "name": "test_cogutil_validation_performance",
+        "mean_time": 4.593064209042827e-07
+      },
+      {
+        "name": "test_atomspace_dependency_chain_performance",
+        "mean_time": 6.77509574377459e-07
+      },
+      {
+        "name": "test_atomspace_validation_performance",
+        "mean_time": 1.0193017572320237e-05
+      },
+      {
+        "name": "test_pln_validation_performance",
+        "mean_time": 1.9578616008287648e-05
+      },
+      {
+        "name": "test_ure_validation_performance",
+        "mean_time": 1.9615648494381077e-05
+      }
+    ],
+    "slowest_tests": [
+      {
+        "name": "test_atomspace_python_bindings_validation_performance",
+        "mean_time": 0.011663017278469622
+      },
+      {
+        "name": "test_validation_command_performance[cogutil]",
+        "mean_time": 0.062140182529413536
+      },
+      {
+        "name": "test_status_command_performance",
+        "mean_time": 0.06233436541177686
+      },
+      {
+        "name": "test_validation_command_performance[atomspace]",
+        "mean_time": 0.06244287382354982
+      },
+      {
+        "name": "test_help_command_performance",
+        "mean_time": 0.06294943194117263
+      }
+    ],
+    "memory_efficient_tests": [],
+    "high_memory_tests": []
+  }
+}
