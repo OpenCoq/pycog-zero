@@ -18,7 +18,15 @@ from typing import Dict, Any, List, Optional
 try:
     from opencog.atomspace import AtomSpace, types
     from opencog.utilities import initialize_opencog
+    # Import new Value types for enhanced atomspace bindings
+    from opencog.atomspace import FloatValue, StringValue, LinkValue, BoolValue
+    # Import specific type constructors for cleaner atom creation
+    from opencog.type_constructors import (
+        ConceptNode, PredicateNode, InheritanceLink, SimilarityLink,
+        EdgeLink, ListLink, EvaluationLink, set_default_atomspace
+    )
     OPENCOG_AVAILABLE = True
+    VALUE_TYPES_AVAILABLE = True
     
     # Try to import PLN components
     try:
@@ -52,7 +60,12 @@ except ImportError:
     OPENCOG_AVAILABLE = False
     PLN_AVAILABLE = False
     TORCHPLN_AVAILABLE = False
+    VALUE_TYPES_AVAILABLE = False
     TensorTruthValue = None
+    FloatValue = None
+    StringValue = None
+    LinkValue = None
+    BoolValue = None
 
 # Import other atomspace tools for enhanced integration
 try:
@@ -211,22 +224,42 @@ class PLNReasoningTool:
         ]
     
     def create_probabilistic_atom(self, concept_name: str, strength: float = 0.8, confidence: float = 0.9):
-        """Create an atom with probabilistic truth value."""
+        """Create an atom with probabilistic truth value using new atomspace bindings."""
         if not self.atomspace:
             return None
             
         try:
-            from opencog.type_constructors import ConceptNode
-            atom = self.atomspace.add_node(types.ConceptNode, concept_name)
-            
-            # Set probabilistic truth value
-            if TORCHPLN_AVAILABLE:
-                set_ttv(atom, TTruthValue([strength, confidence]))
-            else:
-                # Fallback to regular TruthValue
-                atom.tv = types.TruthValue(strength, confidence)
+            # Use type constructors for cleaner atom creation
+            if VALUE_TYPES_AVAILABLE:
+                atom = ConceptNode(concept_name)
                 
-            return atom
+                # Create a key for truth value storage
+                tv_key = PredicateNode("truth-value")
+                
+                # Store truth value as FloatValue using new bindings
+                tv_value = FloatValue([strength, confidence])
+                atom.set_value(tv_key, tv_value)
+                
+                # Also set traditional TruthValue for backward compatibility
+                if TORCHPLN_AVAILABLE:
+                    set_ttv(atom, TTruthValue([strength, confidence]))
+                else:
+                    atom.tv = types.TruthValue(strength, confidence)
+                    
+                return atom
+            else:
+                # Fallback to original implementation
+                from opencog.type_constructors import ConceptNode
+                atom = self.atomspace.add_node(types.ConceptNode, concept_name)
+                
+                # Set probabilistic truth value
+                if TORCHPLN_AVAILABLE:
+                    set_ttv(atom, TTruthValue([strength, confidence]))
+                else:
+                    # Fallback to regular TruthValue
+                    atom.tv = types.TruthValue(strength, confidence)
+                    
+                return atom
         except Exception as e:
             print(f"⚠️ Error creating probabilistic atom: {e}")
             return None
@@ -893,6 +926,123 @@ class PLNReasoningTool:
                 pass
                 
         return premises
+    
+    def attach_metadata_value(self, atom, key_name: str, value_data):
+        """Attach metadata to an atom using new Value API.
+        
+        Args:
+            atom: The atom to attach metadata to
+            key_name: Name of the metadata key
+            value_data: Data to attach (list of numbers, strings, or atoms)
+        
+        Returns:
+            The atom with attached metadata, or None on error
+        """
+        if not VALUE_TYPES_AVAILABLE or not atom:
+            return atom
+        
+        try:
+            # Create a key for the metadata
+            key = PredicateNode(key_name)
+            
+            # Determine value type and create appropriate Value
+            if isinstance(value_data, list):
+                if all(isinstance(x, (int, float)) for x in value_data):
+                    value = FloatValue(value_data)
+                elif all(isinstance(x, str) for x in value_data):
+                    value = StringValue(value_data)
+                elif all(hasattr(x, 'get_value') for x in value_data):  # Atoms
+                    value = LinkValue(value_data)
+                else:
+                    # Mixed types, convert to strings
+                    value = StringValue([str(x) for x in value_data])
+            elif isinstance(value_data, bool):
+                value = BoolValue(value_data)
+            elif isinstance(value_data, (int, float)):
+                value = FloatValue([value_data])
+            elif isinstance(value_data, str):
+                value = StringValue([value_data])
+            else:
+                value = StringValue([str(value_data)])
+            
+            # Attach the value to the atom
+            atom.set_value(key, value)
+            
+            return atom
+        except Exception as e:
+            print(f"⚠️ Error attaching metadata value: {e}")
+            return atom
+    
+    def get_metadata_value(self, atom, key_name: str):
+        """Retrieve metadata from an atom using new Value API.
+        
+        Args:
+            atom: The atom to retrieve metadata from
+            key_name: Name of the metadata key
+        
+        Returns:
+            The metadata value as a Python list, or None if not found
+        """
+        if not VALUE_TYPES_AVAILABLE or not atom:
+            return None
+        
+        try:
+            key = PredicateNode(key_name)
+            value = atom.get_value(key)
+            
+            if value:
+                # Convert Value to Python list
+                return list(value)
+            return None
+        except Exception as e:
+            print(f"⚠️ Error retrieving metadata value: {e}")
+            return None
+    
+    def create_reasoning_context_atom(self, context_data: Dict[str, Any]):
+        """Create an atom that encapsulates reasoning context using Value attachments.
+        
+        Args:
+            context_data: Dictionary containing context information
+        
+        Returns:
+            An atom with attached context values
+        """
+        if not self.atomspace or not VALUE_TYPES_AVAILABLE:
+            return None
+        
+        try:
+            import hashlib
+            
+            # Create context atom with deterministic naming
+            context_name = context_data.get('name')
+            if not context_name:
+                # Use deterministic hash for predictable naming
+                context_str = str(sorted(context_data.items()))
+                context_hash = hashlib.md5(context_str.encode()).hexdigest()[:8]
+                context_name = f"reasoning_context_{context_hash}"
+            
+            context_atom = ConceptNode(context_name)
+            
+            # Attach various context values
+            if 'confidence' in context_data:
+                self.attach_metadata_value(context_atom, "confidence", context_data['confidence'])
+            
+            if 'priority' in context_data:
+                self.attach_metadata_value(context_atom, "priority", context_data['priority'])
+            
+            if 'concepts' in context_data:
+                self.attach_metadata_value(context_atom, "concepts", context_data['concepts'])
+            
+            if 'inference_rules' in context_data:
+                self.attach_metadata_value(context_atom, "inference_rules", context_data['inference_rules'])
+            
+            if 'timestamp' in context_data:
+                self.attach_metadata_value(context_atom, "timestamp", str(context_data['timestamp']))
+            
+            return context_atom
+        except Exception as e:
+            print(f"⚠️ Error creating reasoning context atom: {e}")
+            return None
 
 
 class CognitiveReasoningTool(Tool):
@@ -1630,7 +1780,7 @@ class CognitiveReasoningTool(Tool):
         return results
     
     def parse_query_to_atoms(self, query: str, context: Dict[str, Any] = None):
-        """Convert Agent-Zero query to OpenCog atoms with enhanced context integration."""
+        """Convert Agent-Zero query to OpenCog atoms with enhanced context integration using new bindings."""
         if not self.initialized:
             return []
         
@@ -1642,32 +1792,83 @@ class CognitiveReasoningTool(Tool):
             words = query.lower().split()
             related_concepts = context.get("related_concepts", [])
             
-            # Create concept nodes from query words and context
-            for word in words:
-                if len(word) > 2:  # Skip short words
-                    concept_node = self.atomspace.add_node(types.ConceptNode, word)
-                    atoms.append(concept_node)
-            
-            # Add concepts from reasoning context
-            for concept in related_concepts[:5]:  # Limit to 5 context concepts
-                if concept not in [atom.name for atom in atoms if hasattr(atom, 'name')]:
-                    context_node = self.atomspace.add_node(types.ConceptNode, f"context_{concept}")
-                    atoms.append(context_node)
-            
-            # Create query concept for the entire query
-            query_concept = self.atomspace.add_node(types.ConceptNode, f"query_{hash(query) % 10000}")
-            atoms.append(query_concept)
-            
-            # Link query concept to component words
-            for word_atom in atoms[:-1]:  # Exclude the query concept itself
-                self.atomspace.add_link(
-                    types.EvaluationLink,
-                    [
-                        self.atomspace.add_node(types.PredicateNode, "component_of"),
-                        word_atom,
-                        query_concept
-                    ]
-                )
+            # Use type constructors for cleaner atom creation
+            if VALUE_TYPES_AVAILABLE:
+                # Create concept nodes from query words using new API
+                for word in words:
+                    if len(word) > 2:  # Skip short words
+                        concept_node = ConceptNode(word)
+                        
+                        # Attach metadata using new Value API
+                        self.pln_reasoning.attach_metadata_value(
+                            concept_node, 
+                            "source", 
+                            ["query", "natural_language"]
+                        )
+                        atoms.append(concept_node)
+                
+                # Add concepts from reasoning context
+                for concept in related_concepts[:5]:  # Limit to 5 context concepts
+                    if concept not in [atom.name for atom in atoms if hasattr(atom, 'name')]:
+                        context_node = ConceptNode(f"context_{concept}")
+                        self.pln_reasoning.attach_metadata_value(
+                            context_node,
+                            "source",
+                            ["context", "related_concept"]
+                        )
+                        atoms.append(context_node)
+                
+                # Create query concept for the entire query
+                import hashlib
+                query_hash = hashlib.md5(query.encode()).hexdigest()[:8]
+                query_concept = ConceptNode(f"query_{query_hash}")
+                
+                # Attach query metadata using FloatValue and StringValue
+                query_metadata_key = PredicateNode("query_metadata")
+                query_metadata = StringValue([
+                    query[:100],  # Truncated query text
+                    f"word_count:{len(words)}",
+                    f"concept_count:{len(atoms)}"
+                ])
+                query_concept.set_value(query_metadata_key, query_metadata)
+                
+                atoms.append(query_concept)
+                
+                # Link query concept to component words using EdgeLink
+                for word_atom in atoms[:-1]:  # Exclude the query concept itself
+                    EdgeLink(
+                        PredicateNode("component_of"),
+                        ListLink(word_atom, query_concept)
+                    )
+            else:
+                # Fallback to original implementation
+                for word in words:
+                    if len(word) > 2:  # Skip short words
+                        concept_node = self.atomspace.add_node(types.ConceptNode, word)
+                        atoms.append(concept_node)
+                
+                # Add concepts from reasoning context
+                for concept in related_concepts[:5]:  # Limit to 5 context concepts
+                    if concept not in [atom.name for atom in atoms if hasattr(atom, 'name')]:
+                        context_node = self.atomspace.add_node(types.ConceptNode, f"context_{concept}")
+                        atoms.append(context_node)
+                
+                # Create query concept for the entire query
+                import hashlib
+                query_hash = hashlib.md5(query.encode()).hexdigest()[:8]
+                query_concept = self.atomspace.add_node(types.ConceptNode, f"query_{query_hash}")
+                atoms.append(query_concept)
+                
+                # Link query concept to component words
+                for word_atom in atoms[:-1]:  # Exclude the query concept itself
+                    self.atomspace.add_link(
+                        types.EvaluationLink,
+                        [
+                            self.atomspace.add_node(types.PredicateNode, "component_of"),
+                            word_atom,
+                            query_concept
+                        ]
+                    )
         
         except Exception as e:
             print(f"⚠️ Query parsing warning: {e}")
@@ -1757,42 +1958,83 @@ class CognitiveReasoningTool(Tool):
             return []
         
     def enhanced_pattern_matching_reasoning(self, atoms: List, context: Dict[str, Any]) -> List:
-        """Enhanced pattern matching reasoning with context awareness."""
+        """Enhanced pattern matching reasoning with context awareness using new atomspace bindings."""
         results = []
         
         try:
-            # Create enhanced inheritance relationships
-            for i in range(len(atoms) - 1):
-                # Basic inheritance
-                inheritance_link = self.atomspace.add_link(
-                    types.InheritanceLink, 
-                    [atoms[i], atoms[i + 1]]
-                )
-                results.append(inheritance_link)
+            if VALUE_TYPES_AVAILABLE:
+                # Use type constructors for cleaner link creation
+                for i in range(len(atoms) - 1):
+                    # Basic inheritance using EdgeLink pattern
+                    inheritance_link = InheritanceLink(atoms[i], atoms[i + 1])
+                    
+                    # Attach confidence score using FloatValue
+                    confidence_key = PredicateNode("confidence")
+                    confidence_value = FloatValue([0.8])  # Default confidence
+                    inheritance_link.set_value(confidence_key, confidence_value)
+                    
+                    results.append(inheritance_link)
+                    
+                    # Add similarity relationships for context concepts
+                    if i < len(atoms) - 2:
+                        similarity_link = SimilarityLink(atoms[i], atoms[i + 2])
+                        
+                        # Attach similarity score
+                        similarity_score = FloatValue([0.6])
+                        similarity_link.set_value(confidence_key, similarity_score)
+                        
+                        results.append(similarity_link)
                 
-                # Add similarity relationships for context concepts
-                if i < len(atoms) - 2:
-                    similarity_link = self.atomspace.add_link(
-                        types.SimilarityLink,
-                        [atoms[i], atoms[i + 2]]
+                # Context-based pattern matching with metadata
+                if hasattr(self, '_current_context'):
+                    memory_associations = self._current_context.get("memory_associations", [])
+                    for association in memory_associations[:3]:  # Limit to 3
+                        association_node = ConceptNode(f"memory_{association}")
+                        
+                        # Attach association metadata
+                        meta_key = PredicateNode("association_metadata")
+                        meta_value = StringValue([association, "memory", "context"])
+                        association_node.set_value(meta_key, meta_value)
+                        
+                        for atom in atoms[:2]:  # Link to first 2 atoms
+                            association_link = EdgeLink(
+                                PredicateNode("associated_with"),
+                                ListLink(atom, association_node)
+                            )
+                            results.append(association_link)
+            else:
+                # Fallback to original implementation
+                for i in range(len(atoms) - 1):
+                    # Basic inheritance
+                    inheritance_link = self.atomspace.add_link(
+                        types.InheritanceLink, 
+                        [atoms[i], atoms[i + 1]]
                     )
-                    results.append(similarity_link)
-            
-            # Context-based pattern matching
-            if hasattr(self, '_current_context'):
-                memory_associations = self._current_context.get("memory_associations", [])
-                for association in memory_associations[:3]:  # Limit to 3
-                    association_node = self.atomspace.add_node(types.ConceptNode, f"memory_{association}")
-                    for atom in atoms[:2]:  # Link to first 2 atoms
-                        association_link = self.atomspace.add_link(
-                            types.EvaluationLink,
-                            [
-                                self.atomspace.add_node(types.PredicateNode, "associated_with"),
-                                atom,
-                                association_node
-                            ]
+                    results.append(inheritance_link)
+                    
+                    # Add similarity relationships for context concepts
+                    if i < len(atoms) - 2:
+                        similarity_link = self.atomspace.add_link(
+                            types.SimilarityLink,
+                            [atoms[i], atoms[i + 2]]
                         )
-                        results.append(association_link)
+                        results.append(similarity_link)
+                
+                # Context-based pattern matching
+                if hasattr(self, '_current_context'):
+                    memory_associations = self._current_context.get("memory_associations", [])
+                    for association in memory_associations[:3]:  # Limit to 3
+                        association_node = self.atomspace.add_node(types.ConceptNode, f"memory_{association}")
+                        for atom in atoms[:2]:  # Link to first 2 atoms
+                            association_link = self.atomspace.add_link(
+                                types.EvaluationLink,
+                                [
+                                    self.atomspace.add_node(types.PredicateNode, "associated_with"),
+                                    atom,
+                                    association_node
+                                ]
+                            )
+                            results.append(association_link)
         
         except Exception as e:
             print(f"⚠️ Enhanced pattern matching warning: {e}")
@@ -2370,6 +2612,90 @@ class CognitiveReasoningTool(Tool):
             formatted.insert(0, f"Reasoning summary: {type_summary}")
         
         return formatted
+    
+    def demonstrate_new_bindings(self):
+        """Demonstrate usage of new atomspace bindings for documentation and testing.
+        
+        Returns:
+            Dict with examples of new binding features
+        """
+        if not VALUE_TYPES_AVAILABLE or not self.atomspace:
+            return {"error": "New atomspace bindings not available"}
+        
+        examples = {}
+        
+        try:
+            # Example 1: Create atoms with FloatValue attachments
+            concept_a = ConceptNode("artificial_intelligence")
+            concept_b = ConceptNode("machine_learning")
+            
+            # Attach numerical metadata
+            relevance_key = PredicateNode("relevance_score")
+            concept_a.set_value(relevance_key, FloatValue([0.95, 0.88, 0.92]))
+            concept_b.set_value(relevance_key, FloatValue([0.87, 0.91, 0.85]))
+            
+            examples["float_values"] = {
+                "concept_a": concept_a.name,
+                "concept_b": concept_b.name,
+                "concept_a_scores": list(concept_a.get_value(relevance_key)),
+                "concept_b_scores": list(concept_b.get_value(relevance_key))
+            }
+            
+            # Example 2: Use StringValue for textual metadata
+            description_key = PredicateNode("description")
+            concept_a.set_value(description_key, StringValue([
+                "AI is the simulation of human intelligence",
+                "Includes reasoning, learning, and perception",
+                "Foundation of modern cognitive systems"
+            ]))
+            
+            examples["string_values"] = {
+                "concept": concept_a.name,
+                "descriptions": list(concept_a.get_value(description_key))
+            }
+            
+            # Example 3: Create relationships with metadata
+            inheritance = InheritanceLink(concept_b, concept_a)
+            confidence_key = PredicateNode("confidence")
+            inheritance.set_value(confidence_key, FloatValue([0.92]))
+            
+            examples["link_with_values"] = {
+                "link_type": "InheritanceLink",
+                "from": concept_b.name,
+                "to": concept_a.name,
+                "confidence": list(inheritance.get_value(confidence_key))[0]
+            }
+            
+            # Example 4: Use EdgeLink for semantic relationships
+            relationship = EdgeLink(
+                PredicateNode("enables"),
+                ListLink(concept_b, ConceptNode("prediction"))
+            )
+            
+            strength_key = PredicateNode("strength")
+            relationship.set_value(strength_key, FloatValue([0.85]))
+            
+            examples["edge_link"] = {
+                "predicate": "enables",
+                "from": concept_b.name,
+                "to": "prediction",
+                "strength": list(relationship.get_value(strength_key))[0]
+            }
+            
+            # Example 5: Retrieve and manipulate values
+            scores = list(concept_a.get_value(relevance_key))
+            avg_score = sum(scores) / len(scores) if scores else 0
+            
+            examples["value_manipulation"] = {
+                "original_scores": scores,
+                "average": avg_score,
+                "normalized": [s / max(scores) for s in scores] if scores else []
+            }
+            
+        except Exception as e:
+            examples["error"] = f"Error demonstrating new bindings: {e}"
+        
+        return examples
 
 
 def register():
